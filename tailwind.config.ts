@@ -1,31 +1,16 @@
 import type { Config } from "tailwindcss";
-const { fontFamily } = require("tailwindcss/defaultTheme");
+import * as twAnimate from "tailwindcss-animate";
+import * as defaultTheme from "tailwindcss/defaultTheme";
 
-const config: Config = {
+export default {
 	darkMode: ["class"],
-	content: [
-		"./pages/**/*.{ts,tsx}",
-		"./components/**/*.{ts,tsx}",
-		"./app/**/*.{ts,tsx}",
-		"./src/**/*.{ts,tsx}",
-	],
+	content: ["./app/**/*.{ts,tsx}"],
 	theme: {
-		container: {
-			center: true,
-			padding: "2rem",
-			screens: {
-				"2xl": "1400px",
-			},
+		fontFamily: {
+			sans: ["var(--font-sans)", ...defaultTheme.fontFamily.sans],
+			mono: ["var(--font-mono)", ...defaultTheme.fontFamily.mono],
 		},
 		extend: {
-			backgroundImage: {
-				"gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-				"gradient-conic":
-					"conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-			},
-			fontFamily: {
-				sans: ["var(--font-sans)", ...fontFamily.sans],
-			},
 			colors: {
 				border: "hsl(var(--border))",
 				input: "hsl(var(--input))",
@@ -40,9 +25,9 @@ const config: Config = {
 					DEFAULT: "hsl(var(--secondary))",
 					foreground: "hsl(var(--secondary-foreground))",
 				},
-				destructive: {
-					DEFAULT: "hsl(var(--destructive))",
-					foreground: "hsl(var(--destructive-foreground))",
+				error: {
+					DEFAULT: "hsl(var(--error))",
+					foreground: "hsl(var(--error-foreground))",
 				},
 				muted: {
 					DEFAULT: "hsl(var(--muted))",
@@ -60,6 +45,8 @@ const config: Config = {
 					DEFAULT: "hsl(var(--card))",
 					foreground: "hsl(var(--card-foreground))",
 				},
+				// Custom
+				link: "hsl(var(--link))",
 			},
 			borderRadius: {
 				lg: "var(--radius)",
@@ -75,13 +62,27 @@ const config: Config = {
 					from: { height: "var(--radix-accordion-content-height)" },
 					to: { height: "0" },
 				},
+				"collapsible-down": {
+					from: { height: "0" },
+					to: { height: "var(--radix-collapsible-content-height)" },
+				},
+				"collapsible-up": {
+					from: { height: "var(--radix-collapsible-content-height)" },
+					to: { height: "0" },
+				},
+				"caret-blink": {
+					"0%,70%,100%": { opacity: "1" },
+					"20%,50%": { opacity: "0" },
+				},
 			},
 			animation: {
-				"accordion-down": "accordion-down 0.2s ease-out",
-				"accordion-up": "accordion-up 0.2s ease-out",
+				"accordion-down": "accordion-down 0.1s ease-out",
+				"accordion-up": "accordion-up 0.1s ease-out",
+				"collapsible-down": "collapsible-down 0.1s ease-out",
+				"collapsible-up": "collapsible-up 0.1s ease-out",
+				"caret-blink": "caret-blink 1s ease-out infinite",
 			},
 		},
 	},
-	plugins: [require("tailwindcss-animate")],
-};
-export default config;
+	plugins: [twAnimate],
+} satisfies Config;
