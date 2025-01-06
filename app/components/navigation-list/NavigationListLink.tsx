@@ -5,14 +5,14 @@ import React from "react";
 import { cn } from "~/lib/utility";
 
 const navigationListLinkVariants = cva(
-	"relative flex w-full cursor-pointer items-center rounded-sm px-2 py-2 data-[disabled]:pointer-events-none data-[disabled]:cursor-auto data-[disabled]:opacity-50 focus:outline-none",
+	"relative flex w-full cursor-pointer items-center rounded-sm px-2 py-2 focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:cursor-auto data-[disabled]:opacity-50",
 	{
 		variants: {
 			variant: {
 				default:
-					"text-muted-foreground focus:text-foreground hover:text-foreground",
+					"text-muted-foreground hover:text-foreground focus:text-foreground",
 				solid:
-					"aria-selected:bg-accent focus:bg-accent hover:bg-accent aria-selected:text-accent-foreground focus:text-accent-foreground hover:text-accent-foreground",
+					"hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground aria-selected:bg-accent aria-selected:text-accent-foreground",
 			},
 		},
 		defaultVariants: { variant: "default" },

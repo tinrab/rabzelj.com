@@ -47,9 +47,7 @@ export function NavigationListGroup({
 					{heading}
 				</div>
 			)}
-			<div role="group" aria-labelledby={headingId}>
-				{children}
-			</div>
+			<fieldset aria-labelledby={headingId}>{children}</fieldset>
 		</div>
 	);
 }

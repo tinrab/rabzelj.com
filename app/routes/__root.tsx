@@ -3,9 +3,10 @@ import {
 	ScrollRestoration,
 	createRootRoute,
 } from "@tanstack/react-router";
-import { Meta, Scripts } from "@tanstack/start";
+import { createServerFn, Meta, Scripts } from "@tanstack/start";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type React from "react";
+import { setHeader } from "vinxi/http";
 
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
@@ -15,6 +16,14 @@ import { getThemeServerFn, useRootDocumentTheme } from "~/lib/theme/start";
 import { ThemeProvider } from "~/lib/theme/theme-context";
 import { Toaster } from "~/components/ui/toaster";
 import { loadClientConfig } from "~/config/client";
+import { makeClientConfigScript } from "~/config/utility";
+import { publicMiddleware } from "~/lib/middleware";
+
+const loadClientConfigServerFn = createServerFn({ method: "GET" })
+	.middleware([publicMiddleware])
+	.handler(async () => {
+		return loadClientConfig();
+	});
 
 export const Route = createRootRoute({
 	head: () => {
@@ -81,12 +90,15 @@ export const Route = createRootRoute({
 			],
 		};
 	},
-	headers: () => ({
-		"cache-control": "public, max-age=3600",
-	}),
 	loader: async () => {
+		let theme = useRootDocumentTheme();
+		if (theme === undefined && typeof window !== "undefined") {
+			theme = await getThemeServerFn();
+		}
+
 		return {
-			theme: await getThemeServerFn(),
+			theme,
+			config: await loadClientConfigServerFn(),
 		};
 	},
 	errorComponent: (props) => {
@@ -132,6 +144,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						{children}
 						<Toaster slotProps={{ viewport: { className: "top-auto" } }} />
 						<ScrollRestoration />
+						<script
+							// biome-ignore lint/security/noDangerouslySetInnerHtml: setting window.CONFIG
+							dangerouslySetInnerHTML={{
+								__html: makeClientConfigScript(data.config),
+							}}
+						/>
 						<Scripts />
 					</body>
 				</QueryClientProvider>

@@ -74,6 +74,14 @@ export default {
 					"0%,70%,100%": { opacity: "1" },
 					"20%,50%": { opacity: "0" },
 				},
+				pulse: {
+					"0% , 100%": {
+						transform: "translate(-50% , -50%) scale(1)",
+					},
+					"50%": {
+						transform: "translate(-50% , -50%) scale(0.9)",
+					},
+				},
 			},
 			animation: {
 				"accordion-down": "accordion-down 0.1s ease-out",
@@ -81,6 +89,7 @@ export default {
 				"collapsible-down": "collapsible-down 0.1s ease-out",
 				"collapsible-up": "collapsible-up 0.1s ease-out",
 				"caret-blink": "caret-blink 1s ease-out infinite",
+				pulse: "pulse 16s ease calc(var(--index, 0) * 0.1s) infinite",
 			},
 		},
 	},

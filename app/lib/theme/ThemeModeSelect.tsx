@@ -32,10 +32,14 @@ export function ThemeModeSelect({
 	const resolvedTheme = theme ?? themeProvider?.theme;
 
 	const handleThemeChange = (newTheme: Theme): void => {
-		if (onThemeSelect) {
+		if (themeProvider === undefined) {
+			return;
+		}
+
+		themeProvider.setTheme(newTheme);
+
+		if (onThemeSelect !== undefined) {
 			onThemeSelect(newTheme);
-		} else if (themeProvider) {
-			themeProvider.setTheme(newTheme);
 		}
 	};
 

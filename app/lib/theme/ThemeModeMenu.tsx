@@ -31,7 +31,8 @@ export function ThemeModeMenu({
 		}
 
 		themeProvider.setTheme(newTheme);
-		if (onThemeChange !== undefined && themeProvider.theme !== newTheme) {
+
+		if (onThemeChange !== undefined) {
 			onThemeChange(newTheme);
 		}
 	};

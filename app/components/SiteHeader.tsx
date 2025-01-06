@@ -1,4 +1,5 @@
 import { useRouter } from "@tanstack/react-router";
+import type React from "react";
 import { MdMenu } from "react-icons/md";
 
 import { Header, HeaderRow, HeaderTitle } from "~/components/layout/header";
@@ -7,6 +8,7 @@ import { HeaderMobile } from "~/components/layout/header-mobile";
 import { NavigationList } from "~/components/navigation-list/NavigationList";
 import { NavigationListGroup } from "~/components/navigation-list/NavigationListGroup";
 import { NavigationListLink } from "~/components/navigation-list/NavigationListLink";
+import { PulseDecoration } from "~/components/PulseDecoration";
 import { SiteLink } from "~/components/SiteLink";
 import { IconButton } from "~/components/ui/icon-button";
 import {
@@ -15,6 +17,7 @@ import {
 	NavigationMenuLink,
 	NavigationMenuList,
 } from "~/components/ui/navigation-menu";
+import { pathLocator } from "~/lib/path-locator";
 import { changeThemeServerFn } from "~/lib/theme/start";
 import { ThemeModeMenu } from "~/lib/theme/ThemeModeMenu";
 import { cn } from "~/lib/utility";
@@ -25,7 +28,7 @@ interface SiteHeaderLinkData {
 }
 
 const links: SiteHeaderLinkData[] = [
-	// { title: "Blog", to: pathLocator.blog.index },
+	{ title: "Blog", to: pathLocator.blog.index },
 ];
 
 export function SiteHeader() {
@@ -33,6 +36,10 @@ export function SiteHeader() {
 
 	return (
 		<Header>
+			<div className="-top-[0px] pointer-events-none absolute h-full w-full overflow-hidden">
+				<PulseDecoration className="absolute left-1/2" />
+			</div>
+
 			<HeaderRow className="max-w-screen-xl">
 				<SiteLink to="/">
 					<HeaderTitle />
@@ -53,6 +60,8 @@ export function SiteHeader() {
 
 					<ThemeModeMenu
 						onThemeChange={async (theme) => {
+							console.log(theme);
+
 							await changeThemeServerFn({ data: { theme: theme } });
 							router.invalidate();
 						}}

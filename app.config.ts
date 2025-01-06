@@ -3,7 +3,6 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import type { RouterSchema } from "vinxi";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { cloudflare } from "unenv";
 
 const routeRules: Record<string, unknown> = {};
 for (const fileName of await fs.readdir("public")) {
@@ -32,8 +31,6 @@ for (const fileName of await fs.readdir("public")) {
 
 const config = defineConfig({
 	server: {
-		preset: "cloudflare-pages",
-		unenv: cloudflare,
 		routeRules: {
 			"/_build/**": {
 				cache: {

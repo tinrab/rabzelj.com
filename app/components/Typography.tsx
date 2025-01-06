@@ -7,8 +7,8 @@ import { cn } from "~/lib/utility";
 export const typographyVariants = cva("", {
 	variants: {
 		variant: {
-			h1: "scroll-m-20 font-light text-5xl tracking-tight lg:text-8xl md:text-7xl",
-			h2: "scroll-m-20 font-light text-4xl tracking-tight lg:text-6xl md:text-5xl",
+			h1: "scroll-m-20 font-light text-5xl tracking-tight md:text-7xl lg:text-8xl",
+			h2: "scroll-m-20 font-light text-4xl tracking-tight md:text-5xl lg:text-6xl",
 			h3: "scroll-m-20 font-normal text-3xl tracking-tight",
 			h4: "scroll-m-20 font-medium text-2xl tracking-tight",
 			h5: "scroll-m-20 font-medium text-xl tracking-tight",
@@ -33,8 +33,8 @@ const topGutters: Record<string, string> = {
 	h2: "mt-8 lg:mt-10",
 	h3: "mt-8",
 	h4: "mt-6",
-	// h5: 'mt-3',
-	// h6: 'mt-3',
+	h5: "mt-3",
+	h6: "mt-3",
 	// body1: 'mt-3',
 	// body2: 'mt-3',
 };
@@ -53,6 +53,7 @@ const bottomGutters: Record<string, string> = {
 export type TypographyProps = {
 	gutterTop?: boolean;
 	gutterBottom?: boolean;
+	gutter?: boolean;
 	asVariant?: boolean;
 } & React.HTMLAttributes<HTMLElement> &
 	VariantProps<typeof typographyVariants>;
@@ -67,13 +68,13 @@ export const Typography = React.forwardRef<
 			variant = "body1",
 			gutterTop,
 			gutterBottom,
+			gutter,
 			asVariant,
 			className,
 			...restProps
 		},
 		ref,
 	) => {
-		// const Comp = asChild ? Slot : 'span';
 		const Comp: React.ElementType = asChild
 			? Slot
 			: asVariant
@@ -90,9 +91,11 @@ export const Typography = React.forwardRef<
 				ref={ref}
 				className={cn(
 					typographyVariants({ variant }),
-					gutterTop ? ((variant && topGutters[variant]) ?? "") : "",
-					gutterBottom ? ((variant && bottomGutters[variant]) ?? "") : "",
-					gutterTop || gutterBottom ? "block" : "",
+					gutterTop || gutter ? ((variant && topGutters[variant]) ?? "") : "",
+					gutterBottom || gutter
+						? ((variant && bottomGutters[variant]) ?? "")
+						: "",
+					gutterTop || gutterBottom || gutter ? "block" : "",
 					className,
 				)}
 				{...restProps}

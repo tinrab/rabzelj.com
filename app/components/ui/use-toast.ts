@@ -1,5 +1,5 @@
 // Inspired by react-hot-toast library
-import * as React from "react";
+import React from "react";
 
 import type { ToastActionElement, ToastProps } from "./toast";
 
@@ -172,6 +172,7 @@ function toast({ ...props }: Toast) {
 function useToast() {
 	const [state, setState] = React.useState<State>(memoryState);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: needed
 	React.useEffect(() => {
 		listeners.push(setState);
 		return () => {

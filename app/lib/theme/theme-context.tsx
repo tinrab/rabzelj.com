@@ -6,6 +6,7 @@ import {
 	useState,
 } from "react";
 
+import { THEME_LOCAL_STORAGE_KEY } from "~/lib/theme/constants";
 import { Theme } from "~/lib/theme/types";
 
 type ThemeProviderState = {
@@ -30,7 +31,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
 	children,
-	storageKey = "app-ui-theme",
+	storageKey = THEME_LOCAL_STORAGE_KEY,
 	initialTheme,
 	...otherProps
 }: ThemeProviderProps) {

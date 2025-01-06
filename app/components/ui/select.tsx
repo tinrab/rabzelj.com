@@ -1,6 +1,6 @@
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { cva, type VariantProps } from "class-variance-authority";
-import * as React from "react";
+import React from "react";
 import {
 	MdArrowDownward,
 	MdArrowUpward,
@@ -17,14 +17,14 @@ const SelectGroup = SelectPrimitive.Group;
 const SelectValue = SelectPrimitive.Value;
 
 const selectTriggerVariants = cva(
-	"flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md px-3 py-2 text-sm shadow-neutral-300 ring-offset-background [&>span]:line-clamp-1 disabled:cursor-not-allowed disabled:opacity-50 dark:shadow-neutral-950 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+	"flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md px-3 py-2 text-sm shadow-neutral-300 ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:shadow-neutral-950 [&>span]:line-clamp-1",
 	{
 		variants: {
 			variant: {
 				default:
-					"border border-border bg-background shadow-sm hover:bg-accent data-[placeholder]:text-muted-foreground hover:text-accent-foreground",
+					"border border-border bg-background shadow-sm hover:bg-accent hover:text-accent-foreground data-[placeholder]:text-muted-foreground",
 				ghost:
-					"bg-background hover:bg-accent data-[placeholder]:text-muted-foreground hover:text-accent-foreground",
+					"bg-background hover:bg-accent hover:text-accent-foreground data-[placeholder]:text-muted-foreground",
 			},
 		},
 		defaultVariants: {
@@ -141,7 +141,7 @@ const SelectItem = React.forwardRef<
 	<SelectPrimitive.Item
 		ref={ref}
 		className={cn(
-			"relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none data-[disabled]:pointer-events-none focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50",
+			"relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
 			className,
 		)}
 		{...props}

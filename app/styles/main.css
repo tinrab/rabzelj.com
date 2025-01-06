@@ -9,6 +9,11 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+@import "katex/dist/katex.min.css";
+
+@import "./syntax-highlight.css";
+@import "./katex.css";
+
 @layer base {
 	:root {
 		--font-sans: "Geist Sans";
@@ -70,13 +75,5 @@
 
 	body {
 		@apply bg-background text-foreground;
-	}
-
-	a {
-		color: hsl(var(--link));
-
-		&:hover {
-			text-decoration: underline;
-		}
 	}
 }

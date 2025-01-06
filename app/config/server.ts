@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 
 import { staticConfig } from "~/config/static";
 
@@ -8,7 +8,7 @@ if (typeof window !== "undefined") {
 
 const serverConfigSchema = z.object({
 	app: z.object({
-		url: z.string().url().trim(),
+		url: z.string().url(),
 		domain: z.string(),
 		dataDir: z.string(),
 	}),
@@ -17,7 +17,7 @@ const serverConfigSchema = z.object({
 export type ServerConfig = z.infer<typeof serverConfigSchema>;
 
 export function loadServerConfig(): ServerConfig {
-	const siteUrl = process.env.VITE_TIN_APP_URL?.replace(/\/$/, "");
+	const siteUrl = process.env.TIN_APP_URL?.replace(/\/$/, "");
 
 	return serverConfigSchema.parse({
 		app: {
@@ -28,3 +28,5 @@ export function loadServerConfig(): ServerConfig {
 		},
 	});
 }
+
+export const serverConfig = loadServerConfig();

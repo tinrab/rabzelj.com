@@ -8,13 +8,38 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from "@tanstack/react-router";
+
 // Import Routes
 
 import { Route as rootRoute } from "./routes/__root";
+import { Route as BlogBrowseImport } from "./routes/blog/_browse";
 import { Route as IndexHomeImport } from "./routes/_index/_home";
 import { Route as IndexHomeIndexImport } from "./routes/_index/_home/index";
+import { Route as BlogPostPostImport } from "./routes/blog/_post/_post";
+import { Route as BlogBrowsePostsImport } from "./routes/blog/_browse/_posts";
+import { Route as BlogBrowseTagsIndexImport } from "./routes/blog/_browse/tags.index";
+import { Route as BlogBrowsePostsIndexImport } from "./routes/blog/_browse/_posts.index";
+import { Route as BlogPostPostSlugImport } from "./routes/blog/_post/_post.$slug";
+import { Route as BlogBrowsePostsExternalImport } from "./routes/blog/_browse/_posts.external";
+import { Route as BlogBrowseTagsSlugIndexImport } from "./routes/blog/_browse/tags.$slug.index";
+
+// Create Virtual Routes
+
+const BlogImport = createFileRoute("/blog")();
 
 // Create/Update Routes
+
+const BlogRoute = BlogImport.update({
+	id: "/blog",
+	path: "/blog",
+	getParentRoute: () => rootRoute,
+} as any);
+
+const BlogBrowseRoute = BlogBrowseImport.update({
+	id: "/_browse",
+	getParentRoute: () => BlogRoute,
+} as any);
 
 const IndexHomeRoute = IndexHomeImport.update({
 	id: "/_index/_home",
@@ -25,6 +50,46 @@ const IndexHomeIndexRoute = IndexHomeIndexImport.update({
 	id: "/",
 	path: "/",
 	getParentRoute: () => IndexHomeRoute,
+} as any);
+
+const BlogPostPostRoute = BlogPostPostImport.update({
+	id: "/_post/_post",
+	getParentRoute: () => BlogRoute,
+} as any);
+
+const BlogBrowsePostsRoute = BlogBrowsePostsImport.update({
+	id: "/_posts",
+	getParentRoute: () => BlogBrowseRoute,
+} as any);
+
+const BlogBrowseTagsIndexRoute = BlogBrowseTagsIndexImport.update({
+	id: "/tags/",
+	path: "/tags/",
+	getParentRoute: () => BlogBrowseRoute,
+} as any);
+
+const BlogBrowsePostsIndexRoute = BlogBrowsePostsIndexImport.update({
+	id: "/",
+	path: "/",
+	getParentRoute: () => BlogBrowsePostsRoute,
+} as any);
+
+const BlogPostPostSlugRoute = BlogPostPostSlugImport.update({
+	id: "/$slug",
+	path: "/$slug",
+	getParentRoute: () => BlogPostPostRoute,
+} as any);
+
+const BlogBrowsePostsExternalRoute = BlogBrowsePostsExternalImport.update({
+	id: "/external",
+	path: "/external",
+	getParentRoute: () => BlogBrowsePostsRoute,
+} as any);
+
+const BlogBrowseTagsSlugIndexRoute = BlogBrowseTagsSlugIndexImport.update({
+	id: "/tags/$slug/",
+	path: "/tags/$slug/",
+	getParentRoute: () => BlogBrowseRoute,
 } as any);
 
 // Populate the FileRoutesByPath interface
@@ -38,12 +103,75 @@ declare module "@tanstack/react-router" {
 			preLoaderRoute: typeof IndexHomeImport;
 			parentRoute: typeof rootRoute;
 		};
+		"/blog": {
+			id: "/blog";
+			path: "/blog";
+			fullPath: "/blog";
+			preLoaderRoute: typeof BlogImport;
+			parentRoute: typeof rootRoute;
+		};
+		"/blog/_browse": {
+			id: "/blog/_browse";
+			path: "/blog";
+			fullPath: "/blog";
+			preLoaderRoute: typeof BlogBrowseImport;
+			parentRoute: typeof BlogRoute;
+		};
+		"/blog/_browse/_posts": {
+			id: "/blog/_browse/_posts";
+			path: "";
+			fullPath: "/blog";
+			preLoaderRoute: typeof BlogBrowsePostsImport;
+			parentRoute: typeof BlogBrowseImport;
+		};
+		"/blog/_post/_post": {
+			id: "/blog/_post/_post";
+			path: "";
+			fullPath: "/blog";
+			preLoaderRoute: typeof BlogPostPostImport;
+			parentRoute: typeof BlogImport;
+		};
 		"/_index/_home/": {
 			id: "/_index/_home/";
 			path: "/";
 			fullPath: "/";
 			preLoaderRoute: typeof IndexHomeIndexImport;
 			parentRoute: typeof IndexHomeImport;
+		};
+		"/blog/_browse/_posts/external": {
+			id: "/blog/_browse/_posts/external";
+			path: "/external";
+			fullPath: "/blog/external";
+			preLoaderRoute: typeof BlogBrowsePostsExternalImport;
+			parentRoute: typeof BlogBrowsePostsImport;
+		};
+		"/blog/_post/_post/$slug": {
+			id: "/blog/_post/_post/$slug";
+			path: "/$slug";
+			fullPath: "/blog/$slug";
+			preLoaderRoute: typeof BlogPostPostSlugImport;
+			parentRoute: typeof BlogPostPostImport;
+		};
+		"/blog/_browse/_posts/": {
+			id: "/blog/_browse/_posts/";
+			path: "/";
+			fullPath: "/blog/";
+			preLoaderRoute: typeof BlogBrowsePostsIndexImport;
+			parentRoute: typeof BlogBrowsePostsImport;
+		};
+		"/blog/_browse/tags/": {
+			id: "/blog/_browse/tags/";
+			path: "/tags";
+			fullPath: "/blog/tags";
+			preLoaderRoute: typeof BlogBrowseTagsIndexImport;
+			parentRoute: typeof BlogBrowseImport;
+		};
+		"/blog/_browse/tags/$slug/": {
+			id: "/blog/_browse/tags/$slug/";
+			path: "/tags/$slug";
+			fullPath: "/blog/tags/$slug";
+			preLoaderRoute: typeof BlogBrowseTagsSlugIndexImport;
+			parentRoute: typeof BlogBrowseImport;
 		};
 	}
 }
@@ -62,36 +190,138 @@ const IndexHomeRouteWithChildren = IndexHomeRoute._addFileChildren(
 	IndexHomeRouteChildren,
 );
 
+interface BlogBrowsePostsRouteChildren {
+	BlogBrowsePostsExternalRoute: typeof BlogBrowsePostsExternalRoute;
+	BlogBrowsePostsIndexRoute: typeof BlogBrowsePostsIndexRoute;
+}
+
+const BlogBrowsePostsRouteChildren: BlogBrowsePostsRouteChildren = {
+	BlogBrowsePostsExternalRoute: BlogBrowsePostsExternalRoute,
+	BlogBrowsePostsIndexRoute: BlogBrowsePostsIndexRoute,
+};
+
+const BlogBrowsePostsRouteWithChildren = BlogBrowsePostsRoute._addFileChildren(
+	BlogBrowsePostsRouteChildren,
+);
+
+interface BlogBrowseRouteChildren {
+	BlogBrowsePostsRoute: typeof BlogBrowsePostsRouteWithChildren;
+	BlogBrowseTagsIndexRoute: typeof BlogBrowseTagsIndexRoute;
+	BlogBrowseTagsSlugIndexRoute: typeof BlogBrowseTagsSlugIndexRoute;
+}
+
+const BlogBrowseRouteChildren: BlogBrowseRouteChildren = {
+	BlogBrowsePostsRoute: BlogBrowsePostsRouteWithChildren,
+	BlogBrowseTagsIndexRoute: BlogBrowseTagsIndexRoute,
+	BlogBrowseTagsSlugIndexRoute: BlogBrowseTagsSlugIndexRoute,
+};
+
+const BlogBrowseRouteWithChildren = BlogBrowseRoute._addFileChildren(
+	BlogBrowseRouteChildren,
+);
+
+interface BlogPostPostRouteChildren {
+	BlogPostPostSlugRoute: typeof BlogPostPostSlugRoute;
+}
+
+const BlogPostPostRouteChildren: BlogPostPostRouteChildren = {
+	BlogPostPostSlugRoute: BlogPostPostSlugRoute,
+};
+
+const BlogPostPostRouteWithChildren = BlogPostPostRoute._addFileChildren(
+	BlogPostPostRouteChildren,
+);
+
+interface BlogRouteChildren {
+	BlogBrowseRoute: typeof BlogBrowseRouteWithChildren;
+	BlogPostPostRoute: typeof BlogPostPostRouteWithChildren;
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+	BlogBrowseRoute: BlogBrowseRouteWithChildren,
+	BlogPostPostRoute: BlogPostPostRouteWithChildren,
+};
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren);
+
 export interface FileRoutesByFullPath {
 	"": typeof IndexHomeRouteWithChildren;
+	"/blog": typeof BlogPostPostRouteWithChildren;
 	"/": typeof IndexHomeIndexRoute;
+	"/blog/external": typeof BlogBrowsePostsExternalRoute;
+	"/blog/$slug": typeof BlogPostPostSlugRoute;
+	"/blog/": typeof BlogBrowsePostsIndexRoute;
+	"/blog/tags": typeof BlogBrowseTagsIndexRoute;
+	"/blog/tags/$slug": typeof BlogBrowseTagsSlugIndexRoute;
 }
 
 export interface FileRoutesByTo {
+	"/blog": typeof BlogBrowsePostsIndexRoute;
 	"/": typeof IndexHomeIndexRoute;
+	"/blog/external": typeof BlogBrowsePostsExternalRoute;
+	"/blog/$slug": typeof BlogPostPostSlugRoute;
+	"/blog/tags": typeof BlogBrowseTagsIndexRoute;
+	"/blog/tags/$slug": typeof BlogBrowseTagsSlugIndexRoute;
 }
 
 export interface FileRoutesById {
 	__root__: typeof rootRoute;
 	"/_index/_home": typeof IndexHomeRouteWithChildren;
+	"/blog": typeof BlogRouteWithChildren;
+	"/blog/_browse": typeof BlogBrowseRouteWithChildren;
+	"/blog/_browse/_posts": typeof BlogBrowsePostsRouteWithChildren;
+	"/blog/_post/_post": typeof BlogPostPostRouteWithChildren;
 	"/_index/_home/": typeof IndexHomeIndexRoute;
+	"/blog/_browse/_posts/external": typeof BlogBrowsePostsExternalRoute;
+	"/blog/_post/_post/$slug": typeof BlogPostPostSlugRoute;
+	"/blog/_browse/_posts/": typeof BlogBrowsePostsIndexRoute;
+	"/blog/_browse/tags/": typeof BlogBrowseTagsIndexRoute;
+	"/blog/_browse/tags/$slug/": typeof BlogBrowseTagsSlugIndexRoute;
 }
 
 export interface FileRouteTypes {
 	fileRoutesByFullPath: FileRoutesByFullPath;
-	fullPaths: "" | "/";
+	fullPaths:
+		| ""
+		| "/blog"
+		| "/"
+		| "/blog/external"
+		| "/blog/$slug"
+		| "/blog/"
+		| "/blog/tags"
+		| "/blog/tags/$slug";
 	fileRoutesByTo: FileRoutesByTo;
-	to: "/";
-	id: "__root__" | "/_index/_home" | "/_index/_home/";
+	to:
+		| "/blog"
+		| "/"
+		| "/blog/external"
+		| "/blog/$slug"
+		| "/blog/tags"
+		| "/blog/tags/$slug";
+	id:
+		| "__root__"
+		| "/_index/_home"
+		| "/blog"
+		| "/blog/_browse"
+		| "/blog/_browse/_posts"
+		| "/blog/_post/_post"
+		| "/_index/_home/"
+		| "/blog/_browse/_posts/external"
+		| "/blog/_post/_post/$slug"
+		| "/blog/_browse/_posts/"
+		| "/blog/_browse/tags/"
+		| "/blog/_browse/tags/$slug/";
 	fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
 	IndexHomeRoute: typeof IndexHomeRouteWithChildren;
+	BlogRoute: typeof BlogRouteWithChildren;
 }
 
 const rootRouteChildren: RootRouteChildren = {
 	IndexHomeRoute: IndexHomeRouteWithChildren,
+	BlogRoute: BlogRouteWithChildren,
 };
 
 export const routeTree = rootRoute
@@ -104,7 +334,8 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/_index/_home"
+        "/_index/_home",
+        "/blog"
       ]
     },
     "/_index/_home": {
@@ -113,9 +344,60 @@ export const routeTree = rootRoute
         "/_index/_home/"
       ]
     },
+    "/blog": {
+      "filePath": "blog",
+      "children": [
+        "/blog/_browse",
+        "/blog/_post/_post"
+      ]
+    },
+    "/blog/_browse": {
+      "filePath": "blog/_browse.tsx",
+      "parent": "/blog",
+      "children": [
+        "/blog/_browse/_posts",
+        "/blog/_browse/tags/",
+        "/blog/_browse/tags/$slug/"
+      ]
+    },
+    "/blog/_browse/_posts": {
+      "filePath": "blog/_browse/_posts.tsx",
+      "parent": "/blog/_browse",
+      "children": [
+        "/blog/_browse/_posts/external",
+        "/blog/_browse/_posts/"
+      ]
+    },
+    "/blog/_post/_post": {
+      "filePath": "blog/_post/_post.tsx",
+      "parent": "/blog",
+      "children": [
+        "/blog/_post/_post/$slug"
+      ]
+    },
     "/_index/_home/": {
       "filePath": "_index/_home/index.tsx",
       "parent": "/_index/_home"
+    },
+    "/blog/_browse/_posts/external": {
+      "filePath": "blog/_browse/_posts.external.tsx",
+      "parent": "/blog/_browse/_posts"
+    },
+    "/blog/_post/_post/$slug": {
+      "filePath": "blog/_post/_post.$slug.tsx",
+      "parent": "/blog/_post/_post"
+    },
+    "/blog/_browse/_posts/": {
+      "filePath": "blog/_browse/_posts.index.tsx",
+      "parent": "/blog/_browse/_posts"
+    },
+    "/blog/_browse/tags/": {
+      "filePath": "blog/_browse/tags.index.tsx",
+      "parent": "/blog/_browse"
+    },
+    "/blog/_browse/tags/$slug/": {
+      "filePath": "blog/_browse/tags.$slug.index.tsx",
+      "parent": "/blog/_browse"
     }
   }
 }

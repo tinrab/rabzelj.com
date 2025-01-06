@@ -34,11 +34,14 @@
 			"coverage",
 			"build",
 			"out",
+			".vercel",
+			".vinxi",
 			".next",
 			".vscode",
 			".zed",
 			"**/*.hbs",
-			"./packages/api/src/__generated__/**"
+			"./packages/api/src/__generated__/**",
+			"./app/routeTree.gen.ts"
 		],
 		"include": [
 			"**/*.js",
