@@ -16,7 +16,10 @@ export function PulseDecoration({
 
 	return (
 		<div
-			className={cn("flex items-center justify-center opacity-65", className)}
+			className={cn(
+				"hidden items-center justify-center opacity-65 md:flex",
+				className,
+			)}
 			{...restProps}
 		>
 			{Array.from({ length: n }, (_, i) => {
@@ -24,18 +27,18 @@ export function PulseDecoration({
 				return (
 					<div
 						key={i}
-						className="absolute animate-pulse rounded-full border bg-foreground/20"
+						className="absolute animate-pulse rounded-md border bg-foreground/20"
 						style={
 							{
 								"--index": i,
-								// backgroundColor: `hsl(${(i * 75 + 180) % 360}deg 90% 30%)`,
 								width: `${size}px`,
 								height: `${size * 0.35}px`,
-								opacity: 0.2 - i * 0.04,
+								opacity: 0.2 - i * 0.05,
 								animationDelay: `${i * 2}s`,
 								top: "50%",
 								left: "50%",
 								transform: "translate(-50%, -50%) scale(1)",
+								rotate: `${i * 13 - 7}deg`,
 							} as React.CSSProperties
 						}
 					/>

@@ -82,6 +82,20 @@ export default {
 						transform: "translate(-50% , -50%) scale(0.9)",
 					},
 				},
+				"linear-loader": {
+					"0%": {
+						"background-size": "200% 100%",
+						"background-position": "left -31.25% top 0%",
+					},
+					"50%": {
+						"background-size": "800% 100%",
+						"background-position": "left -49% top 0%",
+					},
+					"100%": {
+						"background-size": "400% 100%",
+						"background-position": "left -102% top 0%",
+					},
+				},
 			},
 			animation: {
 				"accordion-down": "accordion-down 0.1s ease-out",
@@ -90,6 +104,7 @@ export default {
 				"collapsible-up": "collapsible-up 0.1s ease-out",
 				"caret-blink": "caret-blink 1s ease-out infinite",
 				pulse: "pulse 16s ease calc(var(--index, 0) * 0.1s) infinite",
+				"linear-loader": "linear-loader 2s linear infinite",
 			},
 		},
 	},

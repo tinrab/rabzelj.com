@@ -1,12 +1,12 @@
-import { defineCommand, runMain } from "npm:citty";
-import SiteMapper from "npm:sitemapper";
-import * as cheerio from "npm:cheerio";
+import SiteMapper from "sitemapper";
+import * as cheerio from "cheerio";
 import path from "node:path";
+import fs from "node:fs/promises";
 
 import type {
 	BlogPostCommon,
 	ExternalBlogData,
-} from "../../app/lib/blog/post/schema.ts";
+} from "../app/lib/blog/post/schema.ts";
 
 async function loadFlinect(): Promise<BlogPostCommon[]> {
 	const posts: BlogPostCommon[] = [];
@@ -29,6 +29,17 @@ async function loadFlinect(): Promise<BlogPostCommon[]> {
 			"content",
 		);
 		if (!title || !publishedDate) {
+			continue;
+		}
+
+		if (
+			[
+				"deploy-nextjs-github-actions-cloudflare-pages",
+				"nextjs-standalone-docker-sharp-installation",
+				"quick-tips-rust-declarative-macros",
+				"how-to-rust-cuda-basic-ffi",
+			].some((slug) => url.endsWith(slug))
+		) {
 			continue;
 		}
 
@@ -78,26 +89,20 @@ async function loadOutcrawl(): Promise<BlogPostCommon[]> {
 	return posts;
 }
 
-const main = defineCommand({
-	run: async (): Promise<void> => {
-		await Deno.writeTextFile(
-			path.join(import.meta.dirname as string, "../../data/blog/external.json"),
-			JSON.stringify(
-				{
-					flinect: {
-						posts: await loadFlinect(),
-					},
-					outcrawl: {
-						posts: await loadOutcrawl(),
-					},
-				} as ExternalBlogData,
-				null,
-				2,
-			),
-		);
-	},
-});
-
-if (import.meta.main) {
-	await runMain(main);
+export async function loadExternalBlog(): Promise<void> {
+	await fs.writeFile(
+		path.join(import.meta.dirname as string, "../data/blog/external.json"),
+		JSON.stringify(
+			{
+				flinect: {
+					posts: await loadFlinect(),
+				},
+				outcrawl: {
+					posts: await loadOutcrawl(),
+				},
+			} as ExternalBlogData,
+			null,
+			2,
+		),
+	);
 }

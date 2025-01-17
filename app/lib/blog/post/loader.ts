@@ -2,9 +2,6 @@ import { type HastElement, treeProcessorPlugin } from "@temelj/mdx";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
-// import sharp from "@img/sharp-wasm32/sharp.node";
-
-// console.log(sharp);
 
 import { serverConfig } from "~/config/server";
 import {
@@ -43,63 +40,27 @@ export async function loadBlogPosts({
 		}
 	}
 
-	{
-		const allTags = await loadBlogTags();
-		for (let i = 0; i < 42; i++) {
-			const slug = `demo-post-${i}`;
-			const frontmatter = {
-				demo: true,
-				title: `Demo post #${i}`,
-				publishedDate: `2020-${Math.floor(Math.random() * 12) + 1}-${Math.floor(Math.random() * 27) + 1}`,
-				description: `Demo post #${i}.`,
-				tags: ["rust"],
-				cover: "cover.jpg",
-			};
-			const tags: BlogTagData[] = [];
-			for (let i = 0; i < allTags.length / 2; i++) {
-				tags.push(allTags[i]);
-				if (Math.random() * allTags.length < 2) {
-					break;
-				}
-			}
-			posts.push({
-				frontmatter,
-				title: frontmatter.title,
-				url: pathLocator.blog.post.index(slug),
-				publishedDate: frontmatter.publishedDate,
-				slug,
-				tags,
-				assetPath: "/",
-			});
-		}
-	}
-
 	if (tagSlug !== undefined) {
 		posts = posts.filter((post) =>
 			post.tags.some((tag) => tag.slug === tagSlug),
 		);
 	}
 
-	if (process.env.NODE_ENV === "production") {
-		posts = posts.filter((post) => !post.frontmatter.demo);
-	}
-
 	return posts.sort(
 		(a, b) =>
-			new Date(b.frontmatter.publishedDate).getTime() -
-			new Date(a.frontmatter.publishedDate).getTime(),
+			new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime(),
 	);
 }
 
 export async function loadBlogPost(
 	slug: string,
-	includeContent = false,
+	{ includeArtifact }: { includeArtifact?: boolean } = {},
 ): Promise<BlogPostData | undefined> {
 	for (const postDir of await fs.readdir(POSTS_DIR)) {
 		if (!postDir.endsWith(slug)) {
 			continue;
 		}
-		return await readBlogPost(postDir, includeContent);
+		return await readBlogPost(postDir, { includeArtifact });
 	}
 
 	return undefined;
@@ -113,7 +74,7 @@ export async function loadExternalBlogData(): Promise<ExternalBlogData> {
 
 async function readBlogPost(
 	dir: string,
-	includeContent = false,
+	{ includeArtifact }: { includeArtifact?: boolean } = {},
 ): Promise<BlogPostData | undefined> {
 	const slugIndex = dir.lastIndexOf("_");
 	if (slugIndex === -1) {
@@ -129,7 +90,7 @@ async function readBlogPost(
 
 	const compiler = await getMdxCompiler();
 	const artifact = await compiler.compile(source, {
-		frontmatterOnly: !includeContent,
+		frontmatterOnly: !includeArtifact,
 		frontmatterSchema: blogPostFrontmatterSchema,
 		mdxOptions: {
 			rehypePlugins: [
@@ -178,14 +139,16 @@ async function readBlogPost(
 	}
 
 	return {
-		...artifact,
 		title: artifact.frontmatter.title,
 		url: `${serverConfig.app.url}${pathLocator.blog.post.index(slug)}`,
-		publishedDate: artifact.frontmatter.publishedDate,
 		slug,
+		publishedDate: artifact.frontmatter.publishedDate,
+		modifiedDate: artifact.frontmatter.modifiedDate,
+		description: artifact.frontmatter.description,
 		tags,
 		cover,
 		assetPath,
+		artifact: includeArtifact ? artifact : undefined,
 	};
 }
 

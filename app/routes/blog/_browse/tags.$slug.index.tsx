@@ -36,16 +36,18 @@ function RouteComponent() {
 
 	return (
 		<>
-			<Typography variant="h2" asChild gutter>
-				<h1>{tag.title}</h1>
-			</Typography>
-			<Typography variant="body1" asVariant>
-				{tag.description}
-			</Typography>
+			<div className="mb-8">
+				<Typography variant="h2" asChild gutterBottom>
+					<h1>{tag.title}</h1>
+				</Typography>
+				<Typography variant="body1" asVariant>
+					{tag.description}
+				</Typography>
 
-			<Typography variant="a" asChild>
-				<SiteLink to={pathLocator.blog.tags.index}>See all tags.</SiteLink>
-			</Typography>
+				<Typography variant="a" asChild>
+					<SiteLink to={pathLocator.blog.tags.index}>See all tags.</SiteLink>
+				</Typography>
+			</div>
 
 			<BlogPostList
 				posts={groupedPosts}

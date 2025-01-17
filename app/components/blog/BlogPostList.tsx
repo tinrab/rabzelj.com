@@ -19,12 +19,12 @@ export function BlogPostList<T extends BlogPostCommon>({
 					<Typography
 						id={`h-${yearGroup.year}${anchorSuffix}`}
 						gutter
-						variant="h3"
+						variant="h5"
 						asChild
 					>
 						<a
 							href={`#h-${yearGroup.year}${anchorSuffix}`}
-							className="text-foreground"
+							className="text-muted-foreground"
 						>
 							<h2>{yearGroup.year}</h2>
 						</a>
@@ -36,12 +36,12 @@ export function BlogPostList<T extends BlogPostCommon>({
 								<Typography
 									id={`h-${yearGroup.year}-${monthGroup.month}${anchorSuffix}`}
 									gutter
-									variant="h5"
+									variant="h6"
 									asChild
 								>
 									<a
 										href={`#h-${yearGroup.year}-${monthGroup.month}${anchorSuffix}`}
-										className="text-foreground"
+										className="text-muted-foreground/80"
 									>
 										<h3>{monthGroup.month}</h3>
 									</a>
@@ -49,7 +49,9 @@ export function BlogPostList<T extends BlogPostCommon>({
 
 								<ul className="list-disc pl-4">
 									{monthGroup.posts.map((post) => (
-										<li key={post.url}>{renderPost(post)}</li>
+										<li key={post.url} className="text-xl leading-7">
+											{renderPost(post)}
+										</li>
 									))}
 								</ul>
 							</div>

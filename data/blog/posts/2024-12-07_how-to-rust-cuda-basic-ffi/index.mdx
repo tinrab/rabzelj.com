@@ -1,0 +1,289 @@
+---
+title: Working With CUDA in Rust - Basic FFI
+description: Let's work with CUDA in Rust without external crates.
+tags:
+  - rust
+  - cuda
+publishedDate: 2024-12-07
+---
+
+There are existing crates for working with CUDA in Rust, but let's see how to get up and running using only [cc](https://crates.io/crates/cc) and rolling our own bindings.
+
+Source code is available on [GitHub](https://github.com/tinrab/rust-cuda-demo).
+This post contains only excerpts.
+
+# Setup
+
+You need CUDA Toolkit installed on your system along with any additional libraries you might need.
+I use Arch (by the way) which has a wiki page about installing [CUDA](https://wiki.archlinux.org/title/GPGPU#CUDA).
+
+We'll use [cc](https://crates.io/crates/cc) to run the CUDA compiler (nvcc) and link the libraries.
+
+```toml { "fileName": "Cargo.toml" }
+[build-dependencies]
+cc = "1.2.2"
+```
+
+The CUDA compiler (nvcc) requires a specific version of GCC. In this case, we use GCC 13, which must be in your system's PATH.
+
+```rust { "fileName": "build.rs" }
+use std::error::Error;
+
+fn main() -> Result<(), Box<dyn Error>> {
+    cc::Build::new()
+        .cuda(true)
+        .cudart("static")
+        .includes(&["./cuda", "/opt/cuda/include"])
+        .files(&[
+            "./cuda/lib.cu",
+            "./cuda/lib_math.cu",
+            "./cuda/lib_cublas.cu",
+        ])
+        // Needed because nvcc requires specific gcc version.
+        .flag("-ccbin=gcc-13")
+        .warnings(false)
+        .extra_warnings(false)
+        .compile("rustcudademo");
+
+    println!("cargo:rustc-link-search=native=/opt/cuda/lib");
+
+    println!("cargo:rustc-link-lib=cuda");
+    println!("cargo:rustc-link-lib=cudart");
+    println!("cargo:rustc-link-lib=cublas");
+
+    println!("cargo:rerun-if-changed={}", "./build.rs");
+    println!("cargo:rerun-if-changed={}", "./cuda");
+
+    Ok(())
+}
+```
+
+Static linking is also possible if you plan to distribute binaries.
+
+This build script isn't platform-independent. As an improvement, we could introduce conditional compilation and smarter path detection for include paths.
+
+# Memory management
+
+When working with CUDA, memory can be allocated on the host (CPU & RAM) or the device (GPU).
+Typical workflow involves allocating memory on the host, copying it to the device, running the kernel, copying the result back to the host, and deallocating everything.
+We want to avoid copying data back and forth as much as possible.
+
+We will manage memory in Rust via RAII, and allocate on the device manually in C++.
+The FFI interface (from Rust to C++) will accept memory pointers that remain valid throughout the duration of CUDA operations.
+
+Sometimes we want to allocate memory in Rust, pass it to C++, and forget about it.
+The lifetime therefore outlives the scope of the Rust function calling C++ functions.
+This can be achieved by using [Box::leak](https://doc.rust-lang.org/std/boxed/struct.Box.html#method.leak).
+We would then need to free the memory manually in C++.
+
+We could expose CUDA memory allocation functions to Rust directly.
+Although, keeping CUDA-specific things in C++ makes everything clearer.
+Especially if you're looking for learning resources, which are all written in C++.
+
+The code for launching kernels should (probably) also remain in C++.
+The CUDA compiler (nvcc) is a compiler driver on top of host compiler (gcc).
+One feature that it adds is the triple chevron syntax `<<<...>>>` for launching kernels.
+Doing that in Rust wouldn't be straightforward, so we would need to call `cudaLaunchKernel` directly.
+That is more cumbersome.
+
+The possibilities are endless, and you'll need to evaluate the tradeoffs for your specific use case.
+
+# FFI
+
+Let's start with a simple example of adding two vectors.
+
+First, we declare the FFI in C/C++.
+
+```cpp { "fileName": "cuda/lib_math.h" }
+#ifndef LIB_MATH_H
+#define LIB_MATH_H
+
+#include <cuda_runtime.h>
+
+extern "C" {
+    cudaError_t math_vector_add(
+        int n,
+        const float* a,
+        const float* b,
+        float* c
+    );
+}
+
+#endif // LIB_MATH_H
+```
+
+Then we declare the FFI in Rust.
+These rarely look nice.
+
+```rust { "fileName": "src/math.rs" }
+pub mod ffi {
+    use super::*;
+
+    type CudaErrorType = c_int;
+
+    #[link(name = "rustcudademo", kind = "static")]
+    extern "C" {
+        pub fn math_vector_add(
+            n: c_int,
+            a: *const f32,
+            b: *const f32,
+            c: *mut f32,
+        ) -> CudaErrorType;
+    }
+}
+```
+
+Finally, we implement a safe API in Rust.
+
+```rust { "fileName": "src/math.rs" }
+pub fn vector_add(a: &[f32], b: &[f32]) -> CudaResult<Vec<f32>> {
+    let mut c = vec![0.0; a.len()];
+    unsafe {
+        handle_cuda_error!(ffi::math_vector_add(
+            a.len() as c_int,
+            a.as_ptr(),
+            b.as_ptr(),
+            c.as_mut_ptr()
+        ))?;
+    }
+    Ok(c)
+}
+```
+
+Sometimes it's good to further check or assert parameters and return an appropriate error.
+
+# Better types and semantics
+
+C/C++ often does not provide the APIs we would prefer to work with in any reasonable capacity.
+
+Consider this [example](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html#group__CUDART__DEVICE_1g80861db2ce7c29b6e8055af8ae01bc78).
+
+```cpp
+cudaError_t cudaGetDevice(int *device);
+```
+
+Using a pointer as a parameter that the function will mutate and an enum return type (integer) feels wrong.
+C/C++ doesn't have a result monad, nor expressive pattern matching.
+This function always returns an "error", which is `cudaSuccess` (`0`) on success.
+
+So then the question is, how to expose this in Rust?
+That's up to us.
+
+```rust { "fileName": "src/cuda.rs" }
+pub mod ffi {
+    use std::ffi::c_int;
+
+    type CudaErrorType = c_int;
+
+    #[link(name = "rustcudademo", kind = "static")]
+    extern "C" {
+        /// Returns which device is currently being used.
+        #[link_name = "cudaGetDevice"]
+        pub fn cuda_get_device(device: &mut c_int) -> CudaErrorType;
+
+        /// Returns the description string for an error code.
+        #[link_name = "cudaGetErrorString"]
+        pub fn cuda_get_error_string(code: c_int) -> *const c_char;
+    }
+
+    // ...
+}
+
+pub fn get_device_count() -> CudaResult<u32> {
+    let mut count = 0;
+    unsafe {
+        handle_cuda_error!(ffi::cuda_get_device_count(&mut count))?;
+    }
+    Ok(count as u32)
+}
+```
+
+Here we wrote a safe wrapper `get_device_count` around the FFI function that returns a `Result`.
+
+# cuBLAS
+
+Let's also try using cuBLAS.
+
+```cpp { "fileName": "cuda/lib_cublas.h" }
+#ifndef LIB_CUBLAS_H
+#define LIB_CUBLAS_H
+
+#include <cublas_v2.h>
+#include <cuda_runtime.h>
+
+extern "C" {
+    cudaError_t cublas_sgemm(
+        int n,
+        const float* a,
+        const float* b,
+        float* c,
+        float alpha,
+        float beta,
+        cublasStatus_t* cublas_status
+    );
+}
+
+#endif // LIB_CUBLAS_H
+```
+
+Declare the FFI.
+
+```rust { "fileName": "src/cublas.rs" }
+#[link(name = "rustcudademo", kind = "static")]
+extern "C" {
+    pub fn cublas_sgemm(
+        n: c_int,
+        a_matrix: *const f32,
+        b_matrix: *const f32,
+        c_matrix: *mut f32,
+        alpha: f32,
+        beta: f32,
+        cublas_status: *mut CublasStatusType,
+    ) -> CudaErrorType;
+    // ...
+}
+```
+
+Write a safe wrapper for the function.
+
+```rust
+pub fn sgemm(n: usize, a: &[f32], b: &[f32], alpha: f32, beta: f32) -> CudaResult<Vec<f32>> {
+    let mut c = vec![0.0; n * n];
+    unsafe {
+        let mut cublas_status = 0;
+        handle_cublas_error!(
+            ffi::cublas_sgemm(
+                n as c_int,
+                a.as_ptr(),
+                b.as_ptr(),
+                c.as_mut_ptr(),
+                alpha,
+                beta,
+                &mut cublas_status,
+            ),
+            cublas_status
+        )?;
+    }
+    Ok(c)
+}
+```
+
+Then we can use it, without any `unsafe` blocks.
+
+```rust
+#[test]
+fn it_works() {
+    let a = vec![1.0, 2.0, 3.0, 4.0];
+    let b = vec![1.0, 2.0, 3.0, 4.0];
+    let c = sgemm(2, &a, &b, 1.0, 0.0).unwrap();
+    assert_eq!(c, vec![7.0, 10.0, 15.0, 22.0]);
+}
+```
+
+# Conclusion
+
+Working with CUDA in Rust involves three key steps: linking libraries, declaring FFIs, and writing safe wrappers around them.
+Several existing crates provide APIs for CUDA, and there are also ways to auto-generate FFI bindings.
+That's something to look into.
+
+Source code is available on [GitHub](https://github.com/tinrab/rust-cuda-demo).

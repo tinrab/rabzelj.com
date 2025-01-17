@@ -1,0 +1,86 @@
+---
+title: Running Next.js Standalone App With Sharp Inside Docker
+description: Running Next.js standalone app with sharp inside Docker cannot be that hard, right?
+tags:
+  - nextjs
+  - docker
+  - nodejs
+publishedDate: 2023-11-26
+---
+
+Next.js can be built in "standalone" mode, where all the files needed for running an app in production are built and moved into `.next/standalone` directory.
+After doing just that, I had trouble getting [sharp](https://github.com/lovell/sharp) to work, which is used by Next.js for image optimization.
+There's even a log messages warning you that [Sharp is missing in production](https://nextjs.org/docs/messages/sharp-missing-in-production).
+
+Simply trying to install sharp, locally and for CI on GitHub Actions, has lead me down a rabbit hole.
+From following Vercel's official [Next.js in Docker example](https://github.com/vercel/next.js/tree/canary/examples/with-docker),
+which [is incorrect](https://github.com/vercel/next.js/discussions/35296#discussioncomment-4250539) (they automatically install _sharp_ for you on their platform),
+trying to get libvips to compile,
+trying different Docker base images and different libraries, glibc and musl,
+skimming tons of GitHub issues and discussions, rewriting my Dockerfile 5 times...
+
+Long story short, here's the partial Dockerfile for my current working solution.
+This is for my pnpm/turborepo-based monorepo.
+To be fair, my actual Dockerfile is bigger, which is at least partially the reason why I was struggling.
+
+```docker
+FROM node:20.10-bullseye-slim as base
+
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /workspace
+
+# This is necessary to run sharp
+RUN npm install -g --arch=x64 --platform=linux --libc=glibc sharp@0.33.0-rc.2
+# Other dependencies...
+
+# Production image, copy all the files and run Next.js
+FROM base AS runner
+WORKDIR /workspace
+
+ENV NODE_ENV production
+# ENV NEXT_TELEMETRY_DISABLED 1
+# Path to global installation of sharp
+ENV NEXT_SHARP_PATH=/usr/local/lib/node_modules/sharp
+
+# Copy dependencies
+COPY --from=deps --chown=nextjs:nodejs /usr/local/lib/node_modules/sharp /usr/local/lib/node_modules/sharp
+
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Set the correct permission for prerender cache
+RUN mkdir .next && \
+    chown nextjs:nodejs .next && \
+    mkdir -p ./apps/site/.next && \
+    chown nextjs:nodejs ./apps/site/.next
+
+# Copy Next.js built artifacts
+COPY --chown=nextjs:nodejs ./apps/site/.next/standalone ./
+COPY --chown=nextjs:nodejs ./apps/site/.next/static ./.next/static
+COPY --chown=nextjs:nodejs ./apps/site/.next/static ./apps/site/.next/static
+# Include public directory
+COPY ./apps/site/public ./apps/site/public
+
+USER nextjs
+EXPOSE 3000
+ENV PORT 3000
+# Set hostname to localhost
+ENV HOSTNAME "0.0.0.0"
+# Run the app
+CMD ["node", "apps/site/server.js"]
+```
+
+The first change was to use `sharp@next`, a pre-release version of sharp ([Enhancement: Major overhaul of installation](https://github.com/lovell/sharp/issues/3750)).
+This made it easier to build on GitHub Actions.
+Weirdly, it works without needing to install any extra dependencies on the action's Ubuntu-based runner.
+
+I used to write giant Dockerfiles that build the entire project inside a container, but not doing that anymore.
+Creating Docker images is generally easier by building the project on the host or CI server (had pretty good experience with building and publishing using GitHub Actions), then copying artifacts to the image.
+Installing all the dependencies inside a Dockerfile is tedious, and I prefer to avoid it.
+
+I had to install _sharp_ globally.
+Because of how pnpm works, it requires you to install sharp manually (see [this](https://github.com/withastro/astro/issues/8310#issuecomment-1702967398) and [this](https://docs.astro.build/en/reference/errors/missing-sharp/)).
+That didn't work for me, so I installed it with npm and copied it to the production stage from `/usr/local/lib/node_modules`.
+
+All of this seems to work, for now.

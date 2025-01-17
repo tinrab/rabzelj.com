@@ -2,11 +2,6 @@
 	"flinect": {
 		"posts": [
 			{
-				"title": "Working With CUDA in Rust - Basic FFI",
-				"url": "https://flinect.com/blog/how-to-rust-cuda-basic-ffi",
-				"publishedDate": "2024-12-07T00:00:00.000Z"
-			},
-			{
 				"title": "Implementing Google's API Filtering Language in Rust",
 				"url": "https://flinect.com/blog/rust-implement-google-api-filter",
 				"publishedDate": "2024-12-05T00:00:00.000Z"
@@ -15,21 +10,6 @@
 				"title": "Working With Rust, TypeScript and WebAssembly Made a Bit Easier",
 				"url": "https://flinect.com/blog/rust-wasm-with-typescript-serde",
 				"publishedDate": "2024-01-19T00:00:00.000Z"
-			},
-			{
-				"title": "How I Use Declarative Macros in Rust",
-				"url": "https://flinect.com/blog/quick-tips-rust-declarative-macros",
-				"publishedDate": "2023-11-29T00:00:00.000Z"
-			},
-			{
-				"title": "Running Next.js Standalone App With Sharp Inside Docker",
-				"url": "https://flinect.com/blog/nextjs-standalone-docker-sharp-installation",
-				"publishedDate": "2023-11-26T00:00:00.000Z"
-			},
-			{
-				"title": "Deploy Next.js Site to Cloudflare Pages With GitHub Actions",
-				"url": "https://flinect.com/blog/deploy-nextjs-github-actions-cloudflare-pages",
-				"publishedDate": "2023-01-01T00:00:00.000Z"
 			}
 		]
 	},

@@ -1,0 +1,28 @@
+---
+title: PostgreSQL and process-per-connection
+description: Processes being units of concurrency is silly, right?
+tags:
+  - database
+  - postgresql
+publishedDate: 2024-10-18
+---
+
+PostgreSQL spawns a new process for each connection.
+You have to maintain a separate tool (pgbouncer) to get around exhausting the OS's resources.
+
+Ideally, clients use connection pools to re-use connections to the database.
+You have client driver pools, external pools like pgbouncer, and built-into-database ones (some NewSQL databases do this).
+
+*How to build a modern database?*
+
+IO with the database should be achieved with an event loop through a long-lived connection (libpq is one example).
+With modern async runtimes, databases could handle many connections simultaneously.
+
+Async runtime can be built on top of epoll where you're switching between coroutines based on received events.
+
+Even if the database handles connection pools, clients will still use pools because you don't want to constantly be doing TCP handshakes.
+There's also "command pipelines" (e.g. libpq, redis, I think), which is basically multiplexing but you still have multiple connections.
+
+Modern databases don't do concurrency by forking the process anymore.
+Afaik, YugabyteDB (postgres compatible) has a connection pool built-in.
+"Serverless DBs" like Neon also have this.

@@ -10,20 +10,14 @@ for (const fileName of await fs.readdir("public")) {
 	const st = await fs.stat(filePath);
 	if (st.isDirectory()) {
 		routeRules[`/${fileName}/**`] = {
-			cache: {
-				maxAge: 3600,
-			},
 			headers: {
-				"cache-control": "public, max-age=3600",
+				"cache-control": "public, max-age=86400",
 			},
 		};
 	} else {
 		routeRules[`/${fileName}`] = {
-			cache: {
-				maxAge: 3600,
-			},
 			headers: {
-				"cache-control": "public, max-age=3600",
+				"cache-control": "public, max-age=86400",
 			},
 		};
 	}
@@ -33,11 +27,8 @@ const config = defineConfig({
 	server: {
 		routeRules: {
 			"/_build/**": {
-				cache: {
-					maxAge: 3600,
-				},
 				headers: {
-					"cache-control": "public, max-age=3600",
+					"cache-control": "public, max-age=3600, state-while-revalidate=86400",
 				},
 			},
 			...routeRules,
@@ -58,22 +49,26 @@ const config = defineConfig({
 	},
 });
 
-const apiRouter = config.getRouter("api");
+const apiRouter = config.getRouter("api") as RouterSchema & {
+	plugins: unknown[];
+};
 
 config.addRouter({
-	plugins: apiRouter.plugins,
-	name: "robots",
+	name: "sitemap",
+	base: "/sitemap",
+	handler: "app/sitemap.handler.ts",
+	target: "server",
 	type: "http",
-	base: "/robots.txt",
-	handler: "app/robots.ts",
+	plugins: apiRouter.plugins,
 } as RouterSchema);
 
 config.addRouter({
-	plugins: apiRouter.plugins,
-	name: "sitemap",
+	name: "blog-rss",
+	base: "/blog/rss",
+	handler: "app/blog-rss.handler.ts",
+	target: "server",
 	type: "http",
-	base: "/sitemap.xml",
-	handler: "app/sitemap.ts",
+	plugins: apiRouter.plugins,
 } as RouterSchema);
 
 export default config;

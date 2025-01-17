@@ -11,6 +11,7 @@ export const pathLocator = {
 			index: "/blog/tags",
 			page: (slug: string): string => `/blog/tags/${slug}`,
 		},
+		rss: "/blog/rss.xml",
 	},
 	images: {
 		index: "/__images",

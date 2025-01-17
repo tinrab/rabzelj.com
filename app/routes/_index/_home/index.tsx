@@ -8,7 +8,7 @@ import { SiteLink } from "~/components/SiteLink";
 import { Typography } from "~/components/Typography";
 
 export const Route = createFileRoute("/_index/_home/")({
-	component: HomeComponent,
+	component: RouteComponent,
 });
 
 const socialLinks = [
@@ -40,7 +40,7 @@ const socialLinks = [
 	},
 ];
 
-function HomeComponent() {
+function RouteComponent() {
 	return (
 		<div className="flex flex-col items-center px-4 py-6 md:py-24">
 			<Avatar className="mb-3 h-28 w-28">

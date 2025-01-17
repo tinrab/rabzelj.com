@@ -1,11 +1,11 @@
 :root {
 	--code-padding: 1rem;
-
 	--line-number-width-default: 0;
-
+	--code-line-number-color: 0 0% 9%;
 	--code-line-highlight: 0 0% 9%;
 
 	&.dark {
+		--code-line-number-color: 0 0% 96.1%;
 		--code-line-highlight: 0 0% 96.1%;
 	}
 }
@@ -76,26 +76,18 @@ pre.shiki {
 	line-height: 1.25rem;
 	text-align: right;
 
-	color: hsl(var(--muted-foreground) / 0.6);
+	color: hsl(var(--code-line-number-color) / 0.6);
 
 	content: attr(data-line);
 	width: var(--line-number-width, --line-number-width-default);
 	margin-right: var(--code-padding);
 }
 
-code span.line-number:not(.highlighted)::before {
-	/* @apply bg-red-500; */
-}
-
-code span.line-number.highlighted::before {
-	/* @apply bg-blue-500; */
-}
-
 /********** CLI **********/
 
 .shiki code span.line-command::before {
-	@apply mr-2 text-muted-foreground;
 	content: "$";
+	margin-right: 0.5rem;
 }
 
 /********** Required for Shiki **********/

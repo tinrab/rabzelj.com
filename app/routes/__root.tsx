@@ -6,18 +6,17 @@ import {
 import { createServerFn, Meta, Scripts } from "@tanstack/start";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type React from "react";
-import { setHeader } from "vinxi/http";
 
-import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
-import { NotFound } from "~/components/NotFound";
 import mainCss from "~/styles/main.css?url";
 import { pathLocator } from "~/lib/path-locator";
-import { getThemeServerFn, useRootDocumentTheme } from "~/lib/theme/start";
 import { ThemeProvider } from "~/lib/theme/theme-context";
 import { Toaster } from "~/components/ui/toaster";
 import { loadClientConfig } from "~/config/client";
 import { makeClientConfigScript } from "~/config/utility";
 import { publicMiddleware } from "~/lib/middleware";
+import { useRootDocumentTheme } from "~/lib/theme/use-root-document-theme";
+import { getThemeServerFn } from "~/lib/theme/fn";
+import { THEME_LOCAL_STORAGE_KEY } from "~/lib/theme/constants";
 
 const loadClientConfigServerFn = createServerFn({ method: "GET" })
 	.middleware([publicMiddleware])
@@ -26,10 +25,20 @@ const loadClientConfigServerFn = createServerFn({ method: "GET" })
 	});
 
 export const Route = createRootRoute({
+	beforeLoad: async () => {
+		let theme = useRootDocumentTheme();
+		if (theme === undefined && typeof window !== "undefined") {
+			theme = await getThemeServerFn();
+		}
+
+		return {
+			theme,
+			config: await loadClientConfigServerFn(),
+		};
+	},
 	head: () => {
-		const clientConfig = loadClientConfig();
-		const site = clientConfig.app;
-		let tagline = site.description.trim();
+		const { app } = loadClientConfig();
+		let tagline = app.description.trim();
 		if (tagline.endsWith(".")) {
 			tagline = tagline.slice(0, -1);
 		}
@@ -44,9 +53,9 @@ export const Route = createRootRoute({
 					content: "width=device-width, initial-scale=1",
 				},
 
-				{ title: `${site.title}: ${tagline}` },
-				{ name: "description", content: site.description },
-				{ base: new URL(clientConfig.app.url) },
+				{ title: `${app.title}: ${tagline}` },
+				{ name: "description", content: app.description },
+				{ base: new URL(app.url) },
 
 				{ name: "robots", content: "index, follow" },
 				{
@@ -56,14 +65,14 @@ export const Route = createRootRoute({
 				},
 
 				{ property: "og:title", content: tagline },
-				{ property: "og:description", content: site.description },
-				{ property: "og:url", content: clientConfig.app.url },
-				{ property: "og:site_name", content: site.title },
+				{ property: "og:description", content: app.description },
+				{ property: "og:url", content: app.url },
+				{ property: "og:site_name", content: app.title },
 				{ property: "og:locale", content: "en_US" },
 				{ property: "og:type", content: "website" },
 				{
 					property: "og:image",
-					content: `${clientConfig.app.url}${pathLocator.images.file("featured.png")}`,
+					content: `${app.url}${pathLocator.images.file("featured.png")}`,
 				},
 			],
 			links: [
@@ -90,25 +99,6 @@ export const Route = createRootRoute({
 			],
 		};
 	},
-	loader: async () => {
-		let theme = useRootDocumentTheme();
-		if (theme === undefined && typeof window !== "undefined") {
-			theme = await getThemeServerFn();
-		}
-
-		return {
-			theme,
-			config: await loadClientConfigServerFn(),
-		};
-	},
-	errorComponent: (props) => {
-		return (
-			// <RootDocument>
-			<DefaultCatchBoundary {...props} />
-			// </RootDocument>
-		);
-	},
-	notFoundComponent: () => <NotFound />,
 	component: RootComponent,
 });
 
@@ -125,7 +115,7 @@ const queryClient = new QueryClient({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-	const data = Route.useLoaderData();
+	const data = Route.useRouteContext();
 	const theme = useRootDocumentTheme(data.theme);
 
 	return (
@@ -133,12 +123,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			lang="en"
 			data-theme={theme}
 			className={theme}
-			suppressHydrationWarning={true}
+			suppressHydrationWarning
 		>
 			<head>
 				<Meta />
 			</head>
-			<ThemeProvider initialTheme={theme}>
+			<ThemeProvider storageKey={THEME_LOCAL_STORAGE_KEY} initialTheme={theme}>
 				<QueryClientProvider client={queryClient}>
 					<body>
 						{children}

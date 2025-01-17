@@ -40,22 +40,29 @@ export function ThemeProvider({
 	);
 
 	// Applies theme to the document.
-	const applyTheme = useCallback((newTheme: Theme) => {
-		if (typeof document === "undefined") {
-			return;
-		}
-		try {
-			let resolvedTheme = newTheme;
-			if (resolvedTheme === Theme.SYSTEM) {
-				resolvedTheme = getSystemTheme();
+	const applyTheme = useCallback(
+		(newTheme: Theme) => {
+			if (typeof document === "undefined") {
+				return;
 			}
+			try {
+				let resolvedTheme = newTheme;
+				if (resolvedTheme === Theme.SYSTEM) {
+					resolvedTheme = getSystemTheme();
+				}
 
-			const element = document.documentElement;
-			element.dataset.theme = resolvedTheme;
-			element.classList.remove(Theme.LIGHT, Theme.DARK);
-			element.classList.add(resolvedTheme);
-		} catch {}
-	}, []);
+				const element = document.documentElement;
+				element.dataset.theme = resolvedTheme;
+				element.classList.remove(Theme.LIGHT, Theme.DARK);
+				element.classList.add(resolvedTheme);
+
+				if (typeof localStorage !== "undefined") {
+					localStorage.setItem(storageKey, newTheme);
+				}
+			} catch {}
+		},
+		[storageKey],
+	);
 
 	// Applies theme to the document on mount.
 	useEffect(() => {
@@ -74,8 +81,6 @@ export function ThemeProvider({
 	// Allow user to override system theme preference and save it to localStorage.
 	const updateTheme = useCallback(
 		(newTheme: Theme) => {
-			console.log(newTheme);
-
 			if (newTheme !== theme) {
 				setTheme(newTheme);
 				if (typeof localStorage !== "undefined") {

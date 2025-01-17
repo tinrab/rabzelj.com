@@ -28,15 +28,16 @@ export interface BlogPostCommon {
 	title: string;
 	url: string;
 	publishedDate: string;
+	modifiedDate?: string;
 }
 
-export interface BlogPostData
-	extends BlogPostCommon,
-		MdxArtifact<BlogPostFrontmatter> {
+export interface BlogPostData extends BlogPostCommon {
 	slug: string;
+	description: string;
 	tags: BlogTagData[];
 	cover?: BlogPostCoverData;
 	assetPath: string;
+	artifact?: MdxArtifact<BlogPostFrontmatter>;
 }
 
 export interface BlogPostCoverData {

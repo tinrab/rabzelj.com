@@ -47,9 +47,9 @@ export async function loadBlogTag(
 	return tags.find((tag) => tag.slug === slug);
 }
 
-export async function loadBlogTagPostCounts({
-	used,
-}: { used?: boolean } = {}): Promise<BlogTagPostCountData[]> {
+export async function loadBlogTagPostCounts(
+	{ used }: { used?: boolean } = { used: true },
+): Promise<BlogTagPostCountData[]> {
 	const tags = await loadBlogTags();
 	const posts = await loadBlogPosts();
 	const selectedTags: BlogTagPostCountData[] = [];

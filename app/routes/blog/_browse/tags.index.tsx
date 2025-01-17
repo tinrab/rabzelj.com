@@ -12,7 +12,7 @@ import { useMediaQuery } from "~/lib/use-media-query";
 const loadRouteData = createServerFn({ method: "GET" })
 	.middleware([publicMiddleware])
 	.handler(async () => {
-		const tags = await loadBlogTagPostCounts({ used: true });
+		const tags = await loadBlogTagPostCounts();
 		const maxPostCount = Math.max(...tags.map((tag) => tag.postCount));
 
 		return { tags, maxPostCount };
@@ -30,7 +30,7 @@ function RouteComponent() {
 	return (
 		<>
 			<section>
-				<Typography variant="h2" asChild className="text-balance" gutter>
+				<Typography variant="h2" asChild className="text-balance" gutterBottom>
 					<h1>Tags</h1>
 				</Typography>
 			</section>

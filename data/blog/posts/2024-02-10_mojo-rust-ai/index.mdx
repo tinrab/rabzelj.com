@@ -1,0 +1,39 @@
+---
+title: Mojo Outperforms Rust?
+description: Some thoughts about "Mojo outperforming Rust"
+tags:
+  - rust
+  - ai
+publishedDate: 2024-02-10
+---
+
+Stating that something outperforms Rust is nothing new.
+It's often used for clickbait because it works.
+
+Conversations about performance typically center on programming languages' frontends rather than underlying systems, and issues usually lie in flawed implementations.
+
+Rust is an LLVM (and/or Cranelift?) backed language.
+You can achieve any performance you want, though you might have to write inline assembly or hints for the compiler.
+Saying that Rust is slower than C, Zig, or Mojo is meaningless.
+
+See further discussion here: https://reddit.com/r/rust/comments/1al8cuc/modular_community_spotlight_outperforming_rust/.
+
+But, does anybody actually care about performance in AI? Why would Rust be considered for AI anyway?
+
+In ML/AI, a significant portion of compute is performed with "tensors" on the GPU.
+The source code is usually highly experimental, ugly and spaghettified.
+Python is great for this kind of work, and with tools like Google Colab, you can move blazingly fast.
+Why would you need an efficient systems programming language?
+While doing AI, you need to write lots of ugly code quickly.
+In my opinion, the idea of Python will stay, and Mojo can make it more efficient.
+
+There's also a difference between ML in a Jupyter notebook, serving learned models, online/incremental learning, learning on streams of data, recommendation systems, big data, processing video, etc.
+Some parts could need extra performance, and Rust can help.
+
+Here are some interesting Rust projects to look at:
+- Qdrant (https://qdrant.tech), a high-performant vector database. It is written in Rust. It powers X's "See similar posts" feature, afaik.
+- Arroyo (https://arroyo.dev) and Vector by DataDog (http://vector.dev) for stream processing.
+- Burn (https://github.com/tracel-ai/burn) a deep learning framework.
+- tch-rs (https://github.com/LaurentMazare/tch-rs) Rust bindings for PyTorch.
+- rust-bert (https://github.com/guillaume-be/rust-bert) for running NLP transformers models for summarization, sentiment analysis, embeddings, etc.
+- Candle (https://github.com/huggingface/candle) a minimalist ML framework.

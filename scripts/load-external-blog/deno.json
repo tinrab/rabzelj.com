@@ -1,5 +1,0 @@
-{
-	"tasks": {
-		"run": "deno -A ./main.ts"
-	}
-}

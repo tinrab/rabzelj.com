@@ -1,0 +1,311 @@
+---
+title: How I Use Declarative Macros in Rust
+description: Showing my common use cases for declarative macros in Rust.
+tags:
+  - rust
+publishedDate: 2023-11-29
+---
+
+Macros are one of my favorite features of Rust.
+I use both declarative and procedural macros heavily in my projects.
+Coming from C/C++, I never really liked metaprogramming, but Rust makes it great.
+
+In this post, I'll show common use cases of mine for writing declarative macros, and I don't mean just writing [dbg!](https://doc.rust-lang.org/std/macro.dbg.html) all over the place.
+I'll write about procedural macros in another post.
+
+# Quick intro
+
+This is just a quick intro to macros.
+I recommend reading [Macros](https://doc.rust-lang.org/book/ch19-06-macros.html) chapter from Rust book and [The Little Book of Rust Macros](https://danielkeep.github.io/tlborm/book/README.html).
+
+Declarative macros are rules that match against Rust syntax and produce Rust code.
+They are declared with `macro_rules! macro_name {...}` construct, and used as `macro_name!(...)`.
+
+Macro rules consist of patterns or matchers, and templates.
+Matchers define what Rust fragments to match.
+They are written as `$name:expr => ...`, where `$name` is a "metavariable" and `expr` is a fragment specifier.
+
+For example, the macro below would bind any Rust expression to the metavariable `$name`.
+
+```rust
+macro_rules! say_hello {
+  ($name:expr) => {
+      println!("Hello, {}!", $name);
+  };
+}
+
+say_hello!("World");
+say_hello!({ 13 + 29 });
+```
+
+There are various [fragment specifiers](https://doc.rust-lang.org/reference/macros-by-example.html#metavariables), but I mostly use `ident`, `expr`, `ty`/`path` and `tt`.
+
+Repetitions define repeated patterns.
+You can define them with `$(...)`, followed by a separator and an operator, which is `*` for any number of repetitions, `+` for at least one, and `?` for an optional fragment.
+Metavariables inside repetitions are matched against the corresponding fragment in the input.
+They can be expanded inside the template with `$(...)*`.
+For example, the macro bellow matches any number of key-value pairs in its last matcher.
+
+```rust
+macro_rules! hash_map {
+  () => {
+    ::std::collections::HashMap::new()
+  };
+  ($capacity:expr) => {
+    ::std::collections::HashMap::with_capacity($capacity)
+  };
+  ($($key:expr => $value:expr),* $(,)?) => {{
+    let mut _map = hash_map!(count_repeating!($($key),*));
+    $(
+      _map.insert($key, $value);
+    )*
+    _map
+  }};
+}
+```
+
+This macro can be used to easily create a `HashMap`.
+It's from my utility library called [Bomboni](https://github.com/tinrab/bomboni).
+In case you need to count the number of repetitions, you can look [here](https://veykril.github.io/tlborm/decl-macros/building-blocks/counting.html).
+
+One common pattern is handling trailing comma, because having a trailing comma at the end of a long list makes code prettier after formatting.
+This is done by `$(,)` at the end of the pattern, which will match one or zero commas.
+
+# Implementing traits
+
+For me, the most common use case for declarative macros is implementing traits.
+If you ever looked at Rust's std library sources, you can see how they use macros for repetitive implementations (an example is [int_impl!](https://github.com/rust-lang/rust/blob/master/library/core/src/num/mod.rs#L334) macro).
+
+I typically write macros when implementing `From` and `TryFrom` traits for structs that represent data-transfer objects or API request/response types.
+For example, checking if fields exist, converting from `Option`s, constructing errors based on field names, handling visibility, etc.
+
+Here's an `Id` type that implements `From` for all integer types.
+
+```rust
+struct Id(u128);
+
+macro_rules! impl_from {
+  ( $( $source:ty ),* $(,)? ) => {
+    $(impl From<$source> for Id {
+      fn from(x: $source) -> Self {
+        Id::new(x as u128)
+      }
+    })*
+  };
+}
+impl_from!(i8, i16, i32, i64, i128, u8, u16, u32, u64);
+```
+
+This would require 9 `From`s to be written by hand.
+
+Here's an example of implementing _serde_ traits for Google Protobuf's [Well-Known Types](https://buf.build/protocolbuffers/wellknowntypes).
+Another example could be serializing simple types as strings, where you utilize `Display`/`FromStr` and combine it with serde's `Serialize` and `Deserialize`.
+
+```rust
+macro_rules! impl_value_serde {
+  ($type:ty, $as:ty) => {
+    impl Serialize for $type {
+      fn serialize<S>(
+        &self,
+        serializer: S,
+      ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+      where
+        S: Serializer,
+      {
+        <$as>::serialize(&self.value, serializer)
+      }
+    }
+    impl<'de> Deserialize<'de> for $type {
+      fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error>
+      where
+        D: Deserializer<'de>,
+      {
+        let value = <$as>::deserialize(deserializer)?;
+        Ok(value.into())
+      }
+    }
+  };
+}
+impl_value_serde!(DoubleValue, f64);
+impl_value_serde!(FloatValue, f32);
+impl_value_serde!(Int32Value, i32);
+impl_value_serde!(UInt32Value, u32);
+impl_value_serde!(BoolValue, bool);
+impl_value_serde!(StringValue, String);
+```
+
+The following trait is used to parse some API-specific "data-transfer" structs.
+
+```rust
+macro_rules! impl_data_conversion {
+  ($variant:ident, $type:ty) => {
+    impl ProtoParse<ParsedValue> for $type {
+      type Error = GraphError;
+
+      fn parse(x: ParsedValue) -> Result<Self, Self::Error> {
+        if let ParsedValue::Data(x) = x {
+          Ok(x.parse_into()?)
+        } else {
+          Err(GraphError::value_display(
+            &x.to_string(),
+            GraphErrorReason::ValueInvalidNumericData,
+          )
+          .with_data_type_kind(DataTypeKind::$variant))
+        }
+      }
+    }
+  };
+}
+impl_data_conversion!(String, String);
+impl_data_conversion!(Boolean, bool);
+impl_data_conversion!(Float32, f32);
+// ...
+```
+
+This conversion can return an error object, enriched by value and its type.
+For a project I'm working on, this is quite common.
+Writing this code by hand for many types would be annoying.
+
+All of these macros are fairly simple, but they save a ton of time.
+
+# Repetitive code blocks
+
+There are situations where I have long match expressions.
+The match arms are very simple, but there are many of them.
+Or, there are small procedures to be done, but I don't think writing a separate function or a closure would be appropriate.
+
+One macro I really like is [matches!](https://doc.rust-lang.org/std/macro.matches.html).
+It's basically a single-arm match expression, but you can readably use it in if statements.
+
+So, this:
+
+```rust
+match data_type.id {
+  ParsedDataTypeId::Standard(ref data_type_id) if data_type_id == "data-trait-name" => {
+    // ...
+  }
+  _ => {}
+}
+```
+
+Can be written as:
+
+```rust
+if matches!(data_type.id, ParsedDataTypeId::Standard(ref data_type_id)
+            if data_type_id == "data-trait-name") {
+  // ...
+}
+```
+
+I use it to implement utility "is" functions for enums.
+
+```rust
+pub fn is_standard(&self) -> bool {
+  matches!(self, ParsedDataTypeId::Standard(_))
+}
+```
+
+Here, I use a macro to write non-`None` fields to a buffer.
+The [stringify!](https://doc.rust-lang.org/std/macro.stringify.html) macro from Rust's standard library can print Rust's tokens into `&'static str`.
+In this example, I'm using it to get field names as strings.
+
+```rust
+macro_rules! impl_write_field {
+  ($ident:ident) => {
+    if let Some(value) = self.$ident.as_ref() {
+      if empty {
+        empty = false;
+      } else {
+        buf.write_str(", ");
+      }
+      buf.write_str(&format!("{}={}", stringify!($ident), value))?;
+    }
+  };
+}
+impl_write_field!(data_trait_id);
+impl_write_field!(data_type_id);
+impl_write_field!(node_instance_id);
+impl_write_field!(edge);
+// ...
+```
+
+Here, I'm extending an error status struct with builder pattern-like functions for each metadata field
+For a field named `setting_id`, it would give me `with_setting_id` and `setting_id` setter functions.
+
+```rust
+macro_rules! impl_platform_metadata_field {
+($ident:ident, $with_name:ident, $type:ty, into) => {
+    pub fn $ident<R: Into<PlatformErrorReason>>($ident: $type, reason: R) -> Self {
+      Self::new_with_metadata(
+        reason,
+        PlatformErrorMetadata {
+          $ident: Some($ident.into()),
+          ..Default::default()
+        },
+      )
+    }
+    pub fn $with_name(mut self, $ident: $type) -> Self {
+      self.modify_metadata(|metadata| {
+        metadata.$ident = Some($ident.into());
+      })
+    }
+};
+// ...
+/*
+  err.with_reason(GraphErrorReason::DataTypeInvalidFieldValueType)
+    .with_field_id(&field.id)
+*/
+```
+
+Because of [hygiene rules](https://danielkeep.github.io/tlborm/book/mbe-min-hygiene.html) of Rust macros, we are somewhat limited in what we can do with declarative macros.
+You wouldn't be able to create a new identifier such as `with_$name`.
+With procedural macros, you can output any Rust code you want.
+But, if you don't want to write procedural macros, you can use [dtolnay/paste](https://github.com/dtolnay/paste) crate, which allows you to concatenate together metavariables.
+There's a [concat!](https://doc.rust-lang.org/std/macro.concat.html) macro, but it can only concatenate literals into a string.
+
+# Testing
+
+Macros are very handy for testing.
+You can write your own assert statements or test cases.
+
+Here's a macro for asserting correctness of Handlebars templating engine's rendering output.
+
+```rust
+let r = get_handlebars_registry();
+macro_rules! assert_case {
+  ($case:expr, $source:expr, $expected:expr $(,)?) => {
+    assert_eq!(
+      r.render_template(
+        &format!(r#"{{{{{} "{}" }}}}"#, $case, $source),
+        &Value::Null
+      )
+      .unwrap()
+      .as_str(),
+      $expected
+    );
+  };
+}
+macro_rules! assert_expr {
+  ($expr:expr, $result:expr) => {
+    assert_eq!(r.render_template($expr, &Value::Null).unwrap(), $result);
+  };
+}
+
+assert_case!(UPPER_CASE_HELPER_NAME, "variable name", "VARIABLE NAME");
+assert_case!(PASCAL_CASE_HELPER_NAME, "variable name", "VariableName");
+
+assert_expr!("{{add 1 2}}", "3.0");
+assert_expr!("{{sqrt 2}}", "1.4142135623730951");
+```
+
+Calling `assert_eq!` with `render_template` and unwrapping the result for each test case would be too verbose.
+It's possible that an inline array of test cases could be cleaner, but it depends.
+In a project of mine, there's a fairly long macro I have declared in the tests module, and I use it in several test functions.
+It's quite readable.
+For debugging, you might find that writing a macro is better than a function, especially if you use utilities like [line!](https://doc.rust-lang.org/std/macro.line.html),
+[file!](https://doc.rust-lang.org/std/macro.file.html),
+[stringify!](https://doc.rust-lang.org/std/macro.stringify.html), etc.
+
+In conclusion, declarative macros are a great tool for writing otherwise repetitive code.
+Sometimes [expanding](https://rust-analyzer.github.io/manual.html#expand-macro-recursively) a macro can be helpful for understanding what's going on.
+If I'm writing a complicated macro, I write matchers case by case in a test function, and then expand them to see if it matches correctly.

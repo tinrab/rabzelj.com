@@ -24,7 +24,7 @@ function RouteComponent() {
 		<LayoutRoot>
 			<SiteHeader />
 			<LayoutMain>
-				<div className="mx-auto max-w-3xl px-6 py-8 xl:max-w-4xl">
+				<div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
 					<Outlet />
 				</div>
 			</LayoutMain>

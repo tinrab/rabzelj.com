@@ -35,7 +35,7 @@ export function DashedLine({
 					x2={orientation === "horizontal" ? "100%" : 0}
 					y2={orientation === "vertical" ? "100%" : 0}
 					className="stroke-neutral-300 dark:stroke-neutral-700"
-					strokeDasharray="8 8"
+					strokeDasharray="18 4"
 					strokeWidth={size * 2}
 				/>
 			</pattern>

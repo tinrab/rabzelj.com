@@ -44,28 +44,30 @@ function makeSitemap(urls: SitemapUrl[]): string {
   `.trim();
 }
 
-export default defineEventHandler(async () => {
-	const serverConfig = loadServerConfig();
+export default defineEventHandler(async (event) => {
+	if (event.path !== ".xml") {
+		return new Response(null, { status: 302, headers: { Location: "/" } });
+	}
+
+	const config = loadServerConfig();
 	const now = new Date();
 	const thisWeek = new Date(now);
 	thisWeek.setDate(now.getDate() - now.getDay());
 
-	const staticRoutes: SitemapUrl[] = [
-		"/",
-		pathLocator.blog.index,
-		pathLocator.legal.index,
-	].map((path) => ({
-		url: `${serverConfig.app.url}${path}`,
-		changeFrequency: "weekly",
-		lastModified: thisWeek,
-	}));
+	const staticRoutes: SitemapUrl[] = ["/", pathLocator.blog.index].map(
+		(path) => ({
+			url: `${config.app.url}${path}`,
+			changeFrequency: "weekly",
+			lastModified: thisWeek,
+		}),
+	);
 
 	return new Response(makeSitemap([...staticRoutes]), {
 		status: 200,
 		headers: {
 			"Content-Type": "application/xml",
 			"X-Content-Type-Options": "nosniff",
-			"Cache-Control": "public, max-age=3600",
+			"Cache-Control": "public, max-age=86400",
 		},
 	});
 });

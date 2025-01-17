@@ -18,7 +18,7 @@ import {
 	NavigationMenuList,
 } from "~/components/ui/navigation-menu";
 import { pathLocator } from "~/lib/path-locator";
-import { changeThemeServerFn } from "~/lib/theme/start";
+import { changeThemeServerFn } from "~/lib/theme/fn";
 import { ThemeModeMenu } from "~/lib/theme/ThemeModeMenu";
 import { cn } from "~/lib/utility";
 
@@ -37,7 +37,7 @@ export function SiteHeader() {
 	return (
 		<Header>
 			<div className="-top-[0px] pointer-events-none absolute h-full w-full overflow-hidden">
-				<PulseDecoration className="absolute left-1/2" />
+				<PulseDecoration className="-top-[50px] absolute left-1/2" />
 			</div>
 
 			<HeaderRow className="max-w-screen-xl">
@@ -60,8 +60,6 @@ export function SiteHeader() {
 
 					<ThemeModeMenu
 						onThemeChange={async (theme) => {
-							console.log(theme);
-
 							await changeThemeServerFn({ data: { theme: theme } });
 							router.invalidate();
 						}}

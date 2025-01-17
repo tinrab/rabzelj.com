@@ -3,13 +3,20 @@ import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { routeTree } from "~/routeTree.gen";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
+import { LinearLoader } from "~/components/LinearLoader";
 
 export function createRouter() {
 	const router = createTanStackRouter({
 		routeTree,
 		defaultPreload: "intent",
 		defaultErrorComponent: DefaultCatchBoundary,
+		trailingSlash: "never",
 		defaultNotFoundComponent: () => <NotFound />,
+		defaultPendingComponent: () => (
+			<LinearLoader className="absolute inset-0 w-full" square />
+		),
+		defaultPendingMinMs: 100,
+		defaultPendingMs: 300,
 	});
 
 	return router;

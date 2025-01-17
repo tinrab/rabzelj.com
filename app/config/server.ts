@@ -10,6 +10,8 @@ const serverConfigSchema = z.object({
 	app: z.object({
 		url: z.string().url(),
 		domain: z.string(),
+		title: z.string(),
+		description: z.string(),
 		dataDir: z.string(),
 	}),
 });

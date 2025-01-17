@@ -18,7 +18,7 @@ const loadRouteData = createServerFn({ method: "GET" })
 	.middleware([publicMiddleware])
 	.validator(validateZod(z.object({ slug: z.string().min(1) })))
 	.handler(async ({ data: { slug } }) => {
-		const post = await loadBlogPost(slug, true);
+		const post = await loadBlogPost(slug, { includeArtifact: true });
 		if (!post) {
 			throw notFound();
 		}
@@ -37,20 +37,19 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
 			meta: makeSeo({
 				path: match.pathname,
 				title: post.title,
-				description: post.frontmatter.description,
+				description: post.description,
 				image: `${clientConfig.app.url}${pathLocator.assets.blogPostCover(post.slug)}`,
 				properties: {
 					"article:published_time": post.publishedDate,
-					...(post.frontmatter.modifiedDate
+					...(post.modifiedDate
 						? {
-								"article:modified_time": post.frontmatter.modifiedDate,
+								"article:modified_time": post.modifiedDate,
 							}
 						: {}),
 				},
 			}),
 		};
 	},
-	wrapInSuspense: true,
 });
 
 function RouteComponent() {
@@ -58,15 +57,15 @@ function RouteComponent() {
 
 	const content = useMemo(
 		() =>
-			post?.compiled && post.frontmatter
+			post.artifact?.compiled
 				? createMdxContent(
 						{
-							artifact: post,
+							artifact: post.artifact,
 						},
 						mdxPageLowerHeadingComponents,
 					)
 				: undefined,
-		[post],
+		[post.artifact],
 	);
 
 	return (
@@ -81,12 +80,20 @@ function RouteComponent() {
 				<Typography className="mb-3 text-balance" variant="h1" asVariant>
 					{post.title}
 				</Typography>
-				<div className="mb-6 flex flex-wrap gap-2">
+				<div className="flex flex-wrap gap-2">
 					{post.tags.map((tag) => (
 						<BlogTagChip key={tag.slug} tag={tag} />
 					))}
 				</div>
 			</section>
+
+			<Typography
+				variant="body2"
+				asVariant
+				className="mt-5 mb-8 text-muted-foreground italic"
+			>
+				{post.description}
+			</Typography>
 
 			<section className="border-b pb-6">{content}</section>
 

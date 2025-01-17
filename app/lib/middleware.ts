@@ -34,6 +34,9 @@ export function makeServerReply<
 }
 
 export const publicMiddleware = createMiddleware().server(async (ctx) => {
-	setHeader("cache-control", "public, max-age=3600");
+	setHeader(
+		"cache-control",
+		"public, max-age=86400, stale-while-revalidate=3600",
+	);
 	return ctx.next();
 });
