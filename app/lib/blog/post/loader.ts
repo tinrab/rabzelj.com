@@ -34,6 +34,10 @@ export async function loadBlogPosts({
 } = {}): Promise<BlogPostData[]> {
 	let posts: BlogPostData[] = [];
 	for (const postDir of await fs.readdir(POSTS_DIR)) {
+		const postDirStat = await fs.stat(path.join(POSTS_DIR, postDir));
+		if (!postDirStat.isDirectory()) {
+			continue;
+		}
 		const post = await readBlogPost(postDir);
 		if (post !== undefined) {
 			posts.push(post);
