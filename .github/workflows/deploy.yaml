@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [feature/ci]
+    branches: [main]
 
 env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

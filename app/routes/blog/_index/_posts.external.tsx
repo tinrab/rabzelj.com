@@ -4,6 +4,7 @@ import { createServerFn } from "@tanstack/start";
 import { BlogPostList } from "~/components/blog/BlogPostList";
 import { SiteLink } from "~/components/SiteLink";
 import { Typography } from "~/components/Typography";
+import { Separator } from "~/components/ui/separator";
 import { loadExternalBlogData } from "~/lib/blog/post/loader";
 import { groupBlogPosts } from "~/lib/blog/post/utility";
 import { publicMiddleware } from "~/lib/middleware";
@@ -18,7 +19,7 @@ const loadRouteData = createServerFn({ method: "GET" })
 		};
 	});
 
-export const Route = createFileRoute("/blog/_browse/_posts/external")({
+export const Route = createFileRoute("/blog/_index/_posts/external")({
 	component: RouteComponent,
 	loader: () => loadRouteData(),
 });
@@ -44,37 +45,36 @@ function RouteComponent() {
 					anchorSuffix="-flinect"
 					posts={flinectPosts}
 					renderPost={(post) => (
-						<Typography variant="a" gutter asChild>
+						<Typography variant="a" asChild>
 							<SiteLink to={post.url}>{post.title}</SiteLink>
 						</Typography>
 					)}
 				/>
 			</section>
 
-			<hr className="border border-t-2" />
+			<Separator orientation="horizontal" />
 
-			<section>
-				<Typography
-					id="h-outcrawl-posts"
-					variant="h3"
-					asChild
-					className="text-balance"
-					gutter
-				>
-					<a href="#h-outcrawl-posts" className="text-foreground">
-						<h2>Posts on Outcrawl</h2>
-					</a>
-				</Typography>
-				<BlogPostList
-					anchorSuffix="-outcrawl"
-					posts={outcrawlPosts}
-					renderPost={(post) => (
-						<Typography variant="a" gutter asChild>
-							<SiteLink to={post.url}>{post.title}</SiteLink>
-						</Typography>
-					)}
-				/>
-			</section>
+			<Typography
+				id="h-outcrawl-posts"
+				variant="h3"
+				asChild
+				className="text-balance"
+				gutter
+			>
+				<a href="#h-outcrawl-posts" className="text-foreground">
+					<h2>Posts on Outcrawl</h2>
+				</a>
+			</Typography>
+
+			<BlogPostList
+				anchorSuffix="-outcrawl"
+				posts={outcrawlPosts}
+				renderPost={(post) => (
+					<Typography variant="a" asChild>
+						<SiteLink to={post.url}>{post.title}</SiteLink>
+					</Typography>
+				)}
+			/>
 		</>
 	);
 }

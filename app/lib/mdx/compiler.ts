@@ -8,9 +8,10 @@ import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 
 async function loadMdxCompiler(): Promise<MdxCompiler> {
-	const lightTheme = (await import("shiki/themes/catppuccin-latte.mjs"))
+	const lightTheme = (await import("shiki/themes/github-light-default.mjs"))
 		.default;
-	const darkTheme = (await import("shiki/themes/catppuccin-mocha.mjs")).default;
+	const darkTheme = (await import("shiki/themes/github-dark-default.mjs"))
+		.default;
 
 	return (
 		new MdxCompiler()
@@ -19,6 +20,7 @@ async function loadMdxCompiler(): Promise<MdxCompiler> {
 			.withRemarkPlugin(remarkMath)
 			.withRehypePlugin(headingIdPlugin)
 			.withRehypePlugin(syntaxHighlightPlugin, {
+				includeDataAttributes: ["language"],
 				highlight: {},
 				lineNumbers: {},
 				commandLine: {},

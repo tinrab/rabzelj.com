@@ -25,22 +25,21 @@
 					}
 				}
 			}
-		}
+		},
+		"ignore": ["./app/components/ui/**"]
 	},
 	"files": {
 		"ignore": [
 			"node_modules",
 			"dist",
-			"coverage",
 			"build",
 			"out",
+			".output",
 			".vercel",
 			".vinxi",
 			".next",
 			".vscode",
 			".zed",
-			"**/*.hbs",
-			"./packages/api/src/__generated__/**",
 			"./app/routeTree.gen.ts"
 		],
 		"include": [

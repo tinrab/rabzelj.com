@@ -5,7 +5,7 @@ export const pathLocator = {
 		post: {
 			index: (slug: string) => `/blog/${slug}`,
 			asset: (slug: string, assetPath: string) =>
-				`/__assets/blog-post/${slug}/${assetPath}`,
+				`/_assets/blog/post/${slug}/${assetPath}`,
 		},
 		tags: {
 			index: "/blog/tags",
@@ -13,11 +13,13 @@ export const pathLocator = {
 		},
 		rss: "/blog/rss.xml",
 	},
-	images: {
-		index: "/__images",
-		file: (filename: string): string => `/__images/${filename}`,
+	resources: {
+		index: "/resources",
 	},
 	assets: {
-		blogPostCover: (slug: string): string => `/api/blog/post-cover/${slug}`,
+		avatar: "/_assets/avatar.png",
+		blogPostCover: (slug: string): string =>
+			`/api/images/blog/post/cover/${slug}`,
+		featured: "/api/images/featured",
 	},
 };

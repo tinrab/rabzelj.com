@@ -26,7 +26,7 @@ const loadRouteData = createServerFn({ method: "GET" })
 		};
 	});
 
-export const Route = createFileRoute("/blog/_browse/tags/$slug/")({
+export const Route = createFileRoute("/blog/_index/tags/$slug/")({
 	component: RouteComponent,
 	loader: ({ params }) => loadRouteData({ data: params }),
 });
@@ -35,7 +35,7 @@ function RouteComponent() {
 	const { tag, groupedPosts } = Route.useLoaderData();
 
 	return (
-		<>
+		<div className="mx-auto max-w-3xl px-4 pt-6 pb-8 md:pt-12">
 			<div className="mb-8">
 				<Typography variant="h2" asChild gutterBottom>
 					<h1>{tag.title}</h1>
@@ -52,11 +52,11 @@ function RouteComponent() {
 			<BlogPostList
 				posts={groupedPosts}
 				renderPost={(post) => (
-					<Typography variant="a" gutter asChild>
+					<Typography variant="a" asChild>
 						<SiteLink to={`/blog/${post.slug}`}>{post.title}</SiteLink>
 					</Typography>
 				)}
 			/>
-		</>
+		</div>
 	);
 }

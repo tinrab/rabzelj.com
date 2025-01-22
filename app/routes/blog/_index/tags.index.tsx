@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
-import { TagCloud } from "react-tagcloud";
 
 import { SiteLink } from "~/components/SiteLink";
 import { Typography } from "~/components/Typography";
@@ -18,17 +17,18 @@ const loadRouteData = createServerFn({ method: "GET" })
 		return { tags, maxPostCount };
 	});
 
-export const Route = createFileRoute("/blog/_browse/tags/")({
+export const Route = createFileRoute("/blog/_index/tags/")({
 	component: RouteComponent,
 	loader: () => loadRouteData(),
 });
 
 function RouteComponent() {
 	const data = Route.useLoaderData();
-	const isSm = useMediaQuery("(min-width: 640px)");
+	const aboveMd = useMediaQuery("(min-width: 768px)");
+	const aboveLg = useMediaQuery("(min-width: 1024px)");
 
 	return (
-		<>
+		<div className="mx-auto max-w-3xl px-4 pt-6 pb-8 md:pt-12">
 			<section>
 				<Typography variant="h2" asChild className="text-balance" gutterBottom>
 					<h1>Tags</h1>
@@ -36,35 +36,32 @@ function RouteComponent() {
 			</section>
 
 			<section className="block max-w-5xl text-center">
-				<TagCloud
-					tags={data.tags.map((tag) => ({
-						value: tag.slug,
-						count: tag.postCount,
-						props: tag,
-					}))}
-					minSize={isSm ? 24 : 16}
-					maxSize={isSm ? 96 : 34}
-					disableRandomColor
-					shuffle={false}
-					renderer={(tag, size) => (
-						<Typography key={tag.value} variant="a" asChild>
+				<div className="flex flex-wrap items-center justify-center ">
+					{data.tags.map((tag) => (
+						<Typography
+							key={tag.slug}
+							variant="a"
+							asChild
+							className="mx-2 inline-block"
+							style={{
+								fontSize: `${
+									((tag.postCount * 3 + data.maxPostCount) /
+										data.maxPostCount) *
+									(aboveLg ? 1.5 : aboveMd ? 1.2 : 0.8)
+								}rem`,
+								lineHeight: 1.3,
+							}}
+						>
 							<SiteLink
-								to={pathLocator.blog.tags.page(tag.value)}
+								to={pathLocator.blog.tags.page(tag.slug)}
 								className="mx-2 inline-block"
-								style={{
-									fontSize: size,
-									lineHeight: 1.2,
-								}}
 							>
-								{
-									// @ts-ignore missing types
-									tag.props.title
-								}
+								{tag.title}
 							</SiteLink>
 						</Typography>
-					)}
-				/>
+					))}
+				</div>
 			</section>
-		</>
+		</div>
 	);
 }

@@ -1,5 +1,6 @@
 import {
 	Outlet,
+	ScriptOnce,
 	ScrollRestoration,
 	createRootRoute,
 } from "@tanstack/react-router";
@@ -14,9 +15,8 @@ import { Toaster } from "~/components/ui/toaster";
 import { loadClientConfig } from "~/config/client";
 import { makeClientConfigScript } from "~/config/utility";
 import { publicMiddleware } from "~/lib/middleware";
-import { useRootDocumentTheme } from "~/lib/theme/use-root-document-theme";
 import { getThemeServerFn } from "~/lib/theme/fn";
-import { THEME_LOCAL_STORAGE_KEY } from "~/lib/theme/constants";
+import { Theme } from "~/lib/theme/types";
 
 const loadClientConfigServerFn = createServerFn({ method: "GET" })
 	.middleware([publicMiddleware])
@@ -25,14 +25,9 @@ const loadClientConfigServerFn = createServerFn({ method: "GET" })
 	});
 
 export const Route = createRootRoute({
-	beforeLoad: async () => {
-		let theme = useRootDocumentTheme();
-		if (theme === undefined && typeof window !== "undefined") {
-			theme = await getThemeServerFn();
-		}
-
+	loader: async () => {
 		return {
-			theme,
+			theme: await getThemeServerFn(),
 			config: await loadClientConfigServerFn(),
 		};
 	},
@@ -66,13 +61,14 @@ export const Route = createRootRoute({
 
 				{ property: "og:title", content: tagline },
 				{ property: "og:description", content: app.description },
+				{ name: "author", content: app.title },
 				{ property: "og:url", content: app.url },
 				{ property: "og:site_name", content: app.title },
 				{ property: "og:locale", content: "en_US" },
 				{ property: "og:type", content: "website" },
 				{
 					property: "og:image",
-					content: `${app.url}${pathLocator.images.file("featured.png")}`,
+					content: `${app.url}${pathLocator.assets.featured}`,
 				},
 			],
 			links: [
@@ -115,20 +111,26 @@ const queryClient = new QueryClient({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-	const data = Route.useRouteContext();
-	const theme = useRootDocumentTheme(data.theme);
+	const data = Route.useLoaderData();
+	const themeClass = data.theme === Theme.DARK ? "dark" : "";
 
 	return (
 		<html
 			lang="en"
-			data-theme={theme}
-			className={theme}
+			data-theme={themeClass}
+			className={themeClass}
 			suppressHydrationWarning
 		>
 			<head>
 				<Meta />
+				{data.theme === Theme.SYSTEM ? (
+					<ScriptOnce
+						// biome-ignore lint/correctness/noChildrenProp: need to inject theme
+						children={`window.matchMedia('(prefers-color-scheme: dark)').matches ? document.documentElement.classList.add('dark') : null`}
+					/>
+				) : undefined}
 			</head>
-			<ThemeProvider storageKey={THEME_LOCAL_STORAGE_KEY} initialTheme={theme}>
+			<ThemeProvider initialTheme={data.theme}>
 				<QueryClientProvider client={queryClient}>
 					<body>
 						{children}

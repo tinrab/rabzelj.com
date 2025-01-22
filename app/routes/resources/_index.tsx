@@ -1,4 +1,3 @@
-import React from "react";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { SiteFooter } from "~/components/SiteFooter";
@@ -7,12 +6,12 @@ import { makeSeo } from "~/lib/seo";
 import { LayoutMain } from "~/components/layout/LayoutMain";
 import { LayoutRoot } from "~/components/layout/LayoutRoot";
 
-export const Route = createFileRoute("/blog/_browse")({
+export const Route = createFileRoute("/resources/_index")({
 	head({ match }) {
 		return {
 			meta: makeSeo({
 				path: match.pathname,
-				title: "Blog",
+				title: "Resources",
 			}),
 		};
 	},
@@ -24,9 +23,7 @@ function RouteComponent() {
 		<LayoutRoot>
 			<SiteHeader />
 			<LayoutMain>
-				<div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
-					<Outlet />
-				</div>
+				<Outlet />
 			</LayoutMain>
 			<SiteFooter />
 		</LayoutRoot>

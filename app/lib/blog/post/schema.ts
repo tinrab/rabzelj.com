@@ -38,6 +38,13 @@ export interface BlogPostData extends BlogPostCommon {
 	cover?: BlogPostCoverData;
 	assetPath: string;
 	artifact?: MdxArtifact<BlogPostFrontmatter>;
+	related?: RelatedBlogPost[];
+}
+
+export interface RelatedBlogPost {
+	title: string;
+	url: string;
+	slug: string;
 }
 
 export interface BlogPostCoverData {

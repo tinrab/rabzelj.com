@@ -13,22 +13,31 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as BlogBrowseImport } from './routes/blog/_browse'
+import { Route as ResourcesIndexImport } from './routes/resources/_index'
+import { Route as BlogIndexImport } from './routes/blog/_index'
 import { Route as IndexHomeImport } from './routes/_index/_home'
+import { Route as ResourcesIndexIndexImport } from './routes/resources/_index.index'
 import { Route as IndexHomeIndexImport } from './routes/_index/_home/index'
 import { Route as BlogPostPostImport } from './routes/blog/_post/_post'
-import { Route as BlogBrowsePostsImport } from './routes/blog/_browse/_posts'
-import { Route as BlogBrowseTagsIndexImport } from './routes/blog/_browse/tags.index'
-import { Route as BlogBrowsePostsIndexImport } from './routes/blog/_browse/_posts.index'
+import { Route as BlogIndexPostsImport } from './routes/blog/_index/_posts'
+import { Route as BlogIndexTagsIndexImport } from './routes/blog/_index/tags.index'
+import { Route as BlogIndexPostsIndexImport } from './routes/blog/_index/_posts.index'
 import { Route as BlogPostPostSlugImport } from './routes/blog/_post/_post.$slug'
-import { Route as BlogBrowsePostsExternalImport } from './routes/blog/_browse/_posts.external'
-import { Route as BlogBrowseTagsSlugIndexImport } from './routes/blog/_browse/tags.$slug.index'
+import { Route as BlogIndexPostsExternalImport } from './routes/blog/_index/_posts.external'
+import { Route as BlogIndexTagsSlugIndexImport } from './routes/blog/_index/tags.$slug.index'
 
 // Create Virtual Routes
 
+const ResourcesImport = createFileRoute('/resources')()
 const BlogImport = createFileRoute('/blog')()
 
 // Create/Update Routes
+
+const ResourcesRoute = ResourcesImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const BlogRoute = BlogImport.update({
   id: '/blog',
@@ -36,14 +45,25 @@ const BlogRoute = BlogImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const BlogBrowseRoute = BlogBrowseImport.update({
-  id: '/_browse',
+const ResourcesIndexRoute = ResourcesIndexImport.update({
+  id: '/_index',
+  getParentRoute: () => ResourcesRoute,
+} as any)
+
+const BlogIndexRoute = BlogIndexImport.update({
+  id: '/_index',
   getParentRoute: () => BlogRoute,
 } as any)
 
 const IndexHomeRoute = IndexHomeImport.update({
   id: '/_index/_home',
   getParentRoute: () => rootRoute,
+} as any)
+
+const ResourcesIndexIndexRoute = ResourcesIndexIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ResourcesIndexRoute,
 } as any)
 
 const IndexHomeIndexRoute = IndexHomeIndexImport.update({
@@ -57,21 +77,21 @@ const BlogPostPostRoute = BlogPostPostImport.update({
   getParentRoute: () => BlogRoute,
 } as any)
 
-const BlogBrowsePostsRoute = BlogBrowsePostsImport.update({
+const BlogIndexPostsRoute = BlogIndexPostsImport.update({
   id: '/_posts',
-  getParentRoute: () => BlogBrowseRoute,
+  getParentRoute: () => BlogIndexRoute,
 } as any)
 
-const BlogBrowseTagsIndexRoute = BlogBrowseTagsIndexImport.update({
+const BlogIndexTagsIndexRoute = BlogIndexTagsIndexImport.update({
   id: '/tags/',
   path: '/tags/',
-  getParentRoute: () => BlogBrowseRoute,
+  getParentRoute: () => BlogIndexRoute,
 } as any)
 
-const BlogBrowsePostsIndexRoute = BlogBrowsePostsIndexImport.update({
+const BlogIndexPostsIndexRoute = BlogIndexPostsIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => BlogBrowsePostsRoute,
+  getParentRoute: () => BlogIndexPostsRoute,
 } as any)
 
 const BlogPostPostSlugRoute = BlogPostPostSlugImport.update({
@@ -80,16 +100,16 @@ const BlogPostPostSlugRoute = BlogPostPostSlugImport.update({
   getParentRoute: () => BlogPostPostRoute,
 } as any)
 
-const BlogBrowsePostsExternalRoute = BlogBrowsePostsExternalImport.update({
+const BlogIndexPostsExternalRoute = BlogIndexPostsExternalImport.update({
   id: '/external',
   path: '/external',
-  getParentRoute: () => BlogBrowsePostsRoute,
+  getParentRoute: () => BlogIndexPostsRoute,
 } as any)
 
-const BlogBrowseTagsSlugIndexRoute = BlogBrowseTagsSlugIndexImport.update({
+const BlogIndexTagsSlugIndexRoute = BlogIndexTagsSlugIndexImport.update({
   id: '/tags/$slug/',
   path: '/tags/$slug/',
-  getParentRoute: () => BlogBrowseRoute,
+  getParentRoute: () => BlogIndexRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -110,19 +130,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogImport
       parentRoute: typeof rootRoute
     }
-    '/blog/_browse': {
-      id: '/blog/_browse'
+    '/blog/_index': {
+      id: '/blog/_index'
       path: '/blog'
       fullPath: '/blog'
-      preLoaderRoute: typeof BlogBrowseImport
+      preLoaderRoute: typeof BlogIndexImport
       parentRoute: typeof BlogRoute
     }
-    '/blog/_browse/_posts': {
-      id: '/blog/_browse/_posts'
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesImport
+      parentRoute: typeof rootRoute
+    }
+    '/resources/_index': {
+      id: '/resources/_index'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesIndexImport
+      parentRoute: typeof ResourcesRoute
+    }
+    '/blog/_index/_posts': {
+      id: '/blog/_index/_posts'
       path: ''
       fullPath: '/blog'
-      preLoaderRoute: typeof BlogBrowsePostsImport
-      parentRoute: typeof BlogBrowseImport
+      preLoaderRoute: typeof BlogIndexPostsImport
+      parentRoute: typeof BlogIndexImport
     }
     '/blog/_post/_post': {
       id: '/blog/_post/_post'
@@ -138,12 +172,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexHomeIndexImport
       parentRoute: typeof IndexHomeImport
     }
-    '/blog/_browse/_posts/external': {
-      id: '/blog/_browse/_posts/external'
+    '/resources/_index/': {
+      id: '/resources/_index/'
+      path: '/'
+      fullPath: '/resources/'
+      preLoaderRoute: typeof ResourcesIndexIndexImport
+      parentRoute: typeof ResourcesIndexImport
+    }
+    '/blog/_index/_posts/external': {
+      id: '/blog/_index/_posts/external'
       path: '/external'
       fullPath: '/blog/external'
-      preLoaderRoute: typeof BlogBrowsePostsExternalImport
-      parentRoute: typeof BlogBrowsePostsImport
+      preLoaderRoute: typeof BlogIndexPostsExternalImport
+      parentRoute: typeof BlogIndexPostsImport
     }
     '/blog/_post/_post/$slug': {
       id: '/blog/_post/_post/$slug'
@@ -152,26 +193,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogPostPostSlugImport
       parentRoute: typeof BlogPostPostImport
     }
-    '/blog/_browse/_posts/': {
-      id: '/blog/_browse/_posts/'
+    '/blog/_index/_posts/': {
+      id: '/blog/_index/_posts/'
       path: '/'
       fullPath: '/blog/'
-      preLoaderRoute: typeof BlogBrowsePostsIndexImport
-      parentRoute: typeof BlogBrowsePostsImport
+      preLoaderRoute: typeof BlogIndexPostsIndexImport
+      parentRoute: typeof BlogIndexPostsImport
     }
-    '/blog/_browse/tags/': {
-      id: '/blog/_browse/tags/'
+    '/blog/_index/tags/': {
+      id: '/blog/_index/tags/'
       path: '/tags'
       fullPath: '/blog/tags'
-      preLoaderRoute: typeof BlogBrowseTagsIndexImport
-      parentRoute: typeof BlogBrowseImport
+      preLoaderRoute: typeof BlogIndexTagsIndexImport
+      parentRoute: typeof BlogIndexImport
     }
-    '/blog/_browse/tags/$slug/': {
-      id: '/blog/_browse/tags/$slug/'
+    '/blog/_index/tags/$slug/': {
+      id: '/blog/_index/tags/$slug/'
       path: '/tags/$slug'
       fullPath: '/blog/tags/$slug'
-      preLoaderRoute: typeof BlogBrowseTagsSlugIndexImport
-      parentRoute: typeof BlogBrowseImport
+      preLoaderRoute: typeof BlogIndexTagsSlugIndexImport
+      parentRoute: typeof BlogIndexImport
     }
   }
 }
@@ -190,34 +231,34 @@ const IndexHomeRouteWithChildren = IndexHomeRoute._addFileChildren(
   IndexHomeRouteChildren,
 )
 
-interface BlogBrowsePostsRouteChildren {
-  BlogBrowsePostsExternalRoute: typeof BlogBrowsePostsExternalRoute
-  BlogBrowsePostsIndexRoute: typeof BlogBrowsePostsIndexRoute
+interface BlogIndexPostsRouteChildren {
+  BlogIndexPostsExternalRoute: typeof BlogIndexPostsExternalRoute
+  BlogIndexPostsIndexRoute: typeof BlogIndexPostsIndexRoute
 }
 
-const BlogBrowsePostsRouteChildren: BlogBrowsePostsRouteChildren = {
-  BlogBrowsePostsExternalRoute: BlogBrowsePostsExternalRoute,
-  BlogBrowsePostsIndexRoute: BlogBrowsePostsIndexRoute,
+const BlogIndexPostsRouteChildren: BlogIndexPostsRouteChildren = {
+  BlogIndexPostsExternalRoute: BlogIndexPostsExternalRoute,
+  BlogIndexPostsIndexRoute: BlogIndexPostsIndexRoute,
 }
 
-const BlogBrowsePostsRouteWithChildren = BlogBrowsePostsRoute._addFileChildren(
-  BlogBrowsePostsRouteChildren,
+const BlogIndexPostsRouteWithChildren = BlogIndexPostsRoute._addFileChildren(
+  BlogIndexPostsRouteChildren,
 )
 
-interface BlogBrowseRouteChildren {
-  BlogBrowsePostsRoute: typeof BlogBrowsePostsRouteWithChildren
-  BlogBrowseTagsIndexRoute: typeof BlogBrowseTagsIndexRoute
-  BlogBrowseTagsSlugIndexRoute: typeof BlogBrowseTagsSlugIndexRoute
+interface BlogIndexRouteChildren {
+  BlogIndexPostsRoute: typeof BlogIndexPostsRouteWithChildren
+  BlogIndexTagsIndexRoute: typeof BlogIndexTagsIndexRoute
+  BlogIndexTagsSlugIndexRoute: typeof BlogIndexTagsSlugIndexRoute
 }
 
-const BlogBrowseRouteChildren: BlogBrowseRouteChildren = {
-  BlogBrowsePostsRoute: BlogBrowsePostsRouteWithChildren,
-  BlogBrowseTagsIndexRoute: BlogBrowseTagsIndexRoute,
-  BlogBrowseTagsSlugIndexRoute: BlogBrowseTagsSlugIndexRoute,
+const BlogIndexRouteChildren: BlogIndexRouteChildren = {
+  BlogIndexPostsRoute: BlogIndexPostsRouteWithChildren,
+  BlogIndexTagsIndexRoute: BlogIndexTagsIndexRoute,
+  BlogIndexTagsSlugIndexRoute: BlogIndexTagsSlugIndexRoute,
 }
 
-const BlogBrowseRouteWithChildren = BlogBrowseRoute._addFileChildren(
-  BlogBrowseRouteChildren,
+const BlogIndexRouteWithChildren = BlogIndexRoute._addFileChildren(
+  BlogIndexRouteChildren,
 )
 
 interface BlogPostPostRouteChildren {
@@ -233,50 +274,80 @@ const BlogPostPostRouteWithChildren = BlogPostPostRoute._addFileChildren(
 )
 
 interface BlogRouteChildren {
-  BlogBrowseRoute: typeof BlogBrowseRouteWithChildren
+  BlogIndexRoute: typeof BlogIndexRouteWithChildren
   BlogPostPostRoute: typeof BlogPostPostRouteWithChildren
 }
 
 const BlogRouteChildren: BlogRouteChildren = {
-  BlogBrowseRoute: BlogBrowseRouteWithChildren,
+  BlogIndexRoute: BlogIndexRouteWithChildren,
   BlogPostPostRoute: BlogPostPostRouteWithChildren,
 }
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface ResourcesIndexRouteChildren {
+  ResourcesIndexIndexRoute: typeof ResourcesIndexIndexRoute
+}
+
+const ResourcesIndexRouteChildren: ResourcesIndexRouteChildren = {
+  ResourcesIndexIndexRoute: ResourcesIndexIndexRoute,
+}
+
+const ResourcesIndexRouteWithChildren = ResourcesIndexRoute._addFileChildren(
+  ResourcesIndexRouteChildren,
+)
+
+interface ResourcesRouteChildren {
+  ResourcesIndexRoute: typeof ResourcesIndexRouteWithChildren
+}
+
+const ResourcesRouteChildren: ResourcesRouteChildren = {
+  ResourcesIndexRoute: ResourcesIndexRouteWithChildren,
+}
+
+const ResourcesRouteWithChildren = ResourcesRoute._addFileChildren(
+  ResourcesRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
   '': typeof IndexHomeRouteWithChildren
   '/blog': typeof BlogPostPostRouteWithChildren
+  '/resources': typeof ResourcesIndexRouteWithChildren
   '/': typeof IndexHomeIndexRoute
-  '/blog/external': typeof BlogBrowsePostsExternalRoute
+  '/resources/': typeof ResourcesIndexIndexRoute
+  '/blog/external': typeof BlogIndexPostsExternalRoute
   '/blog/$slug': typeof BlogPostPostSlugRoute
-  '/blog/': typeof BlogBrowsePostsIndexRoute
-  '/blog/tags': typeof BlogBrowseTagsIndexRoute
-  '/blog/tags/$slug': typeof BlogBrowseTagsSlugIndexRoute
+  '/blog/': typeof BlogIndexPostsIndexRoute
+  '/blog/tags': typeof BlogIndexTagsIndexRoute
+  '/blog/tags/$slug': typeof BlogIndexTagsSlugIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/blog': typeof BlogBrowsePostsIndexRoute
+  '/blog': typeof BlogIndexPostsIndexRoute
+  '/resources': typeof ResourcesIndexIndexRoute
   '/': typeof IndexHomeIndexRoute
-  '/blog/external': typeof BlogBrowsePostsExternalRoute
+  '/blog/external': typeof BlogIndexPostsExternalRoute
   '/blog/$slug': typeof BlogPostPostSlugRoute
-  '/blog/tags': typeof BlogBrowseTagsIndexRoute
-  '/blog/tags/$slug': typeof BlogBrowseTagsSlugIndexRoute
+  '/blog/tags': typeof BlogIndexTagsIndexRoute
+  '/blog/tags/$slug': typeof BlogIndexTagsSlugIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_index/_home': typeof IndexHomeRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
-  '/blog/_browse': typeof BlogBrowseRouteWithChildren
-  '/blog/_browse/_posts': typeof BlogBrowsePostsRouteWithChildren
+  '/blog/_index': typeof BlogIndexRouteWithChildren
+  '/resources': typeof ResourcesRouteWithChildren
+  '/resources/_index': typeof ResourcesIndexRouteWithChildren
+  '/blog/_index/_posts': typeof BlogIndexPostsRouteWithChildren
   '/blog/_post/_post': typeof BlogPostPostRouteWithChildren
   '/_index/_home/': typeof IndexHomeIndexRoute
-  '/blog/_browse/_posts/external': typeof BlogBrowsePostsExternalRoute
+  '/resources/_index/': typeof ResourcesIndexIndexRoute
+  '/blog/_index/_posts/external': typeof BlogIndexPostsExternalRoute
   '/blog/_post/_post/$slug': typeof BlogPostPostSlugRoute
-  '/blog/_browse/_posts/': typeof BlogBrowsePostsIndexRoute
-  '/blog/_browse/tags/': typeof BlogBrowseTagsIndexRoute
-  '/blog/_browse/tags/$slug/': typeof BlogBrowseTagsSlugIndexRoute
+  '/blog/_index/_posts/': typeof BlogIndexPostsIndexRoute
+  '/blog/_index/tags/': typeof BlogIndexTagsIndexRoute
+  '/blog/_index/tags/$slug/': typeof BlogIndexTagsSlugIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -284,7 +355,9 @@ export interface FileRouteTypes {
   fullPaths:
     | ''
     | '/blog'
+    | '/resources'
     | '/'
+    | '/resources/'
     | '/blog/external'
     | '/blog/$slug'
     | '/blog/'
@@ -293,6 +366,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/blog'
+    | '/resources'
     | '/'
     | '/blog/external'
     | '/blog/$slug'
@@ -302,26 +376,31 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_index/_home'
     | '/blog'
-    | '/blog/_browse'
-    | '/blog/_browse/_posts'
+    | '/blog/_index'
+    | '/resources'
+    | '/resources/_index'
+    | '/blog/_index/_posts'
     | '/blog/_post/_post'
     | '/_index/_home/'
-    | '/blog/_browse/_posts/external'
+    | '/resources/_index/'
+    | '/blog/_index/_posts/external'
     | '/blog/_post/_post/$slug'
-    | '/blog/_browse/_posts/'
-    | '/blog/_browse/tags/'
-    | '/blog/_browse/tags/$slug/'
+    | '/blog/_index/_posts/'
+    | '/blog/_index/tags/'
+    | '/blog/_index/tags/$slug/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexHomeRoute: typeof IndexHomeRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
+  ResourcesRoute: typeof ResourcesRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexHomeRoute: IndexHomeRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
+  ResourcesRoute: ResourcesRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -335,7 +414,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/_index/_home",
-        "/blog"
+        "/blog",
+        "/resources"
       ]
     },
     "/_index/_home": {
@@ -347,25 +427,38 @@ export const routeTree = rootRoute
     "/blog": {
       "filePath": "blog",
       "children": [
-        "/blog/_browse",
+        "/blog/_index",
         "/blog/_post/_post"
       ]
     },
-    "/blog/_browse": {
-      "filePath": "blog/_browse.tsx",
+    "/blog/_index": {
+      "filePath": "blog/_index.tsx",
       "parent": "/blog",
       "children": [
-        "/blog/_browse/_posts",
-        "/blog/_browse/tags/",
-        "/blog/_browse/tags/$slug/"
+        "/blog/_index/_posts",
+        "/blog/_index/tags/",
+        "/blog/_index/tags/$slug/"
       ]
     },
-    "/blog/_browse/_posts": {
-      "filePath": "blog/_browse/_posts.tsx",
-      "parent": "/blog/_browse",
+    "/resources": {
+      "filePath": "resources",
       "children": [
-        "/blog/_browse/_posts/external",
-        "/blog/_browse/_posts/"
+        "/resources/_index"
+      ]
+    },
+    "/resources/_index": {
+      "filePath": "resources/_index.tsx",
+      "parent": "/resources",
+      "children": [
+        "/resources/_index/"
+      ]
+    },
+    "/blog/_index/_posts": {
+      "filePath": "blog/_index/_posts.tsx",
+      "parent": "/blog/_index",
+      "children": [
+        "/blog/_index/_posts/external",
+        "/blog/_index/_posts/"
       ]
     },
     "/blog/_post/_post": {
@@ -379,25 +472,29 @@ export const routeTree = rootRoute
       "filePath": "_index/_home/index.tsx",
       "parent": "/_index/_home"
     },
-    "/blog/_browse/_posts/external": {
-      "filePath": "blog/_browse/_posts.external.tsx",
-      "parent": "/blog/_browse/_posts"
+    "/resources/_index/": {
+      "filePath": "resources/_index.index.tsx",
+      "parent": "/resources/_index"
+    },
+    "/blog/_index/_posts/external": {
+      "filePath": "blog/_index/_posts.external.tsx",
+      "parent": "/blog/_index/_posts"
     },
     "/blog/_post/_post/$slug": {
       "filePath": "blog/_post/_post.$slug.tsx",
       "parent": "/blog/_post/_post"
     },
-    "/blog/_browse/_posts/": {
-      "filePath": "blog/_browse/_posts.index.tsx",
-      "parent": "/blog/_browse/_posts"
+    "/blog/_index/_posts/": {
+      "filePath": "blog/_index/_posts.index.tsx",
+      "parent": "/blog/_index/_posts"
     },
-    "/blog/_browse/tags/": {
-      "filePath": "blog/_browse/tags.index.tsx",
-      "parent": "/blog/_browse"
+    "/blog/_index/tags/": {
+      "filePath": "blog/_index/tags.index.tsx",
+      "parent": "/blog/_index"
     },
-    "/blog/_browse/tags/$slug/": {
-      "filePath": "blog/_browse/tags.$slug.index.tsx",
-      "parent": "/blog/_browse"
+    "/blog/_index/tags/$slug/": {
+      "filePath": "blog/_index/tags.$slug.index.tsx",
+      "parent": "/blog/_index"
     }
   }
 }

@@ -7,20 +7,20 @@ import { cn } from "~/lib/utility";
 export const typographyVariants = cva("", {
 	variants: {
 		variant: {
-			h1: "scroll-m-20 font-light text-5xl tracking-tight md:text-7xl lg:text-8xl",
-			h2: "scroll-m-20 font-light text-4xl tracking-tight md:text-5xl lg:text-6xl",
-			h3: "scroll-m-20 font-normal text-3xl tracking-tight",
-			h4: "scroll-m-20 font-medium text-2xl tracking-tight",
-			h5: "scroll-m-20 font-medium text-xl tracking-tight",
-			h6: "scroll-m-20 font-medium text-lg tracking-tight",
+			h1: "scroll-m-20 text-balance font-light text-4xl md:text-6xl lg:text-7xl",
+			h2: "scroll-m-20 text-balance font-light text-3xl md:text-5xl lg:text-6xl",
+			h3: "scroll-m-20 text-balance font-normal text-3xl",
+			h4: "scroll-m-20 text-balance font-medium text-2xl",
+			h5: "scroll-m-20 text-balance font-medium text-xl",
+			h6: "scroll-m-20 text-balance font-medium text-lg",
 
 			lead: "font-normal text-muted-foreground text-xl",
 			large: "font-semibold text-lg",
 			// small: 'text-sm font-medium leading-none',
 			// muted: 'text-sm text-muted-foreground',
 
-			body1: "leading-7",
-			body2: "leading-5",
+			body1: "text-base leading-7",
+			body2: "text-base leading-5",
 
 			a: "cursor-pointer text-link no-underline hover:underline",
 		},
@@ -30,11 +30,11 @@ export const typographyVariants = cva("", {
 
 const topGutters: Record<string, string> = {
 	h1: "mt-10 lg:mt-12",
-	h2: "mt-8 lg:mt-10",
-	h3: "mt-8",
-	h4: "mt-6",
-	h5: "mt-3",
-	h6: "mt-3",
+	h2: "mt-10 lg:mt-12",
+	h3: "mt-10",
+	h4: "mt-9",
+	h5: "mt-4",
+	h6: "mt-4",
 	// body1: 'mt-3',
 	// body2: 'mt-3',
 };

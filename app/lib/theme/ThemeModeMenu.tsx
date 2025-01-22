@@ -14,14 +14,12 @@ import { Theme } from "~/lib/theme/types";
 type ThemeModeMenuProps = {
 	themes?: Theme[];
 	getThemeLabel?: (theme: Theme) => string;
-	onThemeChange?: (theme: Theme) => void;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export function ThemeModeMenu({
 	themes = [Theme.LIGHT, Theme.DARK, Theme.SYSTEM],
 	getThemeLabel = (theme) =>
 		theme === Theme.LIGHT ? "Light" : theme === Theme.DARK ? "Dark" : "System",
-	onThemeChange,
 }: ThemeModeMenuProps) {
 	const themeProvider = useThemeProviderContext();
 
@@ -31,10 +29,6 @@ export function ThemeModeMenu({
 		}
 
 		themeProvider.setTheme(newTheme);
-
-		if (onThemeChange !== undefined) {
-			onThemeChange(newTheme);
-		}
 	};
 
 	return (

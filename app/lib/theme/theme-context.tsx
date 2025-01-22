@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import { THEME_LOCAL_STORAGE_KEY } from "~/lib/theme/constants";
+import { changeThemeServerFn } from "~/lib/theme/fn";
 import { Theme } from "~/lib/theme/types";
 
 type ThemeProviderState = {
@@ -42,65 +43,49 @@ export function ThemeProvider({
 	// Applies theme to the document.
 	const applyTheme = useCallback(
 		(newTheme: Theme) => {
-			if (typeof document === "undefined") {
-				return;
+			setTheme(newTheme);
+
+			if (typeof localStorage !== "undefined") {
+				localStorage.setItem(storageKey, newTheme);
 			}
-			try {
-				let resolvedTheme = newTheme;
-				if (resolvedTheme === Theme.SYSTEM) {
-					resolvedTheme = getSystemTheme();
-				}
 
-				const element = document.documentElement;
-				element.dataset.theme = resolvedTheme;
-				element.classList.remove(Theme.LIGHT, Theme.DARK);
-				element.classList.add(resolvedTheme);
+			let resolvedTheme = newTheme;
+			if (resolvedTheme === Theme.SYSTEM) {
+				resolvedTheme = getSystemTheme();
+			}
 
-				if (typeof localStorage !== "undefined") {
-					localStorage.setItem(storageKey, newTheme);
-				}
-			} catch {}
+			if (resolvedTheme === Theme.DARK) {
+				document.documentElement.classList.add("dark");
+			} else {
+				document.documentElement.classList.remove("dark");
+			}
 		},
 		[storageKey],
 	);
 
-	// Applies theme to the document on mount.
-	useEffect(() => {
-		if (typeof document === "undefined") {
-			return;
-		}
-		const element = document.documentElement;
-		if (
-			!element.classList.contains(Theme.LIGHT) &&
-			!element.classList.contains(Theme.DARK)
-		) {
-			applyTheme(theme);
-		}
-	}, [applyTheme, theme]);
-
-	// Allow user to override system theme preference and save it to localStorage.
+	// Allow user to change the theme.
 	const updateTheme = useCallback(
 		(newTheme: Theme) => {
-			if (newTheme !== theme) {
-				setTheme(newTheme);
-				if (typeof localStorage !== "undefined") {
-					localStorage.setItem(storageKey, newTheme);
-				}
+			if (newTheme === theme) {
+				return;
 			}
+
+			changeThemeServerFn({ data: { theme: newTheme } });
+
 			applyTheme(newTheme);
 		},
-		[storageKey, applyTheme, theme],
+		[theme, applyTheme],
 	);
 
 	// Listen to system theme preference
 	const handleMediaQuery = useCallback(
 		(event: MediaQueryListEvent | MediaQueryList) => {
-			if (theme !== Theme.SYSTEM) {
+			if (initialTheme !== Theme.SYSTEM) {
 				return;
 			}
 			applyTheme(getSystemTheme(event));
 		},
-		[applyTheme, theme],
+		[applyTheme, initialTheme],
 	);
 	useEffect(() => {
 		const media = window.matchMedia(THEME_MEDIA_QUERY);

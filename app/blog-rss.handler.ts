@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
 		description: config.app.description,
 		site_url: config.app.url,
 		feed_url: `${config.app.url}${pathLocator.blog.rss}`,
-		image_url: `${config.app.url}${pathLocator.images.file("featured.png")}`,
+		image_url: `${config.app.url}${pathLocator.assets.featured}`,
 		pubDate: now,
 		// 1 hour
 		ttl: 60,

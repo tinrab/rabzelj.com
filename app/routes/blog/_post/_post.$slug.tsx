@@ -13,12 +13,17 @@ import { clientConfig } from "~/config/client";
 import { Typography } from "~/components/Typography";
 import { BlogShare } from "~/components/blog/BlogShare";
 import { BlogTagChip } from "~/components/blog/BlogTagChip";
+import { Separator } from "~/components/ui/separator";
+import { SiteLink } from "~/components/SiteLink";
 
 const loadRouteData = createServerFn({ method: "GET" })
 	.middleware([publicMiddleware])
 	.validator(validateZod(z.object({ slug: z.string().min(1) })))
 	.handler(async ({ data: { slug } }) => {
-		const post = await loadBlogPost(slug, { includeArtifact: true });
+		const post = await loadBlogPost(slug, {
+			includeArtifact: true,
+			includeRelated: true,
+		});
 		if (!post) {
 			throw notFound();
 		}
@@ -69,33 +74,35 @@ function RouteComponent() {
 	);
 
 	return (
-		<article className="mx-auto max-w-3xl">
-			<section>
-				<div className="mb-3 flex flex-wrap gap-2">
-					<Typography className="mr-auto text-muted-foreground text-sm">
-						{new Date(post.publishedDate).toLocaleDateString()}
-					</Typography>
-					<BlogShare post={post} />
-				</div>
-				<Typography className="mb-3 text-balance" variant="h1" asVariant>
-					{post.title}
+		<article className="mx-auto max-w-3xl break-words px-4 py-8 md:py-12">
+			<div className="mb-4 flex flex-wrap gap-2">
+				<Typography className="mr-auto text-muted-foreground text-sm">
+					{new Date(post.publishedDate).toLocaleDateString()}
 				</Typography>
-				<div className="flex flex-wrap gap-2">
-					{post.tags.map((tag) => (
-						<BlogTagChip key={tag.slug} tag={tag} />
-					))}
-				</div>
-			</section>
+				<BlogShare post={post} />
+			</div>
+
+			<Typography className="mb-4 text-balance" variant="h1" asVariant>
+				{post.title}
+			</Typography>
 
 			<Typography
 				variant="body2"
 				asVariant
-				className="mt-5 mb-8 text-muted-foreground italic"
+				className="mb-4 text-muted-foreground italic"
 			>
 				{post.description}
 			</Typography>
 
-			<section className="border-b pb-6">{content}</section>
+			<div className="mb-8 flex flex-wrap gap-2">
+				{post.tags.map((tag) => (
+					<BlogTagChip key={tag.slug} tag={tag} />
+				))}
+			</div>
+
+			<section className="pb-6">{content}</section>
+
+			<Separator />
 
 			<section className="py-3">
 				<div className="mb-3 flex flex-wrap gap-2">
@@ -110,6 +117,29 @@ function RouteComponent() {
 					<BlogShare post={post} />
 				</div>
 			</section>
+
+			{post.related?.length ? (
+				<section className="py-3">
+					<Typography variant="h2" asVariant gutterBottom>
+						Related posts
+					</Typography>
+					<ul className="list-disc px-8">
+						{post.related.map((relatedPost) => (
+							<li key={relatedPost.slug}>
+								<Typography
+									variant="a"
+									className="text-balance text-lg"
+									asChild
+								>
+									<SiteLink to={`/blog/${relatedPost.slug}`}>
+										{relatedPost.title}
+									</SiteLink>
+								</Typography>
+							</li>
+						))}
+					</ul>
+				</section>
+			) : undefined}
 		</article>
 	);
 }

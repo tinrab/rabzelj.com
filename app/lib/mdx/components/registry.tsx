@@ -20,8 +20,18 @@ export function getMdxContentComponents({
 	lowerHeadings,
 }: { lowerHeadings?: boolean } = {}): MdxContentComponents {
 	return {
-		p: ({ children, ...restProps }: React.HTMLAttributes<HTMLElement>) => (
-			<Typography variant="body1" gutterBottom asChild {...restProps}>
+		p: ({
+			className,
+			children,
+			...restProps
+		}: React.HTMLAttributes<HTMLElement>) => (
+			<Typography
+				variant="body1"
+				gutterBottom
+				className={cn(className, "text-base/7 lg:text-lg/7")}
+				asChild
+				{...restProps}
+			>
 				<p>{children}</p>
 			</Typography>
 		),
@@ -76,13 +86,13 @@ export function getMdxContentComponents({
 			/>
 		),
 		li: ({
-			// className,
+			className,
 			children,
 			...restProps
 		}: React.HTMLAttributes<HTMLElement>) => (
 			<Typography
 				variant="body1"
-				// className={cn(className, "text-md lg:text-lg")}
+				className={cn(className, "text-base lg:text-lg")}
 				asChild
 				{...restProps}
 			>
@@ -121,5 +131,13 @@ export function getMdxContentComponents({
 		code: (props: React.HTMLAttributes<HTMLElement>) => (
 			<MdxInlineCode {...props} />
 		),
+
+		img: ({ alt, ...restProps }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+			if (!alt) {
+				throw new Error("Image must have an alt attribute");
+			}
+			// biome-ignore lint/a11y/useAltText: generated alt text
+			return <img alt={alt} className="mx-auto" {...restProps} />;
+		},
 	};
 }

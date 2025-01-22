@@ -9,6 +9,7 @@ import {
 	type ExternalBlogData,
 	type BlogPostCoverData,
 	type BlogPostData,
+	type RelatedBlogPost,
 } from "~/lib/blog/post/schema";
 import { loadBlogTags } from "~/lib/blog/tag/loader";
 import type { BlogTagData } from "~/lib/blog/tag/schema";
@@ -18,6 +19,7 @@ import { pathLocator } from "~/lib/path-locator";
 const DATA_DIR = path.join(process.cwd(), serverConfig.app.dataDir);
 const POSTS_DIR = path.join(DATA_DIR, "blog/posts");
 const POST_INDEX_FILE = "index.mdx";
+const MAX_RELATED_POSTS = 3;
 
 export const BLOG_POST_IMAGE_SIZES: { width: number; suffix: string }[] = [
 	{ width: 480, suffix: "sm" },
@@ -29,16 +31,22 @@ export const BLOG_POST_IMAGE_SIZES: { width: number; suffix: string }[] = [
 
 export async function loadBlogPosts({
 	tagSlug,
+	includeArtifact,
 }: {
 	tagSlug?: string;
+	includeArtifact?: boolean;
 } = {}): Promise<BlogPostData[]> {
+	if (process.env.NODE_ENV === "development") {
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+	}
+
 	let posts: BlogPostData[] = [];
 	for (const postDir of await fs.readdir(POSTS_DIR)) {
 		const postDirStat = await fs.stat(path.join(POSTS_DIR, postDir));
 		if (!postDirStat.isDirectory()) {
 			continue;
 		}
-		const post = await readBlogPost(postDir);
+		const post = await readBlogPost(postDir, { includeArtifact });
 		if (post !== undefined) {
 			posts.push(post);
 		}
@@ -58,13 +66,20 @@ export async function loadBlogPosts({
 
 export async function loadBlogPost(
 	slug: string,
-	{ includeArtifact }: { includeArtifact?: boolean } = {},
+	{
+		includeArtifact,
+		includeRelated,
+	}: { includeArtifact?: boolean; includeRelated?: boolean } = {},
 ): Promise<BlogPostData | undefined> {
+	if (process.env.NODE_ENV === "development") {
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+	}
+
 	for (const postDir of await fs.readdir(POSTS_DIR)) {
 		if (!postDir.endsWith(slug)) {
 			continue;
 		}
-		return await readBlogPost(postDir, { includeArtifact });
+		return await readBlogPost(postDir, { includeArtifact, includeRelated });
 	}
 
 	return undefined;
@@ -78,7 +93,10 @@ export async function loadExternalBlogData(): Promise<ExternalBlogData> {
 
 async function readBlogPost(
 	dir: string,
-	{ includeArtifact }: { includeArtifact?: boolean } = {},
+	{
+		includeArtifact,
+		includeRelated,
+	}: { includeArtifact?: boolean; includeRelated?: boolean } = {},
 ): Promise<BlogPostData | undefined> {
 	const slugIndex = dir.lastIndexOf("_");
 	if (slugIndex === -1) {
@@ -142,6 +160,29 @@ async function readBlogPost(
 		};
 	}
 
+	let related: RelatedBlogPost[] | undefined;
+	if (includeRelated) {
+		for (const post of await loadBlogPosts()) {
+			if (
+				post.slug === slug ||
+				!post.tags.some((tag) =>
+					tags.some((postTag) => postTag.slug === tag.slug),
+				)
+			) {
+				continue;
+			}
+			if (!related) {
+				related = [];
+			}
+			related.push({
+				title: post.title,
+				slug: post.slug,
+				url: post.url,
+			});
+		}
+	}
+	related = related?.slice(0, MAX_RELATED_POSTS);
+
 	return {
 		title: artifact.frontmatter.title,
 		url: `${serverConfig.app.url}${pathLocator.blog.post.index(slug)}`,
@@ -153,6 +194,7 @@ async function readBlogPost(
 		cover,
 		assetPath,
 		artifact: includeArtifact ? artifact : undefined,
+		related,
 	};
 }
 

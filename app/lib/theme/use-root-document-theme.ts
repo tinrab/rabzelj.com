@@ -6,38 +6,39 @@ import {
 	THEME_LOCAL_STORAGE_KEY,
 } from "~/lib/theme/constants";
 
-export function useRootDocumentTheme(theme?: Theme): Theme | undefined {
-	let selectedTheme: Theme | undefined = theme;
+// export function useRootDocumentTheme(theme?: Theme): Theme | undefined {
+// 	let selectedTheme: Theme | undefined = theme;
 
-	if (typeof document !== "undefined") {
-		const cookieTheme = parseCookieHeader(document.cookie).find(
-			(cookie) => cookie.name === THEME_COOKIE_NAME,
-		)?.value;
-		if (cookieTheme) {
-			selectedTheme = cookieTheme as Theme;
-		}
-	}
+// 	if (typeof document !== "undefined") {
+// 		const cookieTheme = parseCookieHeader(document.cookie).find(
+// 			(cookie) => cookie.name === THEME_COOKIE_NAME,
+// 		)?.value;
+// 		if (cookieTheme) {
+// 			selectedTheme = cookieTheme as Theme;
+// 		}
+// 	}
 
-	if (typeof localStorage !== "undefined") {
-		const storedTheme = localStorage.getItem(THEME_LOCAL_STORAGE_KEY) as Theme;
+// 	if (typeof localStorage !== "undefined") {
+// 		const storedTheme = localStorage.getItem(THEME_LOCAL_STORAGE_KEY) as Theme;
 
-		if (storedTheme) {
-			selectedTheme = storedTheme;
-		}
-	}
+// 		if (storedTheme) {
+// 			selectedTheme = storedTheme;
+// 		}
+// 	}
 
-	if (selectedTheme === Theme.SYSTEM) {
-		if (typeof window !== "undefined") {
-			const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-			if (mediaQuery.matches) {
-				selectedTheme = Theme.DARK;
-			} else {
-				selectedTheme = Theme.LIGHT;
-			}
-		} else {
-			selectedTheme = Theme.DARK;
-		}
-	}
+// 	if (selectedTheme === Theme.SYSTEM) {
+// 		if (typeof window !== "undefined") {
+// 			const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+// 			if (mediaQuery.matches) {
+// 				selectedTheme = Theme.DARK;
+// 			} else {
+// 				selectedTheme = Theme.LIGHT;
+// 			}
+// 		}
+// 		// else {
+// 		// 	selectedTheme = Theme.DARK;
+// 		// }
+// 	}
 
-	return selectedTheme;
-}
+// 	return selectedTheme;
+// }

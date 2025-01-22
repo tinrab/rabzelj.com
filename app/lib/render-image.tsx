@@ -1,4 +1,4 @@
-import fontSansUrl from "@fontsource/geist-sans/latin-400.css?url";
+import fontSansUrl from "@fontsource/roboto/latin-400.css?url";
 import { Resvg } from "@resvg/resvg-js";
 import path from "node:path";
 import type React from "react";
@@ -20,7 +20,7 @@ export async function renderImage(
 		height,
 		fonts: [
 			{
-				name: "GeistSans",
+				name: "Roboto",
 				style: "normal",
 				data: sansFont,
 			},

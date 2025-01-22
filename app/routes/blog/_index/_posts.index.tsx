@@ -16,7 +16,7 @@ const loadRouteData = createServerFn({ method: "GET" })
 		};
 	});
 
-export const Route = createFileRoute("/blog/_browse/_posts/")({
+export const Route = createFileRoute("/blog/_index/_posts/")({
 	component: RouteComponent,
 	loader: () => loadRouteData(),
 });
@@ -28,7 +28,7 @@ function RouteComponent() {
 		<BlogPostList
 			posts={groupedPosts}
 			renderPost={(post) => (
-				<Typography variant="a" gutter asChild>
+				<Typography variant="a" asChild>
 					<SiteLink to={`/blog/${post.slug}`}>{post.title}</SiteLink>
 				</Typography>
 			)}

@@ -16,21 +16,17 @@ const socialLinks = [
 		title: "Find me on GitHub",
 		to: clientConfig.social.githubUrl,
 	},
-	{
-		title: "Find me on LinkedIn",
-		to: clientConfig.social.linkedInUrl,
-	},
 ];
 
 export function SiteFooter() {
 	return (
 		<LayoutFooter>
-			<div>
+			<div className="flex flex-col gap-2">
 				{socialLinks.map(({ title, to }) => (
 					<Typography
 						key={title}
-						variant="body1"
-						className="block underline"
+						variant="a"
+						className="block text-muted-foreground underline"
 						asChild
 					>
 						<SiteLink to={to}>{title}</SiteLink>

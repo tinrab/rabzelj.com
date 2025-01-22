@@ -12,7 +12,6 @@ type ThemeModeSelectProps = {
 	theme?: Theme;
 	themes?: Theme[];
 	getThemeLabel?: (theme: Theme) => string;
-	onThemeSelect?: (theme: Theme) => void;
 	slotProps?: {
 		trigger?: React.ComponentPropsWithoutRef<typeof SelectTrigger>;
 	};
@@ -23,7 +22,6 @@ export function ThemeModeSelect({
 	themes = [Theme.LIGHT, Theme.DARK, Theme.SYSTEM],
 	getThemeLabel = (theme) =>
 		theme === Theme.LIGHT ? "Light" : theme === Theme.DARK ? "Dark" : "System",
-	onThemeSelect,
 	slotProps = {},
 	...restProps
 }: ThemeModeSelectProps) {
@@ -37,10 +35,6 @@ export function ThemeModeSelect({
 		}
 
 		themeProvider.setTheme(newTheme);
-
-		if (onThemeSelect !== undefined) {
-			onThemeSelect(newTheme);
-		}
 	};
 
 	return (

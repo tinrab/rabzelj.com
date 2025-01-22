@@ -1,4 +1,4 @@
-import { useRouter } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 import type React from "react";
 import { MdMenu } from "react-icons/md";
 
@@ -18,7 +18,6 @@ import {
 	NavigationMenuList,
 } from "~/components/ui/navigation-menu";
 import { pathLocator } from "~/lib/path-locator";
-import { changeThemeServerFn } from "~/lib/theme/fn";
 import { ThemeModeMenu } from "~/lib/theme/ThemeModeMenu";
 import { cn } from "~/lib/utility";
 
@@ -29,10 +28,11 @@ interface SiteHeaderLinkData {
 
 const links: SiteHeaderLinkData[] = [
 	{ title: "Blog", to: pathLocator.blog.index },
+	// { title: "Resources", to: pathLocator.resources.index },
 ];
 
 export function SiteHeader() {
-	const router = useRouter();
+	const location = useLocation();
 
 	return (
 		<Header>
@@ -51,19 +51,16 @@ export function SiteHeader() {
 							{links.map((link) => (
 								<NavigationMenuItem key={link.to}>
 									<NavigationMenuLink asChild>
-										<SiteLink to={link.to}>{link.title}</SiteLink>
+										<SiteLink to={link.to} activeClassName="text-foreground">
+											{link.title}
+										</SiteLink>
 									</NavigationMenuLink>
 								</NavigationMenuItem>
 							))}
 						</NavigationMenuList>
 					</NavigationMenu>
 
-					<ThemeModeMenu
-						onThemeChange={async (theme) => {
-							await changeThemeServerFn({ data: { theme: theme } });
-							router.invalidate();
-						}}
-					/>
+					<ThemeModeMenu />
 
 					<HeaderMobileTrigger />
 				</div>
@@ -75,7 +72,12 @@ export function SiteHeader() {
 				<NavigationList>
 					<NavigationListGroup>
 						{links.map((link) => (
-							<NavigationListLink key={link.to} variant="solid" asChild>
+							<NavigationListLink
+								key={link.to}
+								variant="solid"
+								selected={location.href === link.to}
+								asChild
+							>
 								<SiteLink to={link.to}>{link.title}</SiteLink>
 							</NavigationListLink>
 						))}

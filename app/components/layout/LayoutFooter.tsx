@@ -25,15 +25,18 @@ export function LayoutFooter({
 				Footer
 			</h2>
 
-			<DashedLine />
+			<DashedLine orientation="horizontal" />
 
 			<div
 				{...(slotProps.content ?? {})}
-				className={cn("mx-auto flex max-w-3xl", slotProps.content?.className)}
+				className={cn(
+					"mx-auto flex max-w-3xl px-4",
+					slotProps.content?.className,
+				)}
 			>
 				<DashedLine className="hidden h-full md:block" orientation="vertical" />
 
-				<div className="p-4 pb-8">{children}</div>
+				<div className="px-0 py-4 pb-8 md:px-4">{children}</div>
 
 				<DashedLine
 					className="ml-auto hidden h-full md:block"

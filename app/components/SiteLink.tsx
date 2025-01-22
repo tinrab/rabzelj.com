@@ -19,7 +19,8 @@ export const SiteLink = React.forwardRef<HTMLAnchorElement, SiteLinkProps>(
 
 		const location = useLocation();
 		const className = cn(classNameProp, {
-			[activeClassName]: location.pathname === to && activeClassName,
+			[activeClassName]:
+				to && location.pathname.startsWith(to) && activeClassName,
 		});
 
 		const isExternal =

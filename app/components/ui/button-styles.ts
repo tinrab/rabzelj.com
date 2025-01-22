@@ -1,18 +1,18 @@
 import { cva } from "class-variance-authority";
 
 export const buttonVariants = cva(
-	"inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium text-sm shadow-neutral-300 ring-ring ring-offset-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-selected:ring-2 dark:shadow-neutral-950",
+	"inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium text-sm ring-ring ring-offset-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-selected:ring-2",
 	{
 		variants: {
 			variant: {
 				default:
-					"border border-border bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+					"border border-border bg-primary text-primary-foreground hover:bg-primary/90",
 				secondary:
-					"border border-border bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+					"border border-border bg-secondary text-secondary-foreground hover:bg-secondary/80",
 				error:
-					"border border-border bg-error text-error-foreground shadow-sm hover:bg-error/90",
+					"border border-border bg-error text-error-foreground hover:bg-error/90",
 				outline:
-					"border border-border bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+					"border border-border bg-background hover:bg-accent hover:text-accent-foreground",
 				ghost: "hover:bg-accent hover:text-accent-foreground",
 				link: "font-normal text-link underline-offset-4 hover:underline",
 			},

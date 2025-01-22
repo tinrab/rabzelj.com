@@ -7,7 +7,7 @@ interface DashedLineProps extends React.SVGAttributes<HTMLOrSVGElement> {
 }
 
 export function DashedLine({
-	size = 2,
+	size = 4,
 	orientation = "horizontal",
 	...restProps
 }: DashedLineProps) {
@@ -34,7 +34,7 @@ export function DashedLine({
 					y1="0"
 					x2={orientation === "horizontal" ? "100%" : 0}
 					y2={orientation === "vertical" ? "100%" : 0}
-					className="stroke-neutral-300 dark:stroke-neutral-700"
+					className="stroke-border"
 					strokeDasharray="18 4"
 					strokeWidth={size * 2}
 				/>
