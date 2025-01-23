@@ -51,7 +51,7 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName;
 const NavigationMenuItem = NavigationMenuPrimitive.Item;
 
 const navigationMenuTriggerVariants = cva(
-	"group inline-flex h-9 w-max items-center justify-center rounded-md font-medium text-sm transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+	"group inline-flex h-9 w-max items-center justify-center rounded-md font-medium text-sm transition-colors focus:outline-hidden disabled:pointer-events-none disabled:opacity-50",
 	{
 		variants: {
 			variant: {
@@ -110,7 +110,7 @@ const NavigationMenuContent = React.forwardRef<
 NavigationMenuContent.displayName = NavigationMenuPrimitive.Content.displayName;
 
 const navigationMenuLinkVariants = cva(
-	"items-center justify-center rounded-md font-medium text-sm no-underline transition-colors hover:no-underline focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+	"items-center justify-center rounded-md font-medium text-sm no-underline transition-colors hover:no-underline focus:outline-hidden disabled:pointer-events-none disabled:opacity-50",
 	{
 		variants: {
 			variant: {
@@ -146,7 +146,7 @@ const NavigationMenuViewport = React.forwardRef<
 	<div className={cn("absolute top-full left-0 flex justify-center")}>
 		<NavigationMenuPrimitive.Viewport
 			className={cn(
-				"data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] origin-top-center overflow-hidden rounded-md border bg-popover text-popover-foreground shadow data-[state=closed]:animate-out data-[state=open]:animate-in md:w-[var(--radix-navigation-menu-viewport-width)]",
+				"data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] origin-top-center overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-sm data-[state=closed]:animate-out data-[state=open]:animate-in md:w-[var(--radix-navigation-menu-viewport-width)]",
 				// 'w-full',
 				className,
 			)}
@@ -165,7 +165,7 @@ const NavigationMenuIndicator = React.forwardRef<
 	<NavigationMenuPrimitive.Indicator
 		ref={ref}
 		className={cn(
-			"data-[state=hidden]:fade-out data-[state=visible]:fade-in top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden data-[state=hidden]:animate-out data-[state=visible]:animate-in",
+			"data-[state=hidden]:fade-out data-[state=visible]:fade-in top-full z-1 flex h-1.5 items-end justify-center overflow-hidden data-[state=hidden]:animate-out data-[state=visible]:animate-in",
 			className,
 		)}
 		{...restProps}

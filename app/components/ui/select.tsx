@@ -17,14 +17,14 @@ const SelectGroup = SelectPrimitive.Group;
 const SelectValue = SelectPrimitive.Value;
 
 const selectTriggerVariants = cva(
-	"flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md px-3 py-2 text-sm shadow-neutral-300 ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:shadow-neutral-950 [&>span]:line-clamp-1",
+	"flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md px-3 py-2 text-sm shadow-neutral-300 ring-offset-background focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:shadow-neutral-950 [&>span]:line-clamp-1",
 	{
 		variants: {
 			variant: {
 				default:
-					"border border-border bg-background shadow-sm hover:bg-accent hover:text-accent-foreground data-[placeholder]:text-muted-foreground",
+					"border border-border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground data-placeholder:text-muted-foreground",
 				ghost:
-					"bg-background hover:bg-accent hover:text-accent-foreground data-[placeholder]:text-muted-foreground",
+					"bg-background hover:bg-accent hover:text-accent-foreground data-placeholder:text-muted-foreground",
 			},
 		},
 		defaultVariants: {
@@ -61,10 +61,7 @@ const SelectScrollUpButton = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SelectPrimitive.ScrollUpButton
 		ref={ref}
-		className={cn(
-			"flex cursor-default items-center justify-center py-1",
-			className,
-		)}
+		className={cn("flex items-center justify-center py-1", className)}
 		{...props}
 	>
 		<MdArrowUpward className="size-5" />
@@ -78,10 +75,7 @@ const SelectScrollDownButton = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SelectPrimitive.ScrollDownButton
 		ref={ref}
-		className={cn(
-			"flex cursor-default items-center justify-center py-1",
-			className,
-		)}
+		className={cn("flex items-center justify-center py-1", className)}
 		{...props}
 	>
 		<MdArrowDownward className="size-5" />
@@ -141,7 +135,7 @@ const SelectItem = React.forwardRef<
 	<SelectPrimitive.Item
 		ref={ref}
 		className={cn(
-			"relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+			"relative flex w-full select-none items-center rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50",
 			className,
 		)}
 		{...props}

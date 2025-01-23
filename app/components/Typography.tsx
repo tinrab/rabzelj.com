@@ -22,7 +22,7 @@ export const typographyVariants = cva("", {
 			body1: "text-base leading-7",
 			body2: "text-base leading-5",
 
-			a: "cursor-pointer text-link no-underline hover:underline",
+			a: "text-link no-underline hover:underline",
 		},
 	},
 	defaultVariants: { variant: "body1" },

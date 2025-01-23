@@ -40,7 +40,8 @@
 			".next",
 			".vscode",
 			".zed",
-			"./app/routeTree.gen.ts"
+			"./app/routeTree.gen.ts",
+			"./app/styles/main.css"
 		],
 		"include": [
 			"**/*.js",

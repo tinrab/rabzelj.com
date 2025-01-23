@@ -37,7 +37,7 @@ export function MdxContentHeading({
 				asChild
 				{...restProps}
 			>
-				<a href={`#${id}`} className="cursor-pointer no-underline">
+				<a href={`#${id}`} className="no-underline">
 					<VariantComponent>{children}</VariantComponent>
 				</a>
 			</Typography>

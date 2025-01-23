@@ -40,7 +40,7 @@ export function SiteHeader() {
 				<PulseDecoration className="-top-[50px] absolute left-1/2" />
 			</div>
 
-			<HeaderRow className="max-w-screen-xl">
+			<HeaderRow className="max-w-(--breakpoint-xl)">
 				<SiteLink to="/">
 					<HeaderTitle />
 				</SiteLink>

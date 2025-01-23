@@ -5,7 +5,7 @@ import React from "react";
 import { cn } from "~/lib/utility";
 
 const navigationListLinkVariants = cva(
-	"relative flex w-full cursor-pointer items-center rounded-sm px-2 py-2 focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:cursor-auto data-[disabled]:opacity-50",
+	"relative flex w-full cursor-pointer items-center rounded-sm px-2 py-2 focus:outline-hidden data-disabled:pointer-events-none data-disabled:cursor-auto data-disabled:opacity-50",
 	{
 		variants: {
 			variant: {

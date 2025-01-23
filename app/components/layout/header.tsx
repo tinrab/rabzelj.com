@@ -86,7 +86,7 @@ export function HeaderDivider({
 	return (
 		<RxSlash
 			className={cn(
-				"size-5 flex-shrink-0 text-border",
+				"size-5 shrink-0 text-border",
 				desktopOnly ? "hidden md:inline-flex" : "",
 				className,
 			)}
