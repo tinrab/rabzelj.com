@@ -34,14 +34,19 @@ export function LayoutFooter({
 					slotProps.content?.className,
 				)}
 			>
-				<DashedLine className="hidden h-full md:block" orientation="vertical" />
+				<div className="relative w-full">
+					<DashedLine
+						className="-left-[2px] absolute top-0 hidden h-full md:block"
+						orientation="vertical"
+					/>
 
-				<div className="px-0 py-4 pb-8 md:px-4">{children}</div>
+					<div className="px-4 py-4 pb-8">{children}</div>
 
-				<DashedLine
-					className="ml-auto hidden h-full md:block"
-					orientation="vertical"
-				/>
+					<DashedLine
+						className="-right-[2px] absolute top-0 hidden h-full md:block"
+						orientation="vertical"
+					/>
+				</div>
 			</div>
 		</footer>
 	);

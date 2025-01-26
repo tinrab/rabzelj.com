@@ -3,6 +3,7 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import type { RouterSchema } from "vinxi";
 import fs from "node:fs/promises";
 import path from "node:path";
+import tailwindcss from "@tailwindcss/vite";
 
 const routeRules: Record<string, unknown> = {};
 for (const fileName of await fs.readdir("public")) {
@@ -39,6 +40,7 @@ const config = defineConfig({
 			tsConfigPaths({
 				projects: ["./tsconfig.json"],
 			}),
+			tailwindcss(),
 		],
 		build: {
 			sourcemap: false,

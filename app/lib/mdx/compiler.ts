@@ -1,7 +1,6 @@
 import {
 	headingIdPlugin,
 	MdxCompiler,
-	removeImportsExportsPlugin,
 	syntaxHighlightPlugin,
 } from "@temelj/mdx";
 import rehypeKatex from "rehype-katex";
@@ -15,10 +14,9 @@ async function loadMdxCompiler(): Promise<MdxCompiler> {
 
 	return (
 		new MdxCompiler()
-			.withRemarkPlugin(removeImportsExportsPlugin)
 			// @ts-ignore invalid types
 			.withRemarkPlugin(remarkMath)
-			.withRehypePlugin(headingIdPlugin)
+			.withRehypePlugin(headingIdPlugin, { prefix: "h-" })
 			.withRehypePlugin(syntaxHighlightPlugin, {
 				includeDataAttributes: ["language"],
 				highlight: {},

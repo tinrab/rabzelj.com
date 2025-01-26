@@ -1,0 +1,238 @@
+---
+title: Validate Next.js Server Actions with Zod
+description: This is a simple utility I wrote to validate Next.js server actions with Zod.
+tags:
+  - nextjs
+  - typescript
+publishedDate: 2025-01-26
+---
+
+Having a standard way to validate form data and handle errors is a must-have.
+
+Forms must be validated on the client and on the server.
+In the case of an error, you may want to highlight appropriate input fields of the form and show an error message.
+
+You might have a ton of custom error classes throughout your app.
+To pass them from the server to the client, you'll need to serialize them and re-throw them on the client.
+This typically involves a lot of boilerplate.
+"Re-throwing" isn't always necessarily.
+You could make the error state part of the form state.
+You can also use the new React 19 form and action hooks.
+
+You could use tRPC to make RPCs more manageable, or write your own lightweight wrapper around server actions as shown below.
+
+Here's how you'd use it.
+
+```ts { "fileName": "lib/action.ts" }
+"use server";
+
+export const signInAction = createApiAction(
+  signInFormSchema,
+  async (data): Promise<void> => {
+    if (data.name !== "tester" && data.password !== "password") {
+      throw new AccountError(AccountErrorCode.INVALID_CREDENTIALS);
+    }
+    // ...
+  },
+);
+```
+
+```ts { "fileName": "lib/schema.ts" }
+export const signInFormSchema = z.object({
+  name: z.string().trim(),
+  password: z.string().trim(),
+});
+
+export type SignInFormData = z.infer<typeof signInFormSchema>;
+```
+
+Of course, TypeScript's type inference works as you'd expect.
+
+You could have custom error classes.
+
+```ts { "fileName": "error.ts" }
+export enum AccountErrorCode {
+  INVALID_NAME = "INVALID_NAME",
+  INVALID_PASSWORD = "INVALID_PASSWORD",
+  INVALID_CREDENTIALS = "INVALID_CREDENTIALS",
+}
+
+export class AccountError extends Error {
+  constructor(
+    public readonly code: AccountErrorCode,
+    message?: string,
+  ) {
+    super(message);
+    this.name = "AccountError";
+  }
+}
+```
+
+Errors can be thrown while processing server actions, and you might want to work with them on the client as well.
+So an instance of it needs to be re-created from the data you receive from the server.
+
+Here are the main copy-pasteable parts of the utility.
+It's a bit messy.
+
+```ts { "fileName": "lib/api-action.ts" }
+import { type z, ZodError, type ZodIssue } from "zod";
+
+import { AccountError, type AccountErrorCode } from "~/lib/error";
+
+type ApiAction<TSchema extends z.ZodTypeAny, TResult = void> = (
+  data: z.infer<TSchema>,
+) => Promise<ActionResponse<TResult>>;
+
+type ApiActionFn<TInput, TResult> = (data: TInput) => Promise<TResult>;
+
+type ActionResponse<TResult> = {
+  data?: TResult;
+  message?: string;
+  issues?: ZodIssue[];
+  account?: { code: AccountErrorCode };
+};
+
+export function createApiAction<TSchema extends z.ZodTypeAny, TResult = void>(
+  schema: TSchema,
+  actionFn: ApiActionFn<z.infer<TSchema>, TResult>,
+): (data: FormData) => Promise<ActionResponse<TResult>> {
+  return async (data: unknown): Promise<ActionResponse<TResult>> => {
+    const parsedData = schema.safeParse(
+      data instanceof FormData ? Object.fromEntries(data) : data,
+    );
+    if (parsedData.error) {
+      return {
+        issues: parsedData.error?.issues,
+      };
+    }
+    if (!parsedData.success) {
+      return {
+        message: "Failed to parse data.",
+      };
+    }
+
+    try {
+      const result = await actionFn(parsedData.data);
+      return {
+        data: result,
+      };
+    } catch (error) {
+      console.log(error);
+      if (error instanceof AccountError) {
+        return { account: { code: error.code } };
+      }
+
+      // if (isRedirectError(error)) {
+      //   return {
+      //     message: 'Redirect',
+      //   };
+      // }
+
+      console.error(error);
+    }
+
+    return {
+      message: "Something went wrong.",
+    };
+  };
+}
+
+export async function callApiAction<
+  TSchema extends z.ZodTypeAny,
+  TResult = void,
+>(
+  action: ApiAction<TSchema, TResult>,
+  data: z.infer<TSchema>,
+): Promise<TResult> {
+  const result = await action(data);
+
+  if (result.message) {
+    throw new Error(result.message);
+  }
+
+  if (result.issues && result.issues.length > 0) {
+    throw new ZodError(result.issues);
+  }
+
+  if (result.account) {
+    throw new AccountError(result.account.code);
+  }
+
+  return result.data as TResult;
+}
+```
+
+You can decorate `ActionResponse` type as needed with any extra fields you'd want.
+The whole type needs to be JSON-serializable.
+
+Custom error types need to be handled under that one catch block.
+You need to decide how to pass them to the client and then how to re-create them in the `callApiAction` function, which is called on the client.
+
+Here's how you'd render a form.
+
+```tsx { "fileName": "app/page.tsx" }
+export default function Home() {
+  const formId = useId();
+  const form = useForm<SignInFormData>({
+    resolver: zodResolver(signInFormSchema),
+    defaultValues: {
+      name: "",
+      password: "",
+    },
+  });
+
+  const [error, setError] = useState<string>();
+
+  const handleSubmit = async (data: SignInFormData): Promise<void> => {
+    try {
+      const _result = await callApiAction(signInAction, data);
+      setError(undefined);
+      // ...
+    } catch (error) {
+      if (error instanceof ZodError) {
+        // Mark fields as invalid.
+        const errorData = error.flatten();
+        const fieldErrors = Object.entries(errorData.fieldErrors);
+        for (const [path, message] of fieldErrors) {
+          form.setError(path as keyof SignInFormData, {
+            type: "manual",
+            message: (message ?? [])[0] ?? "Invalid input.",
+          });
+        }
+        if (errorData.formErrors.length !== 0) {
+          setError(errorData.formErrors[0]);
+        }
+        if (errorData.formErrors.length !== 0 || fieldErrors.length !== 0) {
+          return;
+        }
+      }
+
+      if (error instanceof AccountError) {
+        if (error.code === AccountErrorCode.INVALID_CREDENTIALS) {
+          setError("Invalid credentials.");
+          return;
+        }
+      }
+
+      setError("Something went wrong.");
+    }
+  };
+
+  return (
+    // ...
+    <Form {...form}>
+      <form
+        id={formId}
+        // This is needed if JavaScript is disabled.
+        action={signInAction}
+        onSubmit={form.handleSubmit(handleSubmit)}
+    // ...
+  );
+}
+```
+
+Basically, you catch an error and show a message to the user.
+
+If JavaScript is disabled in the browser, the form data will only be validated on the server.
+
+The complete source code is available on [GitHub](https://github.com/tinrab/nextjs-zod-server-action).

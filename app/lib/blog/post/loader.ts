@@ -140,6 +140,7 @@ async function readBlogPost(
 		}
 		tags.push(tag);
 	}
+	tags.sort((a, b) => a.slug.localeCompare(b.slug));
 
 	let cover: BlogPostCoverData | undefined;
 	if (typeof frontmatter.cover === "string") {
