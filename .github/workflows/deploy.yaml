@@ -56,6 +56,9 @@ jobs:
       - name: Install
         run: pnpm install
 
+      - name: Generate
+        run: pnpm run script generate
+
       - name: Build
         run: pnpm run build:vercel
 
