@@ -1,7 +1,6 @@
 import type React from "react";
 
 import { Typography } from "~/components/Typography";
-import { Separator } from "~/components/ui/separator";
 import type { BlogPostCommon, BlogPostYearGroup } from "~/lib/blog/post/schema";
 
 interface BlogPostListProps<T extends BlogPostCommon> {
@@ -24,7 +23,7 @@ export function BlogPostList<T extends BlogPostCommon>({
 							<div className="-left-2 absolute flex size-4 items-center justify-center rounded-full bg-border" />
 						</div>
 
-						<div className="-mt-1 mb-8 ml-4">
+						<div className="-mt-1 mb-4 ml-4">
 							<div className="pb-2">
 								<Typography
 									id={`h-${yearGroup.year}${anchorSuffix}`}
@@ -41,12 +40,12 @@ export function BlogPostList<T extends BlogPostCommon>({
 							{yearGroup.months.map((monthGroup) => (
 								<div
 									key={monthGroup.month}
-									className="relative mb-4 flex w-full flex-col gap-2 pl-0 md:pl-4"
+									className="relative flex w-full flex-col pl-0 md:pl-4"
 								>
 									<Typography
 										id={`h-${yearGroup.year}-${monthGroup.month}${anchorSuffix}`}
 										variant="a"
-										className="text-muted-foreground hover:no-underline"
+										className="mb-2 text-muted-foreground hover:no-underline"
 										asChild
 									>
 										<a
@@ -56,11 +55,11 @@ export function BlogPostList<T extends BlogPostCommon>({
 										</a>
 									</Typography>
 
-									<ul className="list-disc pl-8">
+									<ul className="list-disc pl-4 md:pl-8">
 										{monthGroup.posts.map((post) => (
 											<li
 												key={post.url}
-												className="text-balance text-xl md:text-2xl"
+												className="mb-2 text-balance text-xl md:text-2xl"
 											>
 												{renderPost(post)}
 											</li>
@@ -71,10 +70,7 @@ export function BlogPostList<T extends BlogPostCommon>({
 						</div>
 					</div>
 				))}
-				<Separator
-					orientation="vertical"
-					className="-left-[1px] absolute top-0 h-full overflow-hidden"
-				/>
+				<div className="-left-[2px] absolute top-0 h-full w-[4px] shrink-0 overflow-hidden bg-border" />
 			</div>
 		</div>
 	);

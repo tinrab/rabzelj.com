@@ -46,7 +46,7 @@ function RouteComponent() {
 			<Typography variant="h1" asVariant className="mb-3 text-4xl md:text-5xl">
 				Tin Rabzelj
 			</Typography>
-			<h2 className="mb-6 text-muted-foreground text-sm">Software Engineer</h2>
+			<h2 className="mb-6 text-muted-foreground">Software Engineer</h2>
 
 			<div className="mb-5 text-center">
 				<Typography variant="body1" asVariant>

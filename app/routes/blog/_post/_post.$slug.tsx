@@ -1,7 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
 import { z } from "zod";
-import { useMemo } from "react";
 import { createMdxContent } from "@temelj/mdx-react";
 
 import { loadBlogPost } from "~/lib/blog/post/loader";
@@ -60,18 +59,14 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
 function RouteComponent() {
 	const { post } = Route.useLoaderData();
 
-	const content = useMemo(
-		() =>
-			post.artifact?.compiled
-				? createMdxContent(
-						{
-							artifact: post.artifact,
-						},
-						mdxPageLowerHeadingComponents,
-					)
-				: undefined,
-		[post.artifact],
-	);
+	const content = post.artifact?.compiled
+		? createMdxContent(
+				{
+					artifact: post.artifact,
+				},
+				mdxPageLowerHeadingComponents,
+			)
+		: undefined;
 
 	return (
 		<article className="mx-auto max-w-3xl break-words px-4 py-8 md:py-12">
@@ -118,12 +113,12 @@ function RouteComponent() {
 				</div>
 			</section>
 
-			{post.related?.length ? (
-				<section className="py-3">
+			{post.related?.length && post.related?.length >= 2 ? (
+				<section className="mt-6">
 					<Typography variant="h2" asVariant gutterBottom>
-						Related posts
+						Read more
 					</Typography>
-					<ul className="list-disc px-8">
+					<ul className="my-6 ml-6 list-disc">
 						{post.related.map((relatedPost) => (
 							<li key={relatedPost.slug}>
 								<Typography

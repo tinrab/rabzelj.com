@@ -5,23 +5,29 @@ tags:
   - rust
   - ai
 publishedDate: 2024-02-10
+modifiedDate: 2025-01-01
 ---
 
+There was an article floating around saying that the new "Mojo" programming language outperforms Rust.
+
 Stating that something outperforms Rust is nothing new.
-It's often used for clickbait because it works.
+It's often used as clickbait because it works.
 
 Conversations about performance typically center on programming languages' frontends rather than underlying systems, and issues usually lie in flawed implementations.
 
 Rust is an LLVM (and/or Cranelift?) backed language.
-You can achieve any performance you want, though you might have to write inline assembly or hints for the compiler.
-Saying that Rust is slower than C, Zig, or Mojo is meaningless.
+You can achieve any performance you want, though you might have to write code with the performance in mind, write inline assembly or hints for the compiler.
+Saying that Rust is slower than C/C++, Zig, Mojo, or whatever is meaningless, because all of them can be compiled to the same machine code.
 
 See further discussion here: https://reddit.com/r/rust/comments/1al8cuc/modular_community_spotlight_outperforming_rust/.
 
-But, does anybody actually care about performance in AI? Why would Rust be considered for AI anyway?
+Mojo is meant to be a Python-like language, or a faster Python.
+The obvious target market is AI.
 
-In ML/AI, a significant portion of compute is performed with "tensors" on the GPU.
-The source code is usually highly experimental, ugly and spaghettified.
+But, does anybody actually care about performance in AI? Why would Rust or anything other than Python be considered for AI anyway?
+
+In ML/AI, a significant portion of compute is performed on the GPU.
+The written code is usually highly experimental, ugly and spaghettified.
 Python is great for this kind of work, and with tools like Google Colab, you can move blazingly fast.
 Why would you need an efficient systems programming language?
 While doing AI, you need to write lots of ugly code quickly.

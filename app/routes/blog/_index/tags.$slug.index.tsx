@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/start";
 import { z } from "zod";
 
 import { BlogPostList } from "~/components/blog/BlogPostList";
+import { BlogTagChip } from "~/components/blog/BlogTagChip";
 import { SiteLink } from "~/components/SiteLink";
 import { Typography } from "~/components/Typography";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
@@ -52,9 +53,21 @@ function RouteComponent() {
 			<BlogPostList
 				posts={groupedPosts}
 				renderPost={(post) => (
-					<Typography variant="a" asChild>
-						<SiteLink to={`/blog/${post.slug}`}>{post.title}</SiteLink>
-					</Typography>
+					<div className="flex flex-col">
+						<Typography variant="a" className="mb-1" asChild>
+							<SiteLink to={`/blog/${post.slug}`}>{post.title}</SiteLink>
+						</Typography>
+						<div className="flex flex-wrap gap-2">
+							{post.tags.map((tag) => (
+								<BlogTagChip
+									key={tag.slug}
+									tag={tag}
+									variant="ghost"
+									size="xs"
+								/>
+							))}
+						</div>
+					</div>
 				)}
 			/>
 		</div>
