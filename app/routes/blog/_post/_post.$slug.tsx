@@ -74,7 +74,7 @@ function RouteComponent() {
 				<Typography className="mr-auto text-muted-foreground text-sm">
 					{new Date(post.publishedDate).toLocaleDateString()}
 				</Typography>
-				<BlogShare post={post} />
+				<BlogShare className="hidden sm:flex" post={post} />
 			</div>
 
 			<Typography className="mb-4 text-balance" variant="h1" asVariant>
@@ -109,7 +109,7 @@ function RouteComponent() {
 					<Typography className="mr-auto text-muted-foreground text-sm">
 						{new Date(post.publishedDate).toLocaleDateString()}
 					</Typography>
-					<BlogShare post={post} />
+					<BlogShare className="hidden sm:flex" post={post} />
 				</div>
 			</section>
 

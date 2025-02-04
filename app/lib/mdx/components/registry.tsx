@@ -136,8 +136,15 @@ export function getMdxContentComponents({
 			if (!alt) {
 				throw new Error("Image must have an alt attribute");
 			}
-			// biome-ignore lint/a11y/useAltText: generated alt text
-			return <img alt={alt} className="mx-auto" {...restProps} />;
+			return (
+				<span className="mx-auto flex flex-col gap-2 text-center">
+					{/* biome-ignore lint/a11y/useAltText: generated alt text */}
+					<img alt={alt} {...restProps} />
+					<span className="font-normal text-muted-foreground text-sm leading-5">
+						{alt}
+					</span>
+				</span>
+			);
 		},
 	};
 }

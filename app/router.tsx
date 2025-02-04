@@ -11,6 +11,7 @@ export function createRouter() {
 		defaultPreload: "intent",
 		defaultErrorComponent: DefaultCatchBoundary,
 		trailingSlash: "never",
+		scrollRestoration: true,
 		defaultNotFoundComponent: () => <NotFound />,
 		defaultPendingComponent: () => (
 			<LinearLoader className="absolute inset-0 w-full" square />

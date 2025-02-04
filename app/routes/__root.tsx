@@ -1,9 +1,4 @@
-import {
-	Outlet,
-	ScriptOnce,
-	ScrollRestoration,
-	createRootRoute,
-} from "@tanstack/react-router";
+import { Outlet, ScriptOnce, createRootRoute } from "@tanstack/react-router";
 import { createServerFn, Meta, Scripts } from "@tanstack/start";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type React from "react";
@@ -135,7 +130,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					<body>
 						{children}
 						<Toaster slotProps={{ viewport: { className: "top-auto" } }} />
-						<ScrollRestoration />
 						<script
 							// biome-ignore lint/security/noDangerouslySetInnerHtml: setting window.CONFIG
 							dangerouslySetInnerHTML={{
