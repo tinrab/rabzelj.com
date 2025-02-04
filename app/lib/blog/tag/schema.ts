@@ -1,8 +1,11 @@
 import { z } from "zod";
 
 export const blogTagFrontmatterSchema = z.object({
-	title: z.string(),
-	description: z.string(),
+	title: z.string().trim(),
+	description: z
+		.string()
+		.trim()
+		.regex(/[\.\?]$/),
 });
 
 export type BlogTagFrontmatter = z.infer<typeof blogTagFrontmatterSchema>;

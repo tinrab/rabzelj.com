@@ -28,12 +28,7 @@ export function makeSeo({
 	];
 
 	if (description) {
-		let pageDescription = description.trim();
-		if (!pageDescription.endsWith(".")) {
-			pageDescription += ".";
-		}
-
-		tags.push({ property: "og:description", content: pageDescription });
+		tags.push({ property: "og:description", content: description.trim() });
 	}
 
 	if (image) {

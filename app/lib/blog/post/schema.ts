@@ -5,16 +5,19 @@ import type { BlogTagData } from "~/lib/blog/tag/schema";
 
 export const blogPostFrontmatterSchema = z.object({
 	demo: z.boolean().default(false),
-	title: z.string(),
-	publishedDate: z.string(),
-	modifiedDate: z.string().optional(),
-	description: z.string(),
+	title: z.string().trim(),
+	publishedDate: z.string().trim(),
+	modifiedDate: z.string().trim().optional(),
+	description: z
+		.string()
+		.trim()
+		.regex(/[\.\?]$/),
 	tags: z.array(z.string()),
 	cover: z
 		.union([
-			z.string(),
+			z.string().trim(),
 			z.object({
-				file: z.string(),
+				file: z.string().trim(),
 				width: z.number(),
 				height: z.number(),
 			}),
