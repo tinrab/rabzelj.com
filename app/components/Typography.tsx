@@ -16,8 +16,6 @@ export const typographyVariants = cva("", {
 
 			lead: "font-normal text-muted-foreground text-xl",
 			large: "font-semibold text-lg",
-			// small: 'text-sm font-medium leading-none',
-			// muted: 'text-sm text-muted-foreground',
 
 			body1: "text-base leading-7",
 			body2: "text-base leading-5",

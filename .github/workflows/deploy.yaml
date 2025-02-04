@@ -21,6 +21,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           node-version: 22
+
       # Needed when running locally with `act`
       - name: Install packages
         run: |
@@ -57,7 +58,10 @@ jobs:
         run: pnpm install
 
       - name: Generate
-        run: pnpm run script generate
+        run: node --import tsx/esm ./scripts/main.ts generate
+        env:
+          TIN_APP_URL: http://localhost:3000
+          TIN_APP_DATA_DIR: ./data
 
       - name: Build
         run: pnpm run build:vercel

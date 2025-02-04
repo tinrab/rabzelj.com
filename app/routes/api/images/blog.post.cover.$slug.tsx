@@ -5,7 +5,7 @@ import { loadBlogPost } from "~/lib/blog/post/loader";
 import { pathLocator } from "~/lib/path-locator";
 import { renderImage } from "~/lib/render-image";
 
-export const APIRoute = createAPIFileRoute("/api/images/blog-post-cover/$slug")(
+export const APIRoute = createAPIFileRoute("/api/images/blog/post/cover/$slug")(
 	{
 		GET: async ({ params }) => {
 			const post = await loadBlogPost(params.slug);
