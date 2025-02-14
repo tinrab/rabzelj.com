@@ -2,6 +2,7 @@ import type React from "react";
 
 import { Typography } from "~/components/Typography";
 import type { BlogPostCommon, BlogPostYearGroup } from "~/lib/blog/post/schema";
+import { cn } from "~/lib/utility";
 
 interface BlogPostListProps<T extends BlogPostCommon> {
 	posts: BlogPostYearGroup<T>[];
@@ -59,7 +60,12 @@ export function BlogPostList<T extends BlogPostCommon>({
 										{monthGroup.posts.map((post) => (
 											<li
 												key={post.url}
-												className="mb-2 text-balance text-xl md:text-2xl"
+												className={cn(
+													"mb-2 text-balance",
+													post.priority === 1
+														? "text-2xl md:text-3xl"
+														: "text-xl md:text-2xl",
+												)}
 											>
 												{renderPost(post)}
 											</li>

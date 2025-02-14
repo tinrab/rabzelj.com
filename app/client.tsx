@@ -6,6 +6,4 @@ import { createRouter } from "~/router";
 
 const router = createRouter();
 
-if (document) {
-	hydrateRoot(document, <StartClient router={router} />);
-}
+hydrateRoot(document, <StartClient router={router} />);

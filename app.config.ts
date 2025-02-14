@@ -24,7 +24,7 @@ for (const fileName of await fs.readdir("public")) {
 	}
 }
 
-const config = defineConfig({
+const config = await defineConfig({
 	server: {
 		routeRules: {
 			"/_build/**": {

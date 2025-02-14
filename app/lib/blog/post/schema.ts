@@ -1,37 +1,38 @@
 import type { MdxArtifact } from "@temelj/mdx";
-import { z } from "zod";
+import * as v from "valibot";
 
 import type { BlogTagData } from "~/lib/blog/tag/schema";
 
-export const blogPostFrontmatterSchema = z.object({
-	demo: z.boolean().default(false),
-	title: z.string().trim(),
-	publishedDate: z.string().trim(),
-	modifiedDate: z.string().trim().optional(),
-	description: z
-		.string()
-		.trim()
-		.regex(/[\.\?]$/),
-	tags: z.array(z.string()),
-	cover: z
-		.union([
-			z.string().trim(),
-			z.object({
-				file: z.string().trim(),
-				width: z.number(),
-				height: z.number(),
+export const blogPostFrontmatterSchema = v.object({
+	demo: v.optional(v.boolean(), false),
+	title: v.pipe(v.string(), v.trim()),
+	publishedDate: v.pipe(v.string(), v.trim()),
+	modifiedDate: v.optional(v.pipe(v.string(), v.trim())),
+	description: v.pipe(v.string(), v.trim(), v.regex(/[\.\?]$/)),
+	tags: v.array(v.pipe(v.string(), v.trim())),
+	priority: v.optional(v.number(), 0),
+	cover: v.optional(
+		v.union([
+			v.pipe(v.string(), v.trim()),
+			v.object({
+				file: v.pipe(v.string(), v.trim()),
+				width: v.number(),
+				height: v.number(),
 			}),
-		])
-		.optional(),
+		]),
+	),
 });
 
-export type BlogPostFrontmatter = z.infer<typeof blogPostFrontmatterSchema>;
+export type BlogPostFrontmatter = v.InferOutput<
+	typeof blogPostFrontmatterSchema
+>;
 
 export interface BlogPostCommon {
 	title: string;
 	url: string;
 	publishedDate: string;
 	modifiedDate?: string;
+	priority: number;
 }
 
 export interface BlogPostData extends BlogPostCommon {

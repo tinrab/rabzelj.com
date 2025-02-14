@@ -1,14 +1,11 @@
-import { z } from "zod";
+import * as v from "valibot";
 
-export const blogTagFrontmatterSchema = z.object({
-	title: z.string().trim(),
-	description: z
-		.string()
-		.trim()
-		.regex(/[\.\?]$/),
+export const blogTagFrontmatterSchema = v.object({
+	title: v.string(),
+	description: v.pipe(v.string(), v.trim(), v.regex(/[\.\?]$/)),
 });
 
-export type BlogTagFrontmatter = z.infer<typeof blogTagFrontmatterSchema>;
+export type BlogTagFrontmatter = v.InferOutput<typeof blogTagFrontmatterSchema>;
 
 export interface BlogTagData {
 	title: string;

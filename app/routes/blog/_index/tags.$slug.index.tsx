@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
-import { z } from "zod";
+import * as v from "valibot";
 
 import { BlogPostList } from "~/components/blog/BlogPostList";
 import { BlogTagChip } from "~/components/blog/BlogTagChip";
@@ -9,12 +9,14 @@ import { Typography } from "~/components/Typography";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
 import { groupBlogPosts } from "~/lib/blog/post/utility";
 import { loadBlogTag } from "~/lib/blog/tag/loader";
-import { publicMiddleware, validateZod } from "~/lib/middleware";
+import { publicMiddleware, validateValibot } from "~/lib/middleware";
 import { pathLocator } from "~/lib/path-locator";
 
 const loadRouteData = createServerFn({ method: "GET" })
 	.middleware([publicMiddleware])
-	.validator(validateZod(z.object({ slug: z.string().min(1) })))
+	.validator(
+		validateValibot(v.object({ slug: v.pipe(v.string(), v.minLength(1)) })),
+	)
 	.handler(async ({ data: { slug } }) => {
 		const tag = await loadBlogTag(slug);
 		if (!tag) {

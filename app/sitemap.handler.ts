@@ -1,6 +1,8 @@
 import { defineEventHandler } from "vinxi/http";
 
 import { loadServerConfig } from "~/config/server";
+import { loadBlogPosts } from "~/lib/blog/post/loader";
+import { loadBlogTagPostCounts } from "~/lib/blog/tag/loader";
 import { pathLocator } from "~/lib/path-locator";
 
 type SitemapUrl = {
@@ -62,12 +64,29 @@ export default defineEventHandler(async (event) => {
 		}),
 	);
 
-	return new Response(makeSitemap([...staticRoutes]), {
-		status: 200,
-		headers: {
-			"Content-Type": "application/xml",
-			"X-Content-Type-Options": "nosniff",
-			"Cache-Control": "public, max-age=86400",
+	const posts = await loadBlogPosts();
+	const blogPostRoutes: SitemapUrl[] = posts.map((post) => ({
+		url: `${config.app.url}${pathLocator.blog.post.index(post.slug)}`,
+		changeFrequency: "weekly",
+		lastModified: new Date(post.modifiedDate ?? post.publishedDate),
+	}));
+
+	const tags = await loadBlogTagPostCounts();
+	const blogTagRoutes: SitemapUrl[] = tags.map((tag) => ({
+		url: `${config.app.url}${pathLocator.blog.tags.page(tag.slug)}`,
+		changeFrequency: "weekly",
+		lastModified: thisWeek,
+	}));
+
+	return new Response(
+		makeSitemap([...staticRoutes, ...blogPostRoutes, ...blogTagRoutes]),
+		{
+			status: 200,
+			headers: {
+				"Content-Type": "application/xml",
+				"X-Content-Type-Options": "nosniff",
+				"Cache-Control": "public, max-age=86400",
+			},
 		},
-	});
+	);
 });
