@@ -1,27 +1,26 @@
-import { z } from "zod";
-
 import { staticConfig } from "~/config/static";
+import * as v from "valibot";
 
 if (typeof window !== "undefined") {
 	throw new Error("This file should only be used on the server.");
 }
 
-const serverConfigSchema = z.object({
-	app: z.object({
-		url: z.string().url(),
-		domain: z.string(),
-		title: z.string(),
-		description: z.string(),
-		dataDir: z.string(),
+const serverConfigSchema = v.object({
+	app: v.object({
+		url: v.pipe(v.string(), v.url()),
+		domain: v.string(),
+		title: v.string(),
+		description: v.string(),
+		dataDir: v.string(),
 	}),
 });
 
-export type ServerConfig = z.infer<typeof serverConfigSchema>;
+export type ServerConfig = v.InferOutput<typeof serverConfigSchema>;
 
 export function loadServerConfig(): ServerConfig {
 	const siteUrl = process.env.TIN_APP_URL?.replace(/\/$/, "");
 
-	return serverConfigSchema.parse({
+	return v.parse(serverConfigSchema, {
 		app: {
 			...staticConfig.app,
 			url: siteUrl,

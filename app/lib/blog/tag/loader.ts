@@ -23,10 +23,13 @@ export async function loadBlogTags(): Promise<BlogTagData[]> {
 
 	for (const tagFile of await fs.readdir(TAGS_DIR)) {
 		const source = await fs.readFile(path.join(TAGS_DIR, tagFile), "utf8");
-		const { frontmatter } = await compiler.compile(source, {
-			frontmatterOnly: true,
-			frontmatterSchema: blogTagFrontmatterSchema,
-		});
+		const { frontmatter } = await compiler.compile(
+			source,
+			{
+				frontmatterOnly: true,
+			},
+			blogTagFrontmatterSchema,
+		);
 
 		const slug = tagFile.slice(0, Math.max(0, tagFile.length - 4));
 

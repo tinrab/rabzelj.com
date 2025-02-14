@@ -1,11 +1,11 @@
 import { createMiddleware } from "@tanstack/start";
 import { setHeader } from "vinxi/http";
-import type { z } from "zod";
+import * as v from "valibot";
 
-export function validateZod<T extends z.ZodSchema>(
-	schema: T,
-): (input: unknown) => z.infer<T> {
-	return (input: unknown) => schema.parse(input);
+export function validateValibot<
+	T extends v.ObjectSchema<v.ObjectEntries, undefined>,
+>(schema: T): (input: unknown) => v.InferOutput<T> {
+	return (input: unknown) => v.parse(schema, input);
 }
 
 // From @tanstack/start

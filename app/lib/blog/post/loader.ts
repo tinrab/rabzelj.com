@@ -111,20 +111,24 @@ async function readBlogPost(
 	);
 
 	const compiler = await getMdxCompiler();
-	const artifact = await compiler.compile(source, {
-		frontmatterOnly: !includeArtifact,
-		frontmatterSchema: blogPostFrontmatterSchema,
-		mdxOptions: {
-			rehypePlugins: [
-				[
-					treeProcessorPlugin,
-					{
-						process: (node: HastElement) => processTree(node, assetPath, slug),
-					},
+	const artifact = await compiler.compile(
+		source,
+		{
+			frontmatterOnly: !includeArtifact,
+			mdxOptions: {
+				rehypePlugins: [
+					[
+						treeProcessorPlugin,
+						{
+							process: (node: HastElement) =>
+								processTree(node, assetPath, slug),
+						},
+					],
 				],
-			],
+			},
 		},
-	});
+		blogPostFrontmatterSchema,
+	);
 	const frontmatter = artifact.frontmatter;
 
 	if (process.env.NODE_ENV === "production" && frontmatter.demo) {
@@ -191,6 +195,7 @@ async function readBlogPost(
 		publishedDate: artifact.frontmatter.publishedDate,
 		modifiedDate: artifact.frontmatter.modifiedDate,
 		description: artifact.frontmatter.description,
+		priority: artifact.frontmatter.priority,
 		tags,
 		cover,
 		assetPath,

@@ -1,13 +1,14 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
-import { z } from "zod";
 import { createMdxContent } from "@temelj/mdx-react";
+import * as v from "valibot";
+import { MdReportProblem } from "react-icons/md";
 
 import { loadBlogPost } from "~/lib/blog/post/loader";
 import { mdxPageLowerHeadingComponents } from "~/lib/mdx/content";
 import { makeSeo } from "~/lib/seo";
 import { pathLocator } from "~/lib/path-locator";
-import { publicMiddleware, validateZod } from "~/lib/middleware";
+import { publicMiddleware, validateValibot } from "~/lib/middleware";
 import { clientConfig } from "~/config/client";
 import { Typography } from "~/components/Typography";
 import { BlogShare } from "~/components/blog/BlogShare";
@@ -17,7 +18,13 @@ import { SiteLink } from "~/components/SiteLink";
 
 const loadRouteData = createServerFn({ method: "GET" })
 	.middleware([publicMiddleware])
-	.validator(validateZod(z.object({ slug: z.string().min(1) })))
+	.validator(
+		validateValibot(
+			v.object({
+				slug: v.pipe(v.string(), v.minLength(1)),
+			}),
+		),
+	)
 	.handler(async ({ data: { slug } }) => {
 		const post = await loadBlogPost(slug, {
 			includeArtifact: true,
@@ -70,30 +77,42 @@ function RouteComponent() {
 
 	return (
 		<article className="mx-auto max-w-3xl break-words px-4 py-8 md:py-12">
-			<div className="mb-4 flex flex-wrap gap-2">
-				<Typography className="mr-auto text-muted-foreground text-sm">
-					{new Date(post.publishedDate).toLocaleDateString()}
-				</Typography>
-				<BlogShare className="hidden sm:flex" post={post} />
-			</div>
-
-			<Typography className="mb-4 text-balance" variant="h1" asVariant>
+			<Typography className="mb-8 text-balance" variant="h1" asVariant>
 				{post.title}
 			</Typography>
 
-			<Typography
-				variant="body2"
-				asVariant
-				className="mb-4 text-muted-foreground italic"
-			>
-				{post.description}
-			</Typography>
+			<div className="mb-4 flex flex-wrap gap-2">
+				<div className="w-full">
+					<div className="flex flex-wrap gap-2">
+						<Typography className="mr-auto text-muted-foreground text-sm">
+							{new Date(post.publishedDate).toLocaleDateString()}
+						</Typography>
+						<BlogShare className="hidden sm:flex" post={post} />
+					</div>
+					{new Date(post.publishedDate).getTime() <
+						Date.now() - 1000 * 60 * 60 * 24 * 180 && (
+						<Typography className="mt-2 flex items-center gap-2 text-error text-sm">
+							<MdReportProblem />
+							This article is more than 6 months old and may contain outdated
+							information.
+						</Typography>
+					)}
+				</div>
+			</div>
 
-			<div className="mb-8 flex flex-wrap gap-2">
+			<div className="mb-4 flex flex-wrap gap-2">
 				{post.tags.map((tag) => (
 					<BlogTagChip key={tag.slug} tag={tag} />
 				))}
 			</div>
+
+			<Typography
+				variant="body2"
+				asVariant
+				className="mb-8 text-muted-foreground italic"
+			>
+				{post.description}
+			</Typography>
 
 			<section className="pb-6">{content}</section>
 

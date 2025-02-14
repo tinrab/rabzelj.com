@@ -1,13 +1,13 @@
 import { createServerFn } from "@tanstack/start";
 import { getCookie, setCookie, setHeader } from "vinxi/http";
-import { z } from "zod";
+import * as v from "valibot";
 
-import { validateZod } from "~/lib/middleware";
 import { Theme } from "~/lib/theme/types";
 import { THEME_COOKIE_NAME } from "~/lib/theme/constants";
+import { validateValibot } from "~/lib/middleware";
 
 export const changeThemeServerFn = createServerFn({ method: "POST" })
-	.validator(validateZod(z.object({ theme: z.nativeEnum(Theme) })))
+	.validator(validateValibot(v.object({ theme: v.enum(Theme) })))
 	.handler(async ({ data }) => {
 		setCookie(THEME_COOKIE_NAME, data.theme, {
 			httpOnly: false,

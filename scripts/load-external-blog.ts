@@ -47,6 +47,7 @@ async function loadFlinect(): Promise<BlogPostCommon[]> {
 			title,
 			url: url,
 			publishedDate: new Date(publishedDate).toISOString(),
+			priority: 0,
 		});
 	}
 
@@ -82,6 +83,7 @@ async function loadOutcrawl(): Promise<BlogPostCommon[]> {
 				title: article.title,
 				url: article.url,
 				publishedDate: new Date(article.date).toISOString(),
+				priority: 0,
 			});
 		}
 	}

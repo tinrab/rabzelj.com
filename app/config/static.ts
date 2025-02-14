@@ -4,7 +4,7 @@ export const staticConfig = {
 		description: "Software engineer.",
 	},
 	social: {
-		email: "tin@flinect.com",
+		email: "wlqCiolqhfw1frp",
 		twitterUrl: "https://x.com/tinrab",
 		twitterId: "@tinrab",
 		githubUrl: "https://github.com/tinrab",
