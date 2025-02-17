@@ -31,8 +31,7 @@ export function MdxContentHeading({
 		return (
 			<Typography
 				id={id}
-				gutterTop
-				gutterBottom
+				gutter
 				variant={effectiveVariant}
 				asChild
 				{...restProps}
@@ -46,8 +45,7 @@ export function MdxContentHeading({
 	return (
 		<Typography
 			id={id}
-			gutterTop
-			gutterBottom
+			gutter
 			variant={effectiveVariant}
 			asChild
 			{...restProps}

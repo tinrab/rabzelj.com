@@ -1,0 +1,92 @@
+---
+title: From a Monolith to Microservices
+description: How to go from a monolith to microservices and should you?
+tags:
+  - microservices
+  - architecture
+publishedDate: 2025-02-17
+---
+
+I think microservices are really cool.
+
+This blog post contains basic ideas about splitting a monolithic system into microservices.
+
+# Intro
+
+Microservice architecture describes the structure of systems and the principles behind backend software development.
+
+The fundamental idea is to break down your system into smaller, autonomous services that work together to create the final application that users see.
+We call this a "loosely coupled" system - which means the components don't depend too heavily on each other.
+
+The split is done on a "deployment unit" basis - meaning that services are deployed independently.
+
+## 4+1 view model
+
+If you look at this from the [4+1 view model](https://en.wikipedia.org/wiki/4%2B1_architectural_view_model) (which helps describe architecture from different stakeholders' perspectives), the "development views" are split across multiple services.
+The system following the microservices architecture shouldn't affect how the user interacts with the system.
+For them it's still just a single application.
+
+## Benefits
+
+Breaking down the monolith can bring many advantages.
+For one, it makes it easier to scale the application efficiently.
+It also gives you the freedom to introduce new technologies where they make sense, without having to rewrite everything.
+Important for teams is that it minimizes dependencies between them, so people can work more independently.
+
+This is all in theory, of course.
+
+## Reactive systems
+
+Applications utilizing the microservices architecture can become more resilient too.
+If one service fails, the application can often still function to some extent.
+
+Microservices make it easier to implement so called "reactive systems," which are systems characterized by:
+
+- **Responsiveness**: responding quickly to requests.
+- **Resilience**: recovering from failures. This is achieved through replication, containment, isolation and delegation.
+- **Event/message-driven**: loose coupling by communication via asynchronous messaging.
+This is a big topic and I'll write about it another time.
+- **Elasticity**: scaling up and down to meet demand.
+
+# Decomposition
+
+How do you decompose a monolith into microservices, though?
+
+Here are some ideas to think about.
+
+## Domain-driven design approach
+
+When breaking down a monolithic system into microservices, we can follow the principles of domain-driven design.
+
+Domain-driven design is a very boring and dumb topic with a lot boring and dumb books written about it.
+Basically, it's an approach to software development that tries to model software around business concepts.
+
+For an e-commerce application, you would split the systems into services dealing with customers, products, orders, etc.
+Those are business terms that make sense to non-technical people, which simplifies communication with all the stakeholders.
+
+The boundaries for decomposition are determined by [bounded contexts](https://martinfowler.com/bliki/BoundedContext.html).
+Each bounded context can be implemented independently in whichever way is best suited for that context.
+
+In practice, low code cohesion and tight coupling are often actually quite good.
+Performing data access in a button's onClick handler function inside your Next.js app might look horrible, but it gets the job done.
+
+## Capability-based decomposition
+
+Decomposition can also be performed based on the capabilities of the application or company.
+Different parts of the application where accelerating development would bring greater shareholder value are good candidates for decomposition.
+
+This approach allows teams to focus resources on high-value parts while maintaining the stability of the overall system.
+Changing the marketing copy on a sales page should not affect the reliability of the payment system.
+
+## Performance-driven decomposition
+
+Moving parts of the monolithic system that receives high traffic into their own services can enable resource scalability and further code optimization.
+If you have a full-stack application where social media features such as likes and comments are responsible for eating up most of the resources, you could move them into their own services.
+
+This direction probably makes the most sense.
+You can ship feature fast initially, and then optimize critical parts later.
+
+# Conclusion
+
+Microservices are hard to get right.
+You choose microservices only when the monolith fails.

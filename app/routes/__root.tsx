@@ -1,5 +1,11 @@
-import { Outlet, ScriptOnce, createRootRoute } from "@tanstack/react-router";
-import { createServerFn, Meta, Scripts } from "@tanstack/start";
+import {
+	HeadContent,
+	Outlet,
+	ScriptOnce,
+	Scripts,
+	createRootRoute,
+} from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/start";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type React from "react";
 
@@ -91,6 +97,28 @@ export const Route = createRootRoute({
 				},
 				{ rel: "manifest", href: "/manifest.json" },
 				{ rel: "icon", href: "/favicon.ico" },
+
+				// Importing fonts with postcss and Tailwind v4 doesn't work anymore for whatever reason.
+				// This is temporary until I figure out what's going on.
+				{ rel: "preconnect", href: "https://fonts.googleapis.com" },
+				{
+					rel: "preconnect",
+					href: "https://fonts.gstatic.com",
+					crossOrigin: "",
+				},
+				{
+					rel: "stylesheet",
+					href: "https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap",
+				},
+				// Katex
+				// <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">
+				{
+					rel: "stylesheet",
+					href: "https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css",
+					integrity:
+						"sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib",
+					crossOrigin: "anonymous",
+				},
 			],
 		};
 	},
@@ -121,13 +149,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			suppressHydrationWarning
 		>
 			<head>
-				<Meta />
 				{data.theme === Theme.SYSTEM ? (
 					<ScriptOnce
 						// biome-ignore lint/correctness/noChildrenProp: need to inject theme
 						children={`window.matchMedia('(prefers-color-scheme: dark)').matches ? document.documentElement.classList.add('dark') : null`}
 					/>
 				) : undefined}
+				<HeadContent />
 			</head>
 			<ThemeProvider initialTheme={data.theme}>
 				<QueryClientProvider client={queryClient}>
