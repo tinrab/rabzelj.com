@@ -106,11 +106,7 @@ function RouteComponent() {
 				))}
 			</div>
 
-			<Typography
-				variant="body2"
-				asVariant
-				className="mb-8 text-muted-foreground italic"
-			>
+			<Typography asVariant className="mb-8 text-muted-foreground italic">
 				{post.description}
 			</Typography>
 

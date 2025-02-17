@@ -20,7 +20,7 @@ export function BlogShare({ post, className, ...restProps }: BlogShareProps) {
 			className={cn("flex items-center gap-4", className)}
 			{...restProps}
 		>
-			<Typography variant="body1" className="text-muted-foreground text-sm">
+			<Typography className="text-muted-foreground text-sm">
 				Share on:{" "}
 			</Typography>
 			<SiteLink

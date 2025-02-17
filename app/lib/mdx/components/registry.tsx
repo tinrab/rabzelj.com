@@ -26,9 +26,9 @@ export function getMdxContentComponents({
 			...restProps
 		}: React.HTMLAttributes<HTMLElement>) => (
 			<Typography
-				variant="body1"
 				gutterBottom
-				className={cn(className, "text-base/7 lg:text-lg/7")}
+				// className={cn(className, "text-base/7 lg:text-lg/7")}
+				className={cn(className)}
 				asChild
 				{...restProps}
 			>
@@ -49,6 +49,7 @@ export function getMdxContentComponents({
 			<MdxContentHeading
 				lowerHeadings={lowerHeadings}
 				variant="h1"
+				className="underline decoration-link decoration-dashed underline-offset-8"
 				{...props}
 			/>
 		),
@@ -85,17 +86,8 @@ export function getMdxContentComponents({
 				{...restProps}
 			/>
 		),
-		li: ({
-			className,
-			children,
-			...restProps
-		}: React.HTMLAttributes<HTMLElement>) => (
-			<Typography
-				variant="body1"
-				className={cn(className, "text-base lg:text-lg")}
-				asChild
-				{...restProps}
-			>
+		li: ({ children, ...restProps }: React.HTMLAttributes<HTMLElement>) => (
+			<Typography asChild {...restProps}>
 				<li>{children}</li>
 			</Typography>
 		),

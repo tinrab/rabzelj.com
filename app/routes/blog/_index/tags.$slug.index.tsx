@@ -43,9 +43,7 @@ function RouteComponent() {
 				<Typography variant="h2" asChild gutterBottom>
 					<h1>{tag.title}</h1>
 				</Typography>
-				<Typography variant="body1" asVariant>
-					{tag.description}
-				</Typography>
+				<Typography asVariant>{tag.description}</Typography>
 
 				<Typography variant="a" asChild>
 					<SiteLink to={pathLocator.blog.tags.index}>See all tags.</SiteLink>

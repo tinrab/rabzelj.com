@@ -53,28 +53,28 @@ function RouteComponent() {
 			<h2 className="mb-6 text-muted-foreground">Software Engineer</h2>
 
 			<div className="mb-5 text-center">
-				<Typography variant="body1" asVariant>
+				<Typography asVariant>
 					Personal blog:{" "}
 					<Typography variant="a" asChild>
 						<SiteLink to="/blog">/blog</SiteLink>
 					</Typography>
 					.
 				</Typography>
-				<Typography variant="body1" asVariant>
+				<Typography asVariant>
 					Check out my blog on{" "}
 					<Typography variant="a" asChild>
 						<SiteLink to="https://flinect.com/blog">Flinect</SiteLink>
 					</Typography>
 					.
 				</Typography>
-				<Typography variant="body1" asVariant>
+				<Typography asVariant>
 					Find my OSS projects on{" "}
 					<Typography variant="a" asChild>
 						<SiteLink to="https://github.com/tinrab">GitHub</SiteLink>
 					</Typography>
 					.
 				</Typography>
-				<Typography variant="body1" asVariant>
+				<Typography asVariant>
 					My old blog:{" "}
 					<Typography variant="a" asChild>
 						<SiteLink to="https://outcrawl.com/">outcrawl.com</SiteLink>
