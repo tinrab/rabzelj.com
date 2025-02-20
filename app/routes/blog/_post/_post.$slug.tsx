@@ -77,59 +77,57 @@ function RouteComponent() {
 
 	return (
 		<article className="mx-auto max-w-3xl break-words px-4 py-8 md:py-12">
-			<Typography className="mb-8 text-balance" variant="h1" asVariant>
+			<Typography className="text-balance" variant="h1" asVariant>
 				{post.title}
 			</Typography>
 
-			<div className="mb-4 flex flex-wrap gap-2">
-				<div className="w-full">
-					<div className="flex flex-wrap gap-2">
-						<Typography className="mr-auto text-muted-foreground text-sm">
-							{new Date(post.publishedDate).toLocaleDateString()}
-						</Typography>
-						<BlogShare className="hidden sm:flex" post={post} />
-					</div>
-					{new Date(post.publishedDate).getTime() <
-						Date.now() - 1000 * 60 * 60 * 24 * 180 && (
-						<Typography className="mt-2 flex items-center gap-2 text-error text-sm">
-							<MdReportProblem />
-							This article is more than 6 months old and may contain outdated
-							information.
-						</Typography>
-					)}
-				</div>
+			<Separator className="my-4" />
+
+			{new Date(post.publishedDate).getTime() <
+				Date.now() - 1000 * 60 * 60 * 24 * 180 && (
+				<Typography className="mb-4 flex items-center gap-2 text-error text-sm">
+					<MdReportProblem />
+					This article is more than 6 months old and may contain outdated
+					information.
+				</Typography>
+			)}
+
+			<div className="flex flex-wrap gap-2">
+				<Typography className="mr-auto text-muted-foreground text-sm">
+					{new Date(post.publishedDate).toLocaleDateString()}
+				</Typography>
+				<BlogShare className="hidden sm:flex" post={post} />
 			</div>
 
-			<div className="mb-4 flex flex-wrap gap-2">
+			<div className="mt-4 flex flex-wrap gap-2">
 				{post.tags.map((tag) => (
 					<BlogTagChip key={tag.slug} tag={tag} />
 				))}
 			</div>
 
-			<Typography asVariant className="mb-8 text-muted-foreground italic">
+			<Typography asVariant className="mt-4 text-muted-foreground italic">
 				{post.description}
 			</Typography>
 
-			<section className="pb-6">{content}</section>
+			<section className="pt-6">{content}</section>
 
-			<Separator />
+			<Separator className="my-4" />
 
-			<section className="py-3">
-				<div className="mb-3 flex flex-wrap gap-2">
-					{post.tags.map((tag) => (
-						<BlogTagChip key={tag.slug} tag={tag} />
-					))}
-				</div>
-				<div className="mb-3 flex flex-wrap gap-2">
-					<Typography className="mr-auto text-muted-foreground text-sm">
-						{new Date(post.publishedDate).toLocaleDateString()}
-					</Typography>
-					<BlogShare className="hidden sm:flex" post={post} />
-				</div>
-			</section>
+			<div className="mt-4 flex flex-wrap gap-2">
+				{post.tags.map((tag) => (
+					<BlogTagChip key={tag.slug} tag={tag} />
+				))}
+			</div>
+
+			<div className="mt-4 flex flex-wrap gap-2">
+				<Typography className="mr-auto text-muted-foreground text-sm">
+					{new Date(post.publishedDate).toLocaleDateString()}
+				</Typography>
+				<BlogShare className="hidden sm:flex" post={post} />
+			</div>
 
 			{post.related?.length && post.related?.length >= 2 ? (
-				<section className="mt-6">
+				<section className="mt-12">
 					<Typography variant="h2" asVariant gutterBottom>
 						Read more
 					</Typography>

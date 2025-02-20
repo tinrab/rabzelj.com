@@ -45,13 +45,15 @@ export function getMdxContentComponents({
 			</Typography>
 		),
 
-		h1: (props: React.HTMLAttributes<HTMLElement>) => (
+		h1: ({ children, ...restProps }: React.HTMLAttributes<HTMLElement>) => (
 			<MdxContentHeading
 				lowerHeadings={lowerHeadings}
 				variant="h1"
-				className="underline decoration-link decoration-dashed underline-offset-8"
-				{...props}
-			/>
+				className="text-border underline decoration-dashed underline-offset-8"
+				{...restProps}
+			>
+				<span className="text-foreground">{children}</span>
+			</MdxContentHeading>
 		),
 		h2: (props: React.HTMLAttributes<HTMLElement>) => (
 			<MdxContentHeading
