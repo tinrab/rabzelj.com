@@ -1,160 +1,18 @@
 {
-	"flinect": {
-		"posts": [
-			{
-				"title": "Implementing Google's API Filtering Language in Rust",
-				"url": "https://flinect.com/blog/rust-implement-google-api-filter",
-				"publishedDate": "2024-12-05T00:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Working With Rust, TypeScript and WebAssembly Made a Bit Easier",
-				"url": "https://flinect.com/blog/rust-wasm-with-typescript-serde",
-				"publishedDate": "2024-01-19T00:00:00.000Z",
-				"priority": 0
-			}
-		]
-	},
-	"outcrawl": {
-		"posts": [
-			{
-				"title": "Error Handling Pattern with React and Redux-Saga",
-				"url": "https://outcrawl.com/redux-saga-error-handling",
-				"publishedDate": "2021-01-05T23:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Generating Realistic Test Traffic Using Markov Chains",
-				"url": "https://outcrawl.com/markov-chains-test-traffic",
-				"publishedDate": "2020-10-27T23:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Why Should Microservices Be Idempotent",
-				"url": "https://outcrawl.com/why-idempotent-microservices",
-				"publishedDate": "2020-10-01T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Rate Limiting in Rust Using Redis",
-				"url": "https://outcrawl.com/rust-redis-rate-limiting",
-				"publishedDate": "2020-07-18T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Event Versioning with Rust",
-				"url": "https://outcrawl.com/event-versioning-rust",
-				"publishedDate": "2020-06-22T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Building a Real-time Chat App in Rust and React",
-				"url": "https://outcrawl.com/rust-react-realtime-chat",
-				"publishedDate": "2020-05-19T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "N+1 Queries in GraphQL Using PostgreSQL Window Functions",
-				"url": "https://outcrawl.com/graphql-postgresql-window-functions",
-				"publishedDate": "2018-07-22T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Dependency Injection in Go",
-				"url": "https://outcrawl.com/go-dependency-injection",
-				"publishedDate": "2018-07-09T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Real-time Chat with GraphQL Subscriptions in Go",
-				"url": "https://outcrawl.com/go-graphql-realtime-chat",
-				"publishedDate": "2018-06-19T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Using GraphQL with Microservices in Go",
-				"url": "https://outcrawl.com/go-graphql-gateway-microservices",
-				"publishedDate": "2018-06-13T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Building a Microservices Application in Go Following the CQRS Pattern",
-				"url": "https://outcrawl.com/go-microservices-cqrs-docker",
-				"publishedDate": "2018-05-21T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "How to Build a Search Service with Go and Elasticsearch",
-				"url": "https://outcrawl.com/go-elastic-search-service",
-				"publishedDate": "2018-03-21T23:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Building a URL Shortener with Go and AWS Lambda",
-				"url": "https://outcrawl.com/go-url-shortener-lambda",
-				"publishedDate": "2018-03-12T23:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "How to Build a Self-hosted Leaderboard with Unreal Engine 4",
-				"url": "https://outcrawl.com/unreal-engine-selfhosted-leaderboard",
-				"publishedDate": "2018-02-24T23:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Building a Real-time Collaborative Drawing App in Go",
-				"url": "https://outcrawl.com/realtime-collaborative-drawing-go",
-				"publishedDate": "2017-11-21T23:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Generating Unique 64 bit IDs with Go on Kubernetes",
-				"url": "https://outcrawl.com/generating-unique-ids-kubernetes",
-				"publishedDate": "2017-11-05T23:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Multi-Stage Docker Builds for Kubernetes",
-				"url": "https://outcrawl.com/multi-stage-docker-builds-kubernetes",
-				"publishedDate": "2017-10-30T23:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Getting Started with Microservices using Go, gRPC and Kubernetes",
-				"url": "https://outcrawl.com/getting-started-microservices-go-grpc-kubernetes",
-				"publishedDate": "2017-10-26T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Build an Image Recognition API with Go and TensorFlow",
-				"url": "https://outcrawl.com/image-recognition-api-go-tensorflow",
-				"publishedDate": "2017-10-17T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "How to Keep Your Development Environment Clean",
-				"url": "https://outcrawl.com/clean-development-environment-docker",
-				"publishedDate": "2017-10-09T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Create a GraphQL Server with Go and Google App Engine",
-				"url": "https://outcrawl.com/graphql-server-go-google-app-engine",
-				"publishedDate": "2017-10-01T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Build a Todo List with Angular and Google App Engine - Part 2",
-				"url": "https://outcrawl.com/todo-list-angular-google-app-engine-part-2",
-				"publishedDate": "2017-08-31T22:00:00.000Z",
-				"priority": 0
-			},
-			{
-				"title": "Build a Todo List with Angular and Google App Engine - Part 1",
-				"url": "https://outcrawl.com/todo-list-angular-google-app-engine-part-1",
-				"publishedDate": "2017-08-29T22:00:00.000Z",
-				"priority": 0
-			}
-		]
-	}
+  "flinect": {
+    "posts": [
+      {
+        "title": "Implementing Google's API Filtering Language in Rust",
+        "url": "https://flinect.com/blog/rust-implement-google-api-filter",
+        "publishedDate": "2024-12-05T00:00:00.000Z",
+        "priority": 0
+      },
+      {
+        "title": "Working With Rust, TypeScript and WebAssembly Made a Bit Easier",
+        "url": "https://flinect.com/blog/rust-wasm-with-typescript-serde",
+        "publishedDate": "2024-01-19T00:00:00.000Z",
+        "priority": 0
+      }
+    ]
+  }
 }

@@ -1,0 +1,414 @@
+---
+title: Pointers Are Not Just Integers - Provenance
+description: A pointer is just the address of a memory location, right?
+tags:
+  - rust
+  - systems-programming
+publishedDate: 2025-02-26
+---
+
+Consider this code:
+
+```rust
+#[unsafe(no_mangle)]
+fn example_provenance(a: *mut i32, b: *mut i32) -> i32 {
+    unsafe {
+        // Calculate the offset between pointers `b` and `a`.
+        // b_a_offset = (b - a)
+        let b_a_offset = b.offset_from(a);
+
+        // Add the offset to pointer `a` to get the address of pointer `b`.
+        // b_ptr = a + b_a_offset
+        let b_ptr = a.wrapping_offset(b_a_offset);
+
+        // Both `b_ptr` and `b` should now point to the same memory location.
+        if b_ptr == b {
+            // If pointers are equal, write 42 to the memory location.
+            *b_ptr = 42;
+            // Return the value at pointer `b`, which should be 42.
+            *b
+        } else {
+            // Pointers are different.
+            -1
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let mut a = 3;
+        let mut b = 5;
+        let result = example_provenance(&raw mut a, &raw mut b);
+        assert_eq!(result, 42);
+    }
+}
+```
+
+Running the test gives us:
+
+```text { "commandLine": "0" }
+cargo test
+running 1 test
+test tests::it_works ... ok
+```
+
+What about if we run it in release mode with optimizations enabled?
+
+```text { "commandLine": "0" }
+cargo test --release
+running 1 test
+test tests::it_works ... FAILED
+
+thread 'tests::it_works' panicked at src/main.rs:72:9:
+assertion `left == right` failed
+  left: 5
+ right: 42
+```
+
+It behaves differently in debug and release modes.
+We are using the `unsafe` keyword, which, for one thing, means we can expect undefined behavior.
+
+By the way, the equivalent code breaks in C as well.
+
+```c
+int32_t example_provenance(int32_t *a, int32_t *b) {
+  ptrdiff_t b_a_offset = b - a;
+  int32_t *b_ptr = a + b_a_offset;
+  if (b_ptr == b) {
+    *b_ptr = 42;
+    return *b;
+  } else {
+    return -1;
+  }
+}
+
+int main(int argc, char const *argv[]) {
+  int32_t a = 3;
+  int32_t b = 5;
+  int32_t result = example_provenance(&a, &b);
+  printf("result = %d\n", result);
+  return 0;
+}
+```
+
+Running it yields different results.
+
+```sh { "commandLine": "0,2" }
+clang ./main.c -o prov && ./prov
+result = 42
+clang ./main.c -o prov -O3 && ./prov
+result = 5
+```
+
+Let's try running [miri](https://github.com/rust-lang/miri) - an undefined behavior detector for Rust.
+
+```sh { "commandLine": "0" }
+cargo +nightly miri test
+running 1 test
+test tests::it_works ... error: Undefined Behavior: `ptr_offset_from` called on two different pointers that are not both derived from the same allocation
+  --> src/main.rs:9:26
+   |
+9  |         let b_a_offset = b.offset_from(a);
+   |                          ^^^^^^^^^^^^^^^^ `ptr_offset_from` called on two different pointers that are not both derived from the same allocation
+   |
+```
+
+Okay, so we have "two different pointers" who are "not derived from the same allocation."
+
+Why would the compiler care if they are different pointers? We could've passed in the same pointer as `a` and `b`.
+
+It seems like we shouldn't perform pointer arithmetic on pointers that are not derived from the same allocation.
+Or maybe, we shouldn't treat casted `usize` integers as pointers anymore.
+
+Let's try running another test.
+
+```rust
+#[test]
+fn it_works() {
+    let mut a = 1;
+    let result = example_provenance(&raw mut a, &raw mut a);
+    assert_eq!(result, 42);
+}
+```
+
+This one passes in both debug and release modes, and also passes miri's detector.
+
+What is going on here?
+
+# Provenance
+
+It turns out that the two pointers are not actually the same, even though they are pointing to the same memory location.
+
+The extra information that pointers have is called *provenance*.
+It tells the compiler where a pointer came from, its origin.
+
+Provenance isn't visible in-code or in the compiled assembly, it's just a compiler thing so it knows what kind of optimizations can be done.
+If we mess with it, we get undefined behavior.
+The compiler tracks pointers by their addresses (a `usize` value) and some extra information - like the id of the allocation that the pointer came from ([AllocId](https://github.com/rust-lang/rust/blob/c682aa162b0d41e21cc6748f4fecfe01efb69d1f/compiler/stable_mir/src/mir/alloc.rs#L48)).
+
+Provenance is inherited by all pointers derived from the original pointer through operations like offset, borrowing, and pointer casts.
+Casting a pointer to an integer is one thing, but the real problem is casting an integer back to a pointer.
+You can't get all the original information back.
+
+Rust has two sets of APIs for dealing with these casts: [Strict Provenance](https://doc.rust-lang.org/std/ptr/index.html#strict-provenance) and [Exposed Provenance](https://doc.rust-lang.org/std/ptr/index.html#exposed-provenance).
+
+The "strict API" disallows casting integers to pointers.
+It gives you [map_addr](https://doc.rust-lang.org/std/primitive.pointer.html#method.map_addr) function for creating new pointers by mapping an address to a new one, preserving its provenance.
+
+The "exposed API," e.g. [expose_provenance](https://doc.rust-lang.org/std/primitive.pointer.html#method.expose_provenance) and [with_exposed_provenance](https://doc.rust-lang.org/std/ptr/fn.with_exposed_provenance.html), basically allows you to "expose" pointers and get their integer part, then get back the pointer with one of the provenances that was previously exposed.
+
+Provenance also says which allocated object a pointer is allowed to access.
+It can also manage allocation lifetimes.
+
+The documentation for [wrapping_offset](https://doc.rust-lang.org/std/primitive.pointer.html#method.wrapping_offset) says: "the resulting pointer 'remembers' the allocated object that `self` points to; it must not be used to read or write other allocated objects."
+This can be a clue about what went wrong in the example.
+
+[Allocated objects](https://doc.rust-lang.org/std/ptr/index.html#allocated-object) are addressable instances of memory in Rust.
+These include heap allocations, stack, statics and constants.
+
+The variables `a` and `b` in the example are allocated on the stack as separate allocated objects.
+Using `wrapping_offset` on them is therefore invalid, which means *undefined behavior*.
+
+# Optimizations
+
+Let's see how an optimization can break a program if provenance is not taken into account.
+
+Let's look at the LLVM IR for the `example_provenance` function.
+
+```text { "commandLine": "0" }
+rustc --emit=llvm-ir -O ./src/main.rs -o - | grep -A 10 "i32 @example_provenance"
+define dso_local noundef i32 @example_provenance(ptr noundef %a, ptr noundef %b) unnamed_addr #3 {
+start:
+  %0 = ptrtoint ptr %b to i64
+  %1 = ptrtoint ptr %a to i64
+  %2 = sub i64 %0, %1
+  %3 = getelementptr i8, ptr %a, i64 %2
+  store i32 42, ptr %3, align 4
+  %4 = load i32, ptr %b, align 4, !noundef !4
+  ret i32 %4
+}
+```
+
+The `sub` instruction is from `b.offset_from(a)`, and `getelementptr` does `a.wrapping_offset(b_a_offset)`.
+Before that, `ptrtoint` converts pointers to integers.
+We can see the `store` instruction storing `42i32` to a pointer that was calculated at `%3`.
+
+The `noundef` attribute on parameters says that we expect arguments that are not null and not [poisoned](https://llvm.org/docs/LangRef.html#poison-values), otherwise it's undefined behavior.
+The compiler can expect that pointers were initialized.
+
+There aren't any jumps or conditions in there, and the value `42` is always stored to `b`.
+
+Let's look at the `example_provenance` function's assembly output.
+
+```asm
+example_provenance:
+; Move the value `42` into the memory location pointed to by the `rsi` register.
+; That's the second argument `b`.
+; `dword` says that the value is 4 bytes (`i32`).
+        mov dword ptr [rsi], 42
+; Move the value `42` into the `eax` register.
+; This one is used for the return value.
+        mov eax, 42
+; Return from function.
+        ret
+```
+
+That makes sense.
+Since the pointer check is always true, the truthy body is always executed, and the rest is discarded.
+
+Let's try calling `example_provenance` again.
+
+```rust
+fn main() {
+    let mut a = 3;
+    let mut b = 5;
+
+    let result = unsafe { example_provenance(&raw mut a, &raw mut b) };
+    print_result(result, a, b);
+}
+
+#[unsafe(no_mangle)]
+#[inline(never)]
+fn print_result(result: i32, a: i32, b: i32) {
+    println!("result: {result}");
+    println!("a: {a}, b: {b}");
+}
+```
+
+In release build it prints:
+
+```
+result: 5
+a: 23397, b: 5
+```
+
+Weird, it should print:
+
+```
+result: 42
+a: 3, b: 42
+```
+
+`result` and `b` are `b`'s initial value, and `a` is uninitialized garbage.
+
+Let's examine the x86 of the main function.
+
+```asm
+provenance::main:
+; For the stack.
+        push rax
+; Double write to the same local variable, `b`.
+; On x86_64, the stack grows downwards.
+        mov dword ptr [rsp], 5
+        mov dword ptr [rsp], 42
+; These are the arguments, with System V AMD64 calling convention.
+; The value for `a` is loaded from a location never initialized ([rsp + 4]).
+        mov esi, dword ptr [rsp + 4]
+; `result` and `b` are both 5.
+        mov edi, 5
+        mov edx, 5
+; And so on.
+        call print_result
+        pop rax
+        ret
+```
+
+Obviously, the `example_provenance` function is not even called, it's just inlined as `42`.
+There's only a single call to `print_result`.
+
+By the way, if I force it to not inline with `#[inline(never)]`, the program works.
+
+One problem is that the argument `b` to `print_result` is propagated as a constant `5`.
+This is what [constant folding/constant propagation](https://en.wikipedia.org/wiki/Constant_folding) does.
+After propagating `b`, the compiler didn't account for the fact that `b` is assigned to `42` in the `example_provenance` function, which is now inlined in `main`.
+
+Initialization of `a` was removed as "dead code."
+Optimizer decided that initializing `a` is unnecessary.
+
+Here's the LLVM IR for the `main` function.
+
+```
+; main::main
+define internal void @_ZN4main4main17hf13edf46277a999dE() unnamed_addr #0 {
+start:
+  %b = alloca [4 x i8], align 4
+  %a = alloca [4 x i8], align 4
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %a)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %b)
+  store i32 5, ptr %b, align 4
+  %0 = ptrtoint ptr %b to i64
+  %1 = ptrtoint ptr %a to i64
+  %2 = sub i64 %0, %1
+  %3 = getelementptr i8, ptr %a, i64 %2
+  store i32 42, ptr %3, align 4
+  %_7 = load i32, ptr %a, align 4, !noundef !4
+  call void @print_result(i32 noundef 5, i32 noundef %_7, i32 noundef 5)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %b)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %a)
+  ret void
+}
+```
+
+Variable `a` is allocated, but never stored to.
+`alloca` allocates memory on the stack uninitialized.
+
+I have no idea how the compiler actually worked this one out, but the issue definitely is with provenance and inlining.
+I assume what happened is that `b_ptr` took `a`'s provenance with `offset_from`, then inlining `*b_ptr = 42` hinted the compiler that `a` was actually initialized.
+It then did [dead store elimination](https://en.wikipedia.org/wiki/Dead-code_elimination).
+Not sure, though, since `b`'s constant was propagated without reloading, and we only used `a`'s memory address not its value in the pointer arithmetic.
+
+Why does the second test with `a` and `b` being the same pass?
+
+The documentation for [offset_from](https://doc.rust-lang.org/std/primitive.pointer.html#method.wrapping_offset) says that both parameters must either point to the same address or be both derived from the same allocation.
+An allocated object is equivalent to itself, so that makes sense.
+
+Let's look at the assembly of it.
+
+```asm
+provenance::main:
+        mov edi, 42
+        mov esi, 42
+        mov edx, 42
+        jmp print_result
+```
+
+The compiler propagates the value `42` after what I assume are several optimization steps.
+
+# Aliasing
+
+Let's write two random functions - one taking mutable references and another pointers.
+
+```rust
+#[unsafe(no_mangle)]
+pub fn example_may_alias(a: *mut i32, b: *mut i32) -> i32 {
+    // whatever
+    0
+}
+
+#[unsafe(no_mangle)]
+pub fn example_noalias(a: &mut i32, b: &mut i32) -> i32 {
+    // whatever
+    0
+}
+```
+
+One difference between these two is that we cannot pass the same mutable reference to the noalias one.
+At least within the bounds of safe Rust code - without using `unsafe` keyword.
+
+```text
+error[E0499]: cannot borrow `a` as mutable more than once at a time
+  --> src/main.rs:46:42
+   |
+46 |     let result = example_noalias(&mut a, &mut a);
+   |                  --------------- ------  ^^^^^^ second mutable borrow occurs here
+   |                  |               |
+   |                  |               first mutable borrow occurs here
+   |                  first borrow later used by call
+```
+
+Let's look at LLVM IR for both of these.
+
+```text { "commandLine": "0,5" }
+rustc --emit=llvm-ir -O ./src/main.rs -o - | grep -A 3 "i32 @example_may_alias"
+define dso_local noundef i32 @example_may_alias(ptr nocapture noundef readnone %a, ptr nocapture noundef readnone %b) unnamed_addr #4 {
+start:
+  ret i32 0
+}
+rustc --emit=llvm-ir -O ./src/main.rs -o - | grep -A 3 "i32 @example_noalias"
+define dso_local noundef i32 @example_noalias(ptr noalias nocapture noundef readnone align 4 dereferenceable(4) %a, ptr noalias nocapture noundef readnone align 4 dereferenceable(4) %b) unnamed_addr #4 {
+start:
+  ret i32 0
+}
+```
+
+Notice the [noalias](https://clang.llvm.org/docs/AttributeReference.html#noalias) attribute on the `example_noalias` function's parameters.
+
+The `noalias` attribute tells the optimizer that pointer's memory regions don't overlap.
+The Rust compiler adds it to `&mut` parameters, allowing the optimizer to assume that the memory pointed to by one reference doesn't overlap with any other allocation.
+C has the [restrict](https://en.wikipedia.org/wiki/Restrict) keyword for this purpose.
+
+Immutable references (`&`) can be aliased safely.
+Rust's borrow checker enforces that you can hold only **a single mutable reference at a time**.
+It guarantees that mutable references don't alias.
+These rules allow the compiler to assume there won't be any unexpected mutations of the same memory regions from any other aliases.
+That allows for more optimizations, like reordering instructions and removing them.
+
+"Fighting the borrow checker" shouldn't be viewed as a fight.
+
+# Conclusion
+
+Pointer are more than just integers.
+This is a big subject and there's a lot more to talk about.
+
+I recommend reading these, and Rust docs about [std::ptr](https://doc.rust-lang.org/std/ptr/index.html) also contain a lot of information.
+
+- [Pointers Are Complicated, or: What's in a Byte?](https://www.ralfj.de/blog/2018/07/24/pointers-and-bytes.html)
+- [Pointers Are Complicated II, or: We need better language specs](https://www.ralfj.de/blog/2020/12/14/provenance.html)
+- [Pointers Are Complicated III, or: Pointer-integer casts exposed](https://www.ralfj.de/blog/2022/04/11/provenance-exposed.html)
+- [The Tower of Weakenings: Memory Models For Everyone](https://faultlore.com/blah/tower-of-weakenings/)
+- [Rust Nomicon: Aliasing](https://doc.rust-lang.org/nomicon/aliasing.html)
+- [Rust Unsafe Code Guidelines: Pointer Provenance](https://rust-lang.github.io/unsafe-code-guidelines/glossary.html#pointer-provenance)

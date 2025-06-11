@@ -20,20 +20,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          node-version: 22
-
-      # Needed when running locally with `act`
-      - name: Install packages
-        run: |
-          # sudo snap install yq
-          sudo apt-get update
-          sudo apt-get install -y build-essential curl openssl libssl-dev libc6-dev clang libclang-dev ca-certificates
+          node-version: 24
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         id: pnpm-install
         with:
-          version: "9.15"
+          version: "10.12"
           run_install: false
 
       - name: Get pnpm store directory
