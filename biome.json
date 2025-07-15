@@ -1,68 +1,67 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-	"organizeImports": {
-		"enabled": true
-	},
-	"formatter": {
-		"enabled": true
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"suspicious": {
-				"noArrayIndexKey": "off"
-			},
-			"a11y": {
-				"useValidAnchor": "off"
-			},
-			"nursery": {
-				"useSortedClasses": {
-					"level": "warn",
-					"options": {
-						"attributes": ["classList"],
-						"functions": ["cn", "clsx", "cva", "tw"]
-					}
-				}
-			}
-		},
-		"ignore": ["./app/components/ui/**"]
-	},
-	"files": {
-		"ignore": [
-			"node_modules",
-			"dist",
-			"build",
-			"out",
-			".output",
-			".vercel",
-			".vinxi",
-			".next",
-			".vscode",
-			".zed",
-			"./app/routeTree.gen.ts",
-			"./app/styles/main.css"
-		],
-		"include": [
-			"**/*.js",
-			"**/*.jsx",
-			"**/*.ts",
-			"**/*.tsx",
-			"**/*.mjs",
-			"**/*.cjs",
-			"**/*.json",
-			"**/*.css"
-		],
-		"ignoreUnknown": true
-	},
-	"javascript": {
-		"formatter": {
-			"arrowParentheses": "always",
-			"bracketSameLine": false,
-			"bracketSpacing": true,
-			"quoteProperties": "asNeeded",
-			"semicolons": "always",
-			"trailingCommas": "all"
-		}
-	}
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/.output",
+      "!**/.tanstack",
+      "!**/.nitro",
+      "!**/.vercel",
+      "!src/routeTree.gen.ts"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "useEditorconfig": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": { "useAriaPropsSupportedByRole": "off" },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "warn",
+          "options": {
+            "attributes": ["classList"],
+            "functions": ["cn", "clsx", "cva", "tw"]
+          }
+        }
+      }
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              [":BUN:", ":NODE:"],
+              ":BLANK_LINE:",
+              [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:"],
+              ":BLANK_LINE:",
+              [
+                "@my/lib",
+                "@my/lib/**",
+                "!@my/lib/special",
+                "!@my/lib/special/**",
+                "@/**"
+              ],
+              ":BLANK_LINE:"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "javascript": { "formatter": { "quoteStyle": "double" } }
 }

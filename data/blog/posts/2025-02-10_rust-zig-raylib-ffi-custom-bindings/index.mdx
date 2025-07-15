@@ -1,0 +1,413 @@
+---
+title: How To Use Raylib in Rust With Your Own Bindings
+description: Learn how to create custom Rust bindings for Raylib and how to approach C interoperability in general.
+tags:
+  - rust
+publishedDate: 2025-02-14
+priority: 1
+---
+
+If you want to use Raylib in Rust, you can use the [raylib](https://crates.io/crates/raylib) crate.
+
+I saw that Raylib's repository contains a `build.zig` file, so I thought it'd be cool to use Zig to build it and then use it in Rust.
+
+This post can also serve as a tutorial on how to build your own Rust bindings when linking C code.
+
+The entire source code for this project is available on GitHub [tinrab/rs-raylib-snake](https://github.com/tinrab/rs-raylib-snake).
+
+# Building Raylib
+
+Raylib includes a Zig `build.zig` file, so you can use Zig's `zig build` command to build it.
+The static library library will be in `zig-out/lib` and headers in `zig-out/include`.
+
+You can run Raylib's build from a Rust's build script of our crate.
+
+I also use [bindgen](https://crates.io/crates/bindgen) to generate Rust bindings from C's header files.
+Some other options are [autocxx](https://github.com/google/autocxx) and [cxx](https://github.com/dtolnay/cxx).
+
+```rust { "fileName": "build.rs" }
+fn main() -> Result<(), Box<dyn Error>> {
+    // Run `zig build`
+    let _ = Command::new("zig")
+        .arg("build")
+        .current_dir(RAYLIB_DIR)
+        .status()?;
+
+    // Generate bindings
+    {
+        let builder = bindgen::Builder::default()
+            .header(
+                PathBuf::from(RAYLIB_OUT_DIR)
+                    .join("include")
+                    .join("raylib.h")
+                    .to_str()
+                    .unwrap(),
+            )
+            .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()));
+
+        let bindings = builder.generate()?;
+
+        let out_path = PathBuf::from(std::env::var("OUT_DIR").unwrap());
+        bindings.write_to_file(out_path.join("bindings.rs"))?;
+    }
+
+    // Link to the library
+    println!("cargo:rustc-link-search=native={RAYLIB_OUT_DIR}/lib");
+    println!("cargo:rustc-link-lib=static=raylib");
+
+    Ok(())
+}
+```
+
+Bindings are necessary because Rust doesn't have a concept of "header files," or at least the Rust compiler doesn't recognize C code.
+
+The build script places the `bindings.rs` file into the "out" directory, which we can get the path of from the `OUT_DIR` environment variable.
+That's the standard output path for any build-time generated code.
+
+The generated `bindings.rs` file is included into a module using the `include!` macro.
+
+```rust { "fileName": "src/raylib.rs" }
+#[allow(warnings, unused, clippy::approx_constant)]
+mod ffi {
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
+```
+
+# Rust and C interoperability
+
+A lot of people say the interoperability between Rust and C is not great, but it's actually not that bad.
+Communicating with C++ is a lot harder than with C, from my experience.
+C is a very simple language, so it shouldn't be expected to be too hard to integrate with.
+
+Here's an example of calling a libc API.
+
+```rust
+use std::os::unix::raw::pid_t;
+
+extern "C" {
+    fn getpid() -> pid_t;
+
+    fn fork() -> pid_t;
+}
+
+fn main() {
+    let pid = unsafe { fork() };
+    if pid == 0 {
+        let child_pid = unsafe { getpid() };
+        println!("I'm the child! My pid is {}", child_pid);
+    } else {
+        println!("I'm the parent! My child is {}", pid);
+    }
+}
+```
+
+The annoying parts are the fact that external functions are unsafe and the need for special types like `pid_t`.
+
+The [raw C types](https://doc.rust-lang.org/core/ffi/index.html), while not pretty, exist to adhere to the C standard.
+External functions are unsafe because the Rust compiler cannot guarantee that the function is safe.
+
+If you look at some crates on [crates.io](https://crates.io/), you'll see a "*-sys" naming pattern for unsafe, FFI, bindings-only crates, and their sibling crates that wrap them with safe Rust-like APIs.
+For example, `openssl-sys` and `openssl`.
+
+# Wrapping FFI code with safe interfaces
+
+A good practice is to wrap these ugly items in our own, nicer-looking APIs.
+
+Here's how a generated binding for the Raylib's `InitWindow` function looks like:
+
+```rust
+unsafe extern "C" {
+    pub fn InitWindow(
+        width: ::std::os::raw::c_int,
+        height: ::std::os::raw::c_int,
+        title: *const ::std::os::raw::c_char,
+    );
+}
+```
+
+And here's how we can wrap it in a safe interface.
+
+```rust { "fileName": "src/raylib.rs" }
+pub fn init_window(width: i32, height: i32, title: &str) {
+    unsafe {
+        ffi::InitWindow(
+            width,
+            height,
+            CString::new(title).unwrap().as_ptr() as *const c_char,
+        );
+    }
+}
+```
+
+The unsafe block is limited to just the FFI call.
+
+Here are more examples.
+
+```rust { "fileName": "src/raylib.rs" }
+pub fn begin_drawing() {
+    unsafe { ffi::BeginDrawing() }
+}
+
+pub fn end_drawing() {
+    unsafe { ffi::EndDrawing() }
+}
+
+pub fn draw_rectangle(x: i32, y: i32, width: i32, height: i32, color: Color) {
+    unsafe {
+        ffi::DrawRectangle(x, y, width, height, color);
+    }
+}
+
+pub fn draw_text<T: Into<Vec<u8>>>(text: T, x: i32, y: i32, font_size: i32, color: Color) {
+    unsafe {
+        ffi::DrawText(
+            CString::new(text).unwrap().as_ptr() as *const c_char,
+            x,
+            y,
+            font_size,
+            color,
+        );
+    }
+}
+
+pub fn draw_centered_text<T: Into<Vec<u8>>>(
+    text: T,
+    x: i32,
+    y: i32,
+    font_size: i32,
+    color: Color,
+) {
+    let text: Vec<u8> = text.into();
+    let text_size = measure_text(text.clone(), font_size);
+    draw_text(text, x - text_size / 2, y, font_size, color);
+}
+```
+
+Wrappers don't have to be a 1-to-1 match with the C API.
+You can add and mix extra stuff in there.
+
+Let's handle the window.
+
+```rust { "fileName": "src/window.rs" }
+pub struct Window;
+
+impl Window {
+    pub fn new(width: i32, height: i32, title: &str) -> Self {
+        raylib::init_window(width, height, title);
+
+        Self {}
+    }
+
+    pub fn should_close(&self) -> bool {
+        raylib::window_should_close()
+    }
+}
+
+impl Drop for Window {
+    fn drop(&mut self) {
+        raylib::close_window();
+    }
+}
+```
+
+Here's another benefit of using Rust: we can implement a `Drop` trait to automatically close the window when the program exits.
+
+Another thing you'd often want to do is extending the C types with extra functionality, possibly with Rust-specific features.
+
+Here's the generated `Color` type.
+
+```rust
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct Color {
+    pub r: ::std::os::raw::c_uchar,
+    pub g: ::std::os::raw::c_uchar,
+    pub b: ::std::os::raw::c_uchar,
+    pub a: ::std::os::raw::c_uchar,
+}
+```
+
+Since we include bindings source file directly into our module, we can implement things on it.
+You don't need a newtype as you would when depending on an external crate.
+
+```rust { "fileName": "src/raylib.rs" }
+impl Color {
+    pub const BLACK: Self = Self::from_u32(0x00000000);
+    pub const WHITE: Self = Self::from_u32(0xFFFFFFFF);
+    pub const RED: Self = Self::from_u32(0xFF0000FF);
+    pub const GREEN: Self = Self::from_u32(0x00FF00FF);
+    pub const BLUE: Self = Self::from_u32(0x0000FFFF);
+
+    pub const fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Self { r, g, b, a }
+    }
+
+    pub const fn new_rgb(r: u8, g: u8, b: u8) -> Self {
+        Self { r, g, b, a: 255 }
+    }
+
+    pub const fn from_u32(color: u32) -> Self {
+        let r = ((color >> 24) & 0xFF) as u8;
+        let g = ((color >> 16) & 0xFF) as u8;
+        let b = ((color >> 8) & 0xFF) as u8;
+        let a = (color & 0xFF) as u8;
+        Self { r, g, b, a }
+    }
+}
+```
+
+One thing I like when doing gamedev, which is maybe once every couple of years, is writing what are essentially two different game loops: a render one and a fixed-timestamp one.
+I might need to handle game logic in fixed time intervals, but render at the screen's refresh rate.
+
+You handle inputs in Raylib by calling global functions like `IsKeyDown`. These return the state of a particular keyboard key or mouse button, and their state is reset on the next frame.
+
+That's why you can't render outside the "logic game loop," and that is why I've wrapped input handling that tracks its own state.
+
+```rust
+pub struct Input {
+    key_state: [bool; 4],
+}
+
+thread_local! {
+    static INSTANCE: RefCell<Input> = RefCell::new(Input::new());
+}
+
+impl Input {
+    fn new() -> Self {
+        Input {
+            key_state: [false; 4],
+        }
+    }
+
+    pub fn update() {
+        INSTANCE.with(|r| {
+            let key_state = &mut r.borrow_mut().key_state;
+
+            macro_rules! key {
+                ($key:expr) => {
+                    if raylib::is_key_down($key) {
+                        key_state[($key as usize)] = true;
+                    }
+                };
+            }
+
+            key!(KeyboardKey::KeyUp);
+            key!(KeyboardKey::KeyDown);
+            key!(KeyboardKey::KeyLeft);
+            key!(KeyboardKey::KeyRight);
+        });
+    }
+
+    pub fn clear() {
+        INSTANCE.with(|r| {
+            r.borrow_mut().key_state = [false; 4];
+        });
+    }
+
+    pub fn is_key_down(key: KeyboardKey) -> bool {
+        INSTANCE.with_borrow(|r| r.key_state[key as usize])
+    }
+}
+```
+
+# Rules to follow
+
+When writing safe wrappers around an unsafe parts, these are some of the rules I try to follow:
+
+- **Limit unsafe code**.
+Keep the unsafe parts confined to the smallest possible scope.
+This isn't that hard because pretty much all of the code is safe in practice.
+
+- **Validate FFI inputs and outputs at the boundaries**.
+This means checking that pointer values are not null, strings are valid UTF-8, numeric values are in range, etc.
+Also think about how to translate between C code and modern practices, like result-as-values.
+
+- **Use RAII to your advantage**.
+With window example above, what happens if we close it before initializing it? I don't even know.
+Thanks to RAII, the only way I can call `CloseWindow` is by dropping the `Window` struct.
+
+- **Tests, lints and docs**.
+Basically, write tests.
+You can get AI to generate tests for you, just verify that they make sense.
+Clippy has some great lints.
+For example, requiring you to document unsafe blocks with "SAFETY: ..."
+One great thing about of `unsafe` being a keyword is that you can search for it in your codebase.
+Also, use [miri](https://github.com/rust-lang/miri).
+
+# The main game loop
+
+Let's finish the game.
+
+Here's how our Raylib Rust API looks like in practice.
+
+```rust { "fileName": "src/main.rs" }
+fn main() -> Result<(), Box<dyn Error>> {
+    let window = Window::new(SCREEN_WIDTH, SCREEN_HEIGHT, "Rust Raylib Snake");
+    let mut game = Game::new(Vector2i::new(SCREEN_WIDTH, SCREEN_HEIGHT) / GRID_SIZE);
+
+    // ...
+
+    while !window.should_close() {
+        if !game.game_over {
+            Input::update();
+
+            let current_time = Instant::now().duration_since(start_time).as_micros() as i64;
+            elapsed_time = current_time - previous_time;
+
+            previous_time = current_time;
+
+            lag += elapsed_time;
+            while lag >= FRAME_TIME {
+                game.update();
+                Input::clear();
+                lag -= FRAME_TIME;
+            }
+        }
+
+        raylib::begin_drawing();
+
+        raylib::clear_background(Color::BLACK);
+
+        game.render(GRID_SIZE);
+
+        if game.game_over {
+            // ...
+        }
+
+        raylib::end_drawing();
+    }
+
+    Ok(())
+}
+```
+
+Here's an excerpt of the rendering code.
+
+```rust { "fileName": "src/game.rs" }
+pub fn render(&self, scale: i32) {
+    // Render snake
+    for p in self.snake.iter() {
+        raylib::draw_rectangle(p.x * scale, p.y * scale, scale, scale, Color::BLUE);
+    }
+
+    // Render food
+    raylib::draw_rectangle(
+        self.food.x * scale,
+        self.food.y * scale,
+        scale,
+        scale,
+        Color::RED,
+    );
+
+    // Render score
+    if !self.game_over {
+        raylib::draw_text(format!("Score: {}", self.score), 10, 10, 20, Color::WHITE);
+    }
+}
+```
+
+# Conclusion
+
+Using C code in Rust isn't that scary.
+
+The complete source code is available on GitHub [tinrab/rs-raylib-snake](https://github.com/tinrab/rs-raylib-snake).

@@ -1,25 +1,22 @@
 {
-	"$schema": "https://json.schemastore.org/tsconfig",
-	"compilerOptions": {
-		"strict": true,
-		"noEmit": true,
-		"target": "ESNext",
-		"lib": ["DOM", "DOM.Iterable", "ESNext"],
-		"isolatedModules": true,
-		"esModuleInterop": true,
-		"jsx": "react-jsx",
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"resolveJsonModule": true,
-		"allowJs": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
-		"rootDir": ".",
-		"baseUrl": ".",
-		"paths": {
-			"~/*": ["./app/*"]
-		}
-	},
-	"include": ["**/*.ts", "**/*.tsx"],
-	"exclude": ["./node_modules", "./dist"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"]
+    },
+    "noEmit": true
+  }
 }

@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "command": "pnpm run dev",
+      "label": "dev",
+      "problemMatcher": []
+    },
+    {
+      "type": "shell",
+      "command": "pnpm run lint",
+      "label": "lint",
+      "problemMatcher": []
+    }
+  ]
+}
