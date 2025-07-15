@@ -2,6 +2,7 @@ import type { IconBaseProps } from "react-icons/lib";
 import {
   SiCplusplus,
   SiJson,
+  SiPython,
   SiRust,
   SiToml,
   SiTypescript,
@@ -14,25 +15,28 @@ interface ProgrammingLanguageIconProps extends IconBaseProps {
 
 export function ProgrammingLanguageIcon({
   language,
-  ...restProps
+  ...props
 }: ProgrammingLanguageIconProps) {
   if (language === "text") {
     return;
   }
   if (language === "typescript" || language === "ts" || language === "tsx") {
-    return <SiTypescript {...restProps} />;
+    return <SiTypescript {...props} />;
   }
   if (language === "rust" || language === "rs") {
-    return <SiRust {...restProps} />;
+    return <SiRust {...props} />;
+  }
+  if (language === "python" || language === "py") {
+    return <SiPython {...props} />;
   }
   if (language === "toml") {
-    return <SiToml {...restProps} />;
+    return <SiToml {...props} />;
   }
   if (language === "json") {
-    return <SiJson {...restProps} />;
+    return <SiJson {...props} />;
   }
   if (language === "yaml" || language === "yml") {
-    return <SiYaml {...restProps} />;
+    return <SiYaml {...props} />;
   }
   if (
     language === "h" ||
@@ -40,7 +44,7 @@ export function ProgrammingLanguageIcon({
     language === "hpp" ||
     language === "cpp"
   ) {
-    return <SiCplusplus {...restProps} />;
+    return <SiCplusplus {...props} />;
   }
   throw new Error(`Unknown language: '${language}'`);
 }

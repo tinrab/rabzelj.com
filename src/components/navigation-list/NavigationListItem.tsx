@@ -1,5 +1,5 @@
-import { Slot } from "@radix-ui/react-slot";
-import React from "react";
+import { Slot as SlotPrimitive } from "radix-ui";
+import type React from "react";
 
 import { cn } from "~/lib/utility";
 
@@ -10,13 +10,13 @@ export type NavigationListItemProps = {
 export function NavigationListItem({
   asChild,
   className,
-  ...restProps
+  ...props
 }: NavigationListItemProps) {
-  const Comp = asChild ? Slot : "div";
+  const Comp = asChild ? SlotPrimitive.Slot : "div";
   return (
     <Comp
       className={cn("relative flex w-full items-center px-2 py-2", className)}
-      {...restProps}
+      {...props}
     />
   );
 }

@@ -1,4 +1,5 @@
-import { SiteLink } from "~/components/SiteLink";
+import { Link } from "@tanstack/react-router";
+
 import { Button } from "~/components/ui/button";
 
 export function NotFound({ children }: { children?: React.ReactNode }) {
@@ -10,7 +11,7 @@ export function NotFound({ children }: { children?: React.ReactNode }) {
       <p className="flex flex-wrap items-center gap-2">
         <Button onClick={() => window.history.back()}>Go back</Button>
         <Button variant="outline" asChild>
-          <SiteLink to="/">Start Over</SiteLink>
+          <Link to="/">Start Over</Link>
         </Button>
       </p>
     </div>

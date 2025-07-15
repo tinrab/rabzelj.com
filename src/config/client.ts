@@ -20,6 +20,7 @@ const clientConfigSchema = z.object({
     youtubeId: z.string(),
     blueskyUrl: z.string().url(),
     blueskyId: z.string(),
+    linkedinUrl: z.string().url(),
   }),
 });
 

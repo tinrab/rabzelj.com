@@ -1,20 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
-import { SiteLink } from "~/components/SiteLink";
 import { Typography } from "~/components/Typography";
 import { loadBlogTagPostCounts } from "~/lib/blog/tag/loader";
-import { pathLocator } from "~/lib/path-locator";
+import { pageMiddleware } from "~/lib/middleware";
 import { useMediaQuery } from "~/lib/use-media-query";
 
-const loadRouteData = createServerFn({ type: "static", method: "GET" }).handler(
-  async () => {
+const loadRouteData = createServerFn({ method: "GET" })
+  .middleware([pageMiddleware])
+  .handler(async () => {
     const tags = await loadBlogTagPostCounts();
     const maxPostCount = Math.max(...tags.map((tag) => tag.postCount));
 
     return { tags, maxPostCount };
-  },
-);
+  });
 
 export const Route = createFileRoute("/blog/_index/tags/")({
   component: RouteComponent,
@@ -51,12 +50,13 @@ function RouteComponent() {
                 lineHeight: 1.3,
               }}
             >
-              <SiteLink
-                to={pathLocator.blog.tags.page(tag.slug)}
+              <Link
+                to="/blog/tags/$slug"
+                params={{ slug: tag.slug }}
                 className="mx-2 inline-block"
               >
                 {tag.title}
-              </SiteLink>
+              </Link>
             </Typography>
           ))}
         </div>

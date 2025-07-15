@@ -1,6 +1,14 @@
 @import "tailwindcss";
-
 @import "tw-animate-css";
+
+@import "@fontsource/roboto/300";
+@import "@fontsource/roboto/400";
+@import "@fontsource/roboto/500";
+@import "@fontsource/roboto/700";
+
+@import "@fontsource/roboto-mono/400";
+@import "@fontsource/roboto-mono/500";
+@import "@fontsource/roboto-mono/700";
 
 @layer utilities {
   @import "./syntax-highlight.css";
@@ -121,6 +129,9 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --color-link: var(--link);
+
+  --font-sans: "Roboto";
+  --font-mono: "Roboto Mono";
 
   --animate-pulse: pulse 16s ease calc(var(--index, 0) * 0.1s) infinite;
   --animate-linear-loader: linear-loader 2s linear infinite;

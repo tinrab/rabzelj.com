@@ -1,17 +1,16 @@
 import type React from "react";
 
-import { Typography, type TypographyProps } from "~/components/Typography";
+import { Typography } from "~/components/Typography";
 
 export function MdxContentHeading({
   lowerHeadings,
   variant,
   id,
   children,
-  ...restProps
+  ...props
 }: {
   lowerHeadings?: boolean;
-  variant: TypographyProps["variant"];
-} & React.HTMLAttributes<HTMLElement>) {
+} & React.ComponentProps<typeof Typography>) {
   const effectiveVariant = lowerHeadings
     ? variant === "h1"
       ? "h2"
@@ -19,23 +18,13 @@ export function MdxContentHeading({
         ? "h3"
         : variant === "h3"
           ? "h4"
-          : variant === "h4"
-            ? "h5"
-            : variant === "h5"
-              ? "h6"
-              : variant
+          : variant
     : variant;
   const VariantComponent = effectiveVariant as React.ElementType;
 
   if (id) {
     return (
-      <Typography
-        id={id}
-        gutter
-        variant={effectiveVariant}
-        asChild
-        {...restProps}
-      >
+      <Typography id={id} gutter variant={effectiveVariant} asChild {...props}>
         <a href={`#${id}`} className="no-underline">
           <VariantComponent>{children}</VariantComponent>
         </a>
@@ -43,14 +32,8 @@ export function MdxContentHeading({
     );
   }
   return (
-    <Typography
-      id={id}
-      gutter
-      variant={effectiveVariant}
-      asChild
-      {...restProps}
-    >
-      <VariantComponent>{children}</VariantComponent>
+    <Typography id={id} gutter variant={effectiveVariant} {...props}>
+      {children}
     </Typography>
   );
 }

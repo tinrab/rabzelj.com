@@ -9,7 +9,7 @@ interface DashedLineProps extends React.SVGAttributes<HTMLOrSVGElement> {
 export function DashedLine({
   size = 4,
   orientation = "horizontal",
-  ...restProps
+  ...props
 }: DashedLineProps) {
   const patternId = useId();
 
@@ -18,7 +18,7 @@ export function DashedLine({
       height={orientation === "horizontal" ? size : "100%"}
       width={orientation === "vertical" ? size : "100%"}
       xmlns="http://www.w3.org/2000/svg"
-      {...restProps}
+      {...props}
     >
       <title>Dashed Line</title>
       <pattern

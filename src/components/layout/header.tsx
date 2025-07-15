@@ -1,4 +1,3 @@
-import { Slot } from "@radix-ui/react-slot";
 import type React from "react";
 import { useState } from "react";
 import { RxSlash } from "react-icons/rx";
@@ -8,19 +7,17 @@ import {
   HeaderContextProvider,
   useHeaderContext,
 } from "~/components/layout/header-context";
+import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utility";
 
 export type HeaderProps = React.HtmlHTMLAttributes<HTMLDivElement>;
 
-export function Header({ children, className, ...restProps }: HeaderProps) {
+export function Header({ children, className, ...props }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <HeaderContextProvider menuOpen={menuOpen} onMenuOpenChange={setMenuOpen}>
-      <header
-        className={cn("w-full bg-background/95", className)}
-        {...restProps}
-      >
+      <header className={cn("w-full bg-background/95", className)} {...props}>
         <div className="flex flex-col items-center px-4">{children}</div>
 
         <DashedLine />
@@ -36,7 +33,7 @@ type HeaderRowProps = {
 export function HeaderRow({
   desktopOnly,
   className,
-  ...restProps
+  ...props
 }: HeaderRowProps) {
   return (
     <div
@@ -45,14 +42,14 @@ export function HeaderRow({
         desktopOnly ? "hidden md:flex" : "flex",
         className,
       )}
-      {...restProps}
+      {...props}
     />
   );
 }
 
 interface HeaderTitleProps extends React.ComponentProps<"div"> {}
 
-export function HeaderTitle({ className, ...restProps }: HeaderTitleProps) {
+export function HeaderTitle({ className, ...props }: HeaderTitleProps) {
   const { onMenuOpenChange } = useHeaderContext();
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: needed
@@ -60,13 +57,13 @@ export function HeaderTitle({ className, ...restProps }: HeaderTitleProps) {
     <div
       className={cn("relative", className)}
       onClick={() => onMenuOpenChange(false)}
-      {...restProps}
+      {...props}
     >
-      <div className="inline-block h-[24px] w-auto font-bold text-foreground">
-        Tin Rabzelj{" "}
-        <span className="font-bold text-link text-sm">
-          {`/*looking for work*/`}
-        </span>
+      <div className="flex h-[24px] w-auto gap-2 font-bold text-foreground">
+        <span>Tin Rabzelj</span>
+        <Badge className="bg-red-700 font-bold text-white">
+          looking for work
+        </Badge>
       </div>
       <span className="sr-only">Tin Rabzelj</span>
     </div>
@@ -80,7 +77,7 @@ type HeaderDividerProps = {
 export function HeaderDivider({
   desktopOnly,
   className,
-  ...restProps
+  ...props
 }: HeaderDividerProps) {
   return (
     <RxSlash
@@ -89,7 +86,7 @@ export function HeaderDivider({
         desktopOnly ? "hidden md:inline-flex" : "",
         className,
       )}
-      {...restProps}
+      {...props}
     />
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Slot as SlotPrimitive } from "radix-ui";
 import type React from "react";
 
 import { cn } from "~/lib/utility";
@@ -48,16 +48,16 @@ export function IconButton({
   asChild,
   selected = false,
   disabled,
-  ...restProps
+  ...props
 }: IconButtonProps) {
-  const Comp = asChild ? Slot : "button";
+  const Comp = asChild ? SlotPrimitive.Slot : "button";
   return (
     <Comp
       className={cn(iconButtonVariants({ variant, size }), className)}
       aria-selected={selected}
       aria-disabled={disabled}
       disabled={disabled}
-      {...restProps}
+      {...props}
     />
   );
 }

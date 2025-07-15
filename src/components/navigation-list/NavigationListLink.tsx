@@ -1,5 +1,5 @@
-import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Slot as SlotPrimitive } from "radix-ui";
 import React from "react";
 
 import { cn } from "~/lib/utility";
@@ -29,8 +29,8 @@ export type NavigationListLinkProps = {
 export const NavigationListLink = React.forwardRef<
   HTMLButtonElement,
   NavigationListLinkProps
->(({ asChild, selected, disabled, variant, className, ...restProps }, ref) => {
-  const Comp = asChild ? Slot : "button";
+>(({ asChild, selected, disabled, variant, className, ...props }, ref) => {
+  const Comp = asChild ? SlotPrimitive.Slot : "button";
   return (
     <Comp
       ref={ref}
@@ -38,7 +38,7 @@ export const NavigationListLink = React.forwardRef<
       aria-disabled={disabled}
       data-disabled={disabled}
       className={cn(navigationListLinkVariants({ variant }), className)}
-      {...restProps}
+      {...props}
     />
   );
 });

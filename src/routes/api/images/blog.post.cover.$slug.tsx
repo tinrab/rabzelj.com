@@ -24,16 +24,26 @@ export const ServerRoute = createServerFileRoute(
       <div
         style={{
           fontFamily: "Roboto",
+          padding: "4rem",
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#0a0a0a",
+          color: "white",
         }}
-        tw="px-16 w-full h-full relative flex flex-col items-center justify-center bg-[#0a0a0a] text-white"
       >
         {Array.from({ length: 4 }, (_, i) => {
           const size = 1200 + i * 100;
           return (
             <div
-              key={i}
-              tw="absolute bg-neutral-600"
+              key={size}
               style={{
+                position: "absolute",
+                backgroundColor: "#525252",
                 width: `${size}px`,
                 height: `${size * 0.35}px`,
                 opacity: 0.2 - i * 0.05,
@@ -45,7 +55,7 @@ export const ServerRoute = createServerFileRoute(
           );
         })}
 
-        {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
+        {/** biome-ignore lint/a11y/noSvgWithoutTitle: not needed */}
         <svg
           width="1200"
           height="630"
@@ -77,8 +87,10 @@ export const ServerRoute = createServerFileRoute(
         </svg>
 
         <h1
-          tw="text-center text-8xl -mt-4"
           style={{
+            textAlign: "center",
+            fontSize: "6rem",
+            marginTop: "-1rem",
             textWrap: "balance",
             marginBottom: `${Math.max(2, 8 - (post.title.length / 20) * 3)}rem`,
           }}
@@ -86,29 +98,42 @@ export const ServerRoute = createServerFileRoute(
           {post.title}
         </h1>
 
-        <div tw="flex flex-row items-center justify-center">
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <img
-            tw="mr-2 rounded-full border-2"
+            style={{
+              marginRight: "0.5rem",
+              borderRadius: "9999px",
+              border: "2px solid #737373",
+            }}
             src={`${serverConfig.app.url}${pathLocator.assets.avatar}`}
             alt={serverConfig.app.title}
             width="60"
             height="60"
-            style={{
-              borderColor: "#737373",
-            }}
           />
-          <div tw="flex flex-col">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             <div
-              tw="text-xl"
               style={{
+                fontSize: "1.25rem",
                 lineHeight: "1.75rem",
               }}
             >
               {serverConfig.app.title}
             </div>
             <div
-              tw="text-xl"
               style={{
+                fontSize: "1.25rem",
                 lineHeight: "1.75rem",
                 color: "#737373",
               }}

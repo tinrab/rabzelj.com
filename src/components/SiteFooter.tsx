@@ -1,5 +1,4 @@
 import { LayoutFooter } from "~/components/layout/LayoutFooter";
-import { SiteLink } from "~/components/SiteLink";
 import { Typography } from "~/components/Typography";
 import { clientConfig } from "~/config/client";
 
@@ -29,7 +28,9 @@ export function SiteFooter() {
             className="block text-muted-foreground underline"
             asChild
           >
-            <SiteLink to={to}>{title}</SiteLink>
+            <a href={to} target="_blank" rel="noreferrer">
+              {title}
+            </a>
           </Typography>
         ))}
       </div>

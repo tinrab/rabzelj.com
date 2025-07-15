@@ -19,7 +19,7 @@ export function BlogPostList<T extends BlogPostCommon>({
     <div className="w-full font-sans">
       <div className="relative">
         {posts.map((yearGroup, index) => (
-          <div key={index} className="flex justify-start">
+          <div key={String(index)} className="flex justify-start">
             <div className="sticky z-10">
               <div className="-left-2 absolute flex size-4 items-center justify-center rounded-full bg-border/100" />
             </div>

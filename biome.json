@@ -12,7 +12,9 @@
       "!**/node_modules",
       "!**/.output",
       "!**/.tanstack",
-      "!**/.nitro"
+      "!**/.nitro",
+      "!**/.vercel",
+      "!src/routeTree.gen.ts"
     ]
   },
   "formatter": {

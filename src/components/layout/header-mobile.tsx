@@ -11,16 +11,13 @@ type HeaderMobileProps = React.ComponentProps<"div">;
 export function HeaderMobile({
   className,
   children,
-  ...restProps
+  ...props
 }: HeaderMobileProps) {
   const { menuOpen, onMenuOpenChange } = useHeaderContext();
   return (
     <Sheet open={menuOpen} onOpenChange={onMenuOpenChange}>
       <SheetContent side="left">
-        <div
-          className={cn("flex h-full flex-col gap-6", className)}
-          {...restProps}
-        >
+        <div className={cn("flex h-full flex-col gap-6", className)} {...props}>
           {children}
         </div>
       </SheetContent>
@@ -32,7 +29,7 @@ type HeaderMobileTriggerProps = React.HTMLAttributes<HTMLButtonElement>;
 
 export function HeaderMobileTrigger({
   className,
-  ...restProps
+  ...props
 }: HeaderMobileTriggerProps) {
   const { onMenuOpenChange } = useHeaderContext();
   return (
@@ -44,7 +41,7 @@ export function HeaderMobileTrigger({
 
         onMenuOpenChange(true);
       }}
-      {...restProps}
+      {...props}
     >
       <MdMenu />
       <span className="sr-only">Toggle navigation menu</span>

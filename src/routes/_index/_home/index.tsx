@@ -1,8 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { FaBluesky, FaGithub, FaXTwitter } from "react-icons/fa6";
+import { FaBluesky, FaGithub, FaLinkedin, FaXTwitter } from "react-icons/fa6";
 
-import { SiteLink } from "~/components/SiteLink";
 import { Typography } from "~/components/Typography";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -18,7 +17,7 @@ const socialLinks = [
   {
     title: "X / Twitter",
     props: {
-      to: clientConfig.social.twitterUrl,
+      href: clientConfig.social.twitterUrl,
       "aria-label": "X, formerly Twitter",
     },
     Icon: FaXTwitter,
@@ -26,15 +25,20 @@ const socialLinks = [
   {
     title: "Bluesky",
     props: {
-      to: clientConfig.social.blueskyUrl,
+      href: clientConfig.social.blueskyUrl,
       "aria-label": "Bluesky",
     },
     Icon: FaBluesky,
   },
   {
     title: "GitHub",
-    props: { to: clientConfig.social.githubUrl, "aria-label": "GitHub" },
+    props: { href: clientConfig.social.githubUrl, "aria-label": "GitHub" },
     Icon: FaGithub,
+  },
+  {
+    title: "Linkedin",
+    props: { href: clientConfig.social.linkedinUrl, "aria-label": "Linkedin" },
+    Icon: FaLinkedin,
   },
 ];
 
@@ -47,23 +51,29 @@ function RouteComponent() {
         <AvatarImage src={pathLocator.assets.avatar} alt="Tin Rabzelj" />
         <AvatarFallback>TR</AvatarFallback>
       </Avatar>
-      <Typography variant="h1" asVariant className="mb-3 text-4xl md:text-5xl">
+      <Typography variant="h1" className="mb-3 text-4xl md:text-5xl">
         Tin Rabzelj
       </Typography>
       <h2 className="mb-6 text-muted-foreground">Software Engineer</h2>
 
       <div className="mb-5 text-center">
-        <Typography asVariant>
+        <Typography>
           Personal blog:{" "}
           <Typography variant="a" asChild>
-            <SiteLink to="/blog">/blog</SiteLink>
+            <Link to="/blog">/blog</Link>
           </Typography>
           .
         </Typography>
-        <Typography asVariant>
+        <Typography>
           Find my OSS projects on{" "}
           <Typography variant="a" asChild>
-            <SiteLink to="https://github.com/tinrab">GitHub</SiteLink>
+            <a
+              href="https://github.com/tinrab"
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub
+            </a>
           </Typography>
           .
         </Typography>
@@ -77,14 +87,16 @@ function RouteComponent() {
 
       <div className="mb-5 flex space-x-6">
         {socialLinks.map(({ title, props, Icon }) => (
-          <SiteLink
+          <a
             key={title}
             {...props}
             className="text-base text-foreground/60 transition-colors hover:text-foreground/80"
+            target="_blank"
+            rel="noreferrer"
           >
             <span className="sr-only">{title}</span>
             <Icon className="size-8" aria-hidden="true" />
-          </SiteLink>
+          </a>
         ))}
       </div>
 
@@ -100,7 +112,7 @@ function RouteComponent() {
         }}
       >
         {email?.length ? (
-          <SiteLink to={`mailto:${email}`}>Contact Email</SiteLink>
+          <a href={`mailto:${email}`}>Contact Email</a>
         ) : (
           <span className="cursor-pointer">View Email</span>
         )}

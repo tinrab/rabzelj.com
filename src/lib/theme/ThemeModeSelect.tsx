@@ -23,7 +23,7 @@ export function ThemeModeSelect({
   getThemeLabel = (theme) =>
     theme === Theme.LIGHT ? "Light" : theme === Theme.DARK ? "Dark" : "System",
   slotProps = {},
-  ...restProps
+  ...props
 }: ThemeModeSelectProps) {
   const themeProvider = useThemeProviderContext();
 
@@ -38,11 +38,7 @@ export function ThemeModeSelect({
   };
 
   return (
-    <Select
-      {...restProps}
-      value={resolvedTheme}
-      onValueChange={handleThemeChange}
-    >
+    <Select {...props} value={resolvedTheme} onValueChange={handleThemeChange}>
       <SelectTrigger {...(slotProps?.trigger ?? {})}>
         <SelectValue />
       </SelectTrigger>

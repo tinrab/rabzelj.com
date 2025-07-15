@@ -41,7 +41,7 @@ export const ServerRoute = createServerFileRoute("/sitemap.xml").methods({
         headers: {
           "Content-Type": "application/xml",
           "X-Content-Type-Options": "nosniff",
-          "Cache-Control": "public, max-age=86400",
+          "Cache-Control": "public, max-age=3600, stale-while-revalidate=3600",
         },
       },
     );

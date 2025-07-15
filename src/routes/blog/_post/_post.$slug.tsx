@@ -1,4 +1,4 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { createMdxContent } from "@temelj/mdx-react";
 import { MdReportProblem } from "react-icons/md";
@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import { BlogNoteAlert } from "~/components/blog/BlogNoteAlert";
 import { BlogTagChip } from "~/components/blog/BlogTagChip";
-import { SiteLink } from "~/components/SiteLink";
 import { Typography } from "~/components/Typography";
 import { Separator } from "~/components/ui/separator";
 import { clientConfig } from "~/config/client";
@@ -15,11 +14,13 @@ import {
   BLOG_TAG_SLUG_NOTES,
   BLOG_TAG_SLUG_PAPER_NOTES,
 } from "~/lib/blog/tag/constants";
-import { mdxPageLowerHeadingComponents } from "~/lib/mdx/content";
+import { mdxPageLowerHeadingComponents } from "~/lib/mdx/components/registry";
+import { pageMiddleware } from "~/lib/middleware";
 import { pathLocator } from "~/lib/path-locator";
 import { makeSeo } from "~/lib/seo";
 
-const loadRouteData = createServerFn({ type: "static", method: "GET" })
+const loadRouteData = createServerFn({ method: "GET" })
+  .middleware([pageMiddleware])
   .validator(
     z.object({
       slug: z.string().min(1),
@@ -33,7 +34,16 @@ const loadRouteData = createServerFn({ type: "static", method: "GET" })
     if (!post) {
       throw notFound();
     }
-    return { post };
+
+    const title = post.tags.some(
+      (tag) =>
+        tag.slug === BLOG_TAG_SLUG_NOTES ||
+        tag.slug === BLOG_TAG_SLUG_PAPER_NOTES,
+    )
+      ? `${post.title} | Paper Notes`
+      : post.title;
+
+    return { post, title };
   });
 
 export const Route = createFileRoute("/blog/_post/_post/$slug")({
@@ -43,11 +53,12 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
     if (loaderData === undefined) {
       return {};
     }
-    const { post } = loaderData;
+    const { post, title } = loaderData;
+
     return {
       meta: makeSeo({
         path: match.pathname,
-        title: post.title,
+        title,
         description: post.description,
         image: `${clientConfig.app.url}${pathLocator.assets.blogPostCover(post.slug)}`,
         properties: {
@@ -64,7 +75,7 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
 });
 
 function RouteComponent() {
-  const { post } = Route.useLoaderData();
+  const { post, title } = Route.useLoaderData();
 
   const content = post.artifact?.compiled
     ? createMdxContent(
@@ -74,20 +85,19 @@ function RouteComponent() {
         mdxPageLowerHeadingComponents,
       )
     : undefined;
+  const isNote = post.tags.some(
+    (tag) =>
+      tag.slug === BLOG_TAG_SLUG_NOTES ||
+      tag.slug === BLOG_TAG_SLUG_PAPER_NOTES,
+  );
 
   return (
     <article className="mx-auto max-w-3xl break-words px-4 py-8 md:py-12">
-      <Typography className="text-balance" variant="h1" asVariant>
-        {post.title}
+      <Typography className="text-balance" variant="h1">
+        {title}
       </Typography>
 
-      {post.tags.some(
-        (tag) =>
-          tag.slug === BLOG_TAG_SLUG_NOTES ||
-          tag.slug === BLOG_TAG_SLUG_PAPER_NOTES,
-      ) ? (
-        <BlogNoteAlert className="mt-4" />
-      ) : undefined}
+      {isNote ? <BlogNoteAlert className="mt-4" /> : undefined}
 
       {post.cover?.srcSet ? (
         <img
@@ -123,9 +133,11 @@ function RouteComponent() {
         ))}
       </div>
 
-      <Typography asVariant className="mt-4 text-muted-foreground italic">
-        {post.description}
-      </Typography>
+      {!isNote ? (
+        <Typography className="mt-4 text-muted-foreground italic">
+          {post.description}
+        </Typography>
+      ) : undefined}
 
       <section className="pt-6">{content}</section>
 
@@ -146,7 +158,7 @@ function RouteComponent() {
 
       {post.related?.length && post.related?.length >= 2 ? (
         <section className="mt-12">
-          <Typography variant="h2" asVariant gutterBottom>
+          <Typography variant="h2" gutterBottom>
             Read more
           </Typography>
           <ul className="my-6 ml-6 list-disc">
@@ -157,9 +169,14 @@ function RouteComponent() {
                   className="text-balance text-lg"
                   asChild
                 >
-                  <SiteLink to={`/blog/${relatedPost.slug}`}>
+                  <Link
+                    to="/blog/$slug"
+                    params={{
+                      slug: relatedPost.slug,
+                    }}
+                  >
                     {relatedPost.title}
-                  </SiteLink>
+                  </Link>
                 </Typography>
               </li>
             ))}

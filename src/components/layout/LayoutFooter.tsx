@@ -13,13 +13,13 @@ export function LayoutFooter({
   slotProps = {},
   className,
   children,
-  ...restProps
+  ...props
 }: LayoutFooterProps) {
   return (
     <footer
       className={cn("w-full", className)}
       aria-labelledby="footer-heading"
-      {...restProps}
+      {...props}
     >
       <h2 id="footer-heading" className="sr-only">
         Footer

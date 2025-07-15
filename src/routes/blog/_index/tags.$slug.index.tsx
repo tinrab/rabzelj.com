@@ -1,17 +1,17 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { BlogPostList } from "~/components/blog/BlogPostList";
 import { BlogTagChip } from "~/components/blog/BlogTagChip";
-import { SiteLink } from "~/components/SiteLink";
 import { Typography } from "~/components/Typography";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
 import { groupBlogPosts } from "~/lib/blog/post/utility";
 import { loadBlogTag } from "~/lib/blog/tag/loader";
-import { pathLocator } from "~/lib/path-locator";
+import { pageMiddleware } from "~/lib/middleware";
 
-const loadRouteData = createServerFn({ type: "static", method: "GET" })
+const loadRouteData = createServerFn({ method: "GET" })
+  .middleware([pageMiddleware])
   .validator(z.object({ slug: z.string().min(1) }))
   .handler(async ({ data: { slug } }) => {
     const tag = await loadBlogTag(slug);
@@ -39,10 +39,10 @@ function RouteComponent() {
         <Typography variant="h2" asChild gutterBottom>
           <h1>{tag.title}</h1>
         </Typography>
-        <Typography asVariant>{tag.description}</Typography>
+        <Typography>{tag.description}</Typography>
 
         <Typography variant="a" asChild>
-          <SiteLink to={pathLocator.blog.tags.index}>See all tags.</SiteLink>
+          <Link to="/blog/tags">See all tags.</Link>
         </Typography>
       </div>
 
@@ -51,7 +51,9 @@ function RouteComponent() {
         renderPost={(post) => (
           <div className="flex flex-col">
             <Typography variant="a" className="mb-1" asChild>
-              <SiteLink to={`/blog/${post.slug}`}>{post.title}</SiteLink>
+              <Link to="/blog/$slug" params={{ slug: post.slug }}>
+                {post.title}
+              </Link>
             </Typography>
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag) => (

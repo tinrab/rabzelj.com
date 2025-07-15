@@ -13,5 +13,6 @@ export const staticConfig = {
     youtubeId: "@tinrab",
     blueskyUrl: "https://bsky.app/profile/rabzelj.com",
     blueskyId: "rabzelj.com",
+    linkedinUrl: "https://www.linkedin.com/in/tinrab",
   },
 };

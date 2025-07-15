@@ -1,4 +1,4 @@
-import { useLocation } from "@tanstack/react-router";
+import { Link, type ToOptions, useLocation } from "@tanstack/react-router";
 import type React from "react";
 import { MdMenu } from "react-icons/md";
 
@@ -10,26 +10,21 @@ import { NavigationList } from "~/components/navigation-list/NavigationList";
 import { NavigationListGroup } from "~/components/navigation-list/NavigationListGroup";
 import { NavigationListLink } from "~/components/navigation-list/NavigationListLink";
 import { PulseDecoration } from "~/components/PulseDecoration";
-import { SiteLink } from "~/components/SiteLink";
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
 } from "~/components/ui/navigation-menu";
-import { pathLocator } from "~/lib/path-locator";
 import { ThemeModeMenu } from "~/lib/theme/ThemeModeMenu";
 import { cn } from "~/lib/utility";
 
 interface SiteHeaderLinkData {
   title: string;
-  to: string;
+  to: ToOptions["to"];
 }
 
-const links: SiteHeaderLinkData[] = [
-  { title: "Blog", to: pathLocator.blog.index },
-  // { title: "Resources", to: pathLocator.resources.index },
-];
+const links: SiteHeaderLinkData[] = [{ title: "Blog", to: "/blog" }];
 
 export function SiteHeader() {
   const location = useLocation();
@@ -41,9 +36,9 @@ export function SiteHeader() {
       </div>
 
       <HeaderRow className="max-w-(--breakpoint-xl)">
-        <SiteLink to="/">
+        <Link to="/">
           <HeaderTitle />
-        </SiteLink>
+        </Link>
 
         <div className="ml-auto flex items-center gap-3 pl-3">
           <NavigationMenu className="hidden md:inline-flex">
@@ -51,9 +46,14 @@ export function SiteHeader() {
               {links.map((link) => (
                 <NavigationMenuItem key={link.to}>
                   <NavigationMenuLink asChild>
-                    <SiteLink to={link.to} activeClassName="text-foreground">
+                    <Link
+                      to={link.to}
+                      className={cn(
+                        location.pathname === link.to && "text-foreground",
+                      )}
+                    >
                       {link.title}
-                    </SiteLink>
+                    </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               ))}
@@ -78,7 +78,7 @@ export function SiteHeader() {
                 selected={location.href === link.to}
                 asChild
               >
-                <SiteLink to={link.to}>{link.title}</SiteLink>
+                <Link to={link.to}>{link.title}</Link>
               </NavigationListLink>
             ))}
           </NavigationListGroup>
@@ -92,7 +92,7 @@ type HeaderMobileTriggerProps = React.HTMLAttributes<HTMLButtonElement>;
 
 export function HeaderMobileTrigger({
   className,
-  ...restProps
+  ...props
 }: HeaderMobileTriggerProps) {
   const { onMenuOpenChange } = useHeaderContext();
   return (
@@ -100,7 +100,7 @@ export function HeaderMobileTrigger({
       variant="outline"
       className={cn("shrink-0 md:hidden", className)}
       onClick={() => onMenuOpenChange(true)}
-      {...restProps}
+      {...props}
     >
       <MdMenu />
       <span className="sr-only">Toggle navigation menu</span>

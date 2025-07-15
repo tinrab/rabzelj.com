@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import type React from "react";
 import { useId } from "react";
-import { FaCheck, FaCopy } from "react-icons/fa6";
+import { MdCheck, MdContentCopy } from "react-icons/md";
 
 import { IconButton } from "~/components/IconButton";
 import { ProgrammingLanguageIcon } from "~/components/ProgrammingLanguageIcon";
@@ -18,7 +18,7 @@ export function MdxCodeBlock({
   "data-file-name": fileName,
   "data-language": language,
   style: _style,
-  ...restProps
+  ...props
 }: MdxCodeBlockProps) {
   const codeId = useId();
   const copyMutation = useMutation({
@@ -38,7 +38,7 @@ export function MdxCodeBlock({
   };
 
   return (
-    <div className="relative rounded-sm" {...restProps}>
+    <div className={cn(className, "relative rounded-sm")} {...props}>
       {fileName ? (
         <div className="relative flex rounded-t-sm border-border border-t-2 border-r-2 border-l-2 p-2 text-muted-foreground">
           <div className="ml-2 flex grow items-center gap-2 self-center text-muted-foreground text-sm">
@@ -55,7 +55,7 @@ export function MdxCodeBlock({
             onClick={handleCopyClick}
             disabled={copyMutation.isPending}
           >
-            {copyMutation.isPending ? <FaCheck /> : <FaCopy />}
+            {copyMutation.isPending ? <MdCheck /> : <MdContentCopy />}
           </IconButton>
         </div>
       ) : undefined}
@@ -67,16 +67,12 @@ export function MdxCodeBlock({
             "relative flex overflow-auto rounded-sm border-2 border-border font-mono font-normal text-sm leading-relaxed [&_code]:bg-transparent",
             fileName ? "rounded-t-none" : "",
             "shiki",
-            className,
           )}
         >
           {children}
         </pre>
         {!fileName ? (
-          <div
-            className="absolute top-0 right-0 z-10 hidden p-2 text-muted-foreground group-hover:block"
-            // className="absolute top-0 right-0 z-10 p-2 text-muted-foreground"
-          >
+          <div className="absolute top-0 right-0 z-10 hidden p-2 text-muted-foreground group-hover:block">
             <IconButton
               variant="outline"
               size="sm"
@@ -84,7 +80,7 @@ export function MdxCodeBlock({
               onClick={handleCopyClick}
               disabled={copyMutation.isPending}
             >
-              {copyMutation.isPending ? <FaCheck /> : <FaCopy />}
+              {copyMutation.isPending ? <MdCheck /> : <MdContentCopy />}
             </IconButton>
           </div>
         ) : undefined}

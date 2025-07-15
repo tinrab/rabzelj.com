@@ -127,7 +127,6 @@ const ApiImagesBlogPostCoverSlugServerRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '': typeof IndexHomeRouteWithChildren
   '/blog': typeof BlogPostPostRouteWithChildren
   '/resources': typeof ResourcesIndexRouteWithChildren
   '/': typeof IndexHomeIndexRoute
@@ -170,7 +169,6 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | ''
     | '/blog'
     | '/resources'
     | '/'
@@ -264,32 +262,18 @@ export interface RootServerRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: ''
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: unknown
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_index/_home': {
-      id: '/_index/_home'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof IndexHomeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog/_index': {
-      id: '/blog/_index'
+    '/blog': {
+      id: '/blog'
       path: '/blog'
       fullPath: '/blog'
-      preLoaderRoute: typeof BlogIndexRouteImport
-      parentRoute: typeof BlogRoute
-    }
-    '/blog/rss.xml': {
-      id: '/blog/rss.xml'
-      path: ''
-      fullPath: '/blog/rss.xml'
-      preLoaderRoute: unknown
+      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resources/_index': {
@@ -299,33 +283,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourcesIndexRouteImport
       parentRoute: typeof ResourcesRoute
     }
-    '/api/images/featured': {
-      id: '/api/images/featured'
-      path: ''
-      fullPath: '/api/images/featured'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog/_index/_posts': {
-      id: '/blog/_index/_posts'
-      path: ''
+    '/blog/_index': {
+      id: '/blog/_index'
+      path: '/blog'
       fullPath: '/blog'
-      preLoaderRoute: typeof BlogIndexPostsRouteImport
-      parentRoute: typeof BlogIndexRoute
-    }
-    '/blog/_post/_post': {
-      id: '/blog/_post/_post'
-      path: ''
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogPostPostRouteImport
+      preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof BlogRoute
     }
-    '/_index/_home/': {
-      id: '/_index/_home/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexHomeIndexRouteImport
-      parentRoute: typeof IndexHomeRoute
+    '/_index/_home': {
+      id: '/_index/_home'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof IndexHomeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/resources/_index/': {
       id: '/resources/_index/'
@@ -334,18 +304,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourcesIndexIndexRouteImport
       parentRoute: typeof ResourcesIndexRoute
     }
-    '/blog/_index/_posts/external': {
-      id: '/blog/_index/_posts/external'
-      path: '/external'
-      fullPath: '/blog/external'
-      preLoaderRoute: typeof BlogIndexPostsExternalRouteImport
-      parentRoute: typeof BlogIndexPostsRoute
+    '/_index/_home/': {
+      id: '/_index/_home/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexHomeIndexRouteImport
+      parentRoute: typeof IndexHomeRoute
     }
-    '/blog/_index/_posts/notes': {
-      id: '/blog/_index/_posts/notes'
-      path: '/notes'
-      fullPath: '/blog/notes'
-      preLoaderRoute: typeof BlogIndexPostsNotesRouteImport
+    '/blog/_post/_post': {
+      id: '/blog/_post/_post'
+      path: ''
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogPostPostRouteImport
+      parentRoute: typeof BlogRoute
+    }
+    '/blog/_index/_posts': {
+      id: '/blog/_index/_posts'
+      path: ''
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogIndexPostsRouteImport
+      parentRoute: typeof BlogIndexRoute
+    }
+    '/blog/_index/tags/': {
+      id: '/blog/_index/tags/'
+      path: '/tags'
+      fullPath: '/blog/tags'
+      preLoaderRoute: typeof BlogIndexTagsIndexRouteImport
+      parentRoute: typeof BlogIndexRoute
+    }
+    '/blog/_index/_posts/': {
+      id: '/blog/_index/_posts/'
+      path: '/'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexPostsIndexRouteImport
       parentRoute: typeof BlogIndexPostsRoute
     }
     '/blog/_post/_post/$slug': {
@@ -355,19 +346,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogPostPostSlugRouteImport
       parentRoute: typeof BlogPostPostRoute
     }
-    '/blog/_index/_posts/': {
-      id: '/blog/_index/_posts/'
-      path: '/'
-      fullPath: '/blog/'
-      preLoaderRoute: typeof BlogIndexPostsIndexRouteImport
+    '/blog/_index/_posts/notes': {
+      id: '/blog/_index/_posts/notes'
+      path: '/notes'
+      fullPath: '/blog/notes'
+      preLoaderRoute: typeof BlogIndexPostsNotesRouteImport
       parentRoute: typeof BlogIndexPostsRoute
     }
-    '/blog/_index/tags/': {
-      id: '/blog/_index/tags/'
-      path: '/tags'
-      fullPath: '/blog/tags'
-      preLoaderRoute: typeof BlogIndexTagsIndexRouteImport
-      parentRoute: typeof BlogIndexRoute
+    '/blog/_index/_posts/external': {
+      id: '/blog/_index/_posts/external'
+      path: '/external'
+      fullPath: '/blog/external'
+      preLoaderRoute: typeof BlogIndexPostsExternalRouteImport
+      parentRoute: typeof BlogIndexPostsRoute
     }
     '/blog/_index/tags/$slug/': {
       id: '/blog/_index/tags/$slug/'
@@ -375,13 +366,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/blog/tags/$slug'
       preLoaderRoute: typeof BlogIndexTagsSlugIndexRouteImport
       parentRoute: typeof BlogIndexRoute
-    }
-    '/api/images/blog/post/cover/$slug': {
-      id: '/api/images/blog/post/cover/$slug'
-      path: ''
-      fullPath: '/api/images/blog/post/cover/$slug'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -394,20 +378,6 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof SitemapDotxmlServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
-    '/_index/_home': {
-      id: '/_index/_home'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/blog/_index': {
-      id: '/blog/_index'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
     '/blog/rss.xml': {
       id: '/blog/rss.xml'
       path: '/blog/rss.xml'
@@ -415,88 +385,11 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof BlogRssDotxmlServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
-    '/resources/_index': {
-      id: '/resources/_index'
-      path: '/resources'
-      fullPath: '/resources'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
     '/api/images/featured': {
       id: '/api/images/featured'
       path: '/api/images/featured'
       fullPath: '/api/images/featured'
       preLoaderRoute: typeof ApiImagesFeaturedServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/blog/_index/_posts': {
-      id: '/blog/_index/_posts'
-      path: ''
-      fullPath: '/blog'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/blog/_post/_post': {
-      id: '/blog/_post/_post'
-      path: ''
-      fullPath: '/blog'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/_index/_home/': {
-      id: '/_index/_home/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/resources/_index/': {
-      id: '/resources/_index/'
-      path: '/'
-      fullPath: '/resources/'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/blog/_index/_posts/external': {
-      id: '/blog/_index/_posts/external'
-      path: '/external'
-      fullPath: '/blog/external'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/blog/_index/_posts/notes': {
-      id: '/blog/_index/_posts/notes'
-      path: '/notes'
-      fullPath: '/blog/notes'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/blog/_post/_post/$slug': {
-      id: '/blog/_post/_post/$slug'
-      path: '/$slug'
-      fullPath: '/blog/$slug'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/blog/_index/_posts/': {
-      id: '/blog/_index/_posts/'
-      path: '/'
-      fullPath: '/blog/'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/blog/_index/tags/': {
-      id: '/blog/_index/tags/'
-      path: '/tags'
-      fullPath: '/blog/tags'
-      preLoaderRoute: unknown
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/blog/_index/tags/$slug/': {
-      id: '/blog/_index/tags/$slug/'
-      path: '/tags/$slug'
-      fullPath: '/blog/tags/$slug'
-      preLoaderRoute: unknown
       parentRoute: typeof rootServerRouteImport
     }
     '/api/images/blog/post/cover/$slug': {

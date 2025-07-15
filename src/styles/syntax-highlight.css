@@ -23,6 +23,11 @@ pre.shiki {
   --shiki-dark: #cdcdcd;
 }
 
+code {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0;
+}
+
 .shiki code {
   display: block;
   width: fit-content;
@@ -36,11 +41,6 @@ pre.shiki {
   word-wrap: normal;
   tab-size: 4;
   hyphens: none;
-}
-
-code {
-  font-variant-ligatures: none;
-  font-feature-settings: "liga" 0;
 }
 
 /********** Line highlight **********/
@@ -65,11 +65,9 @@ code {
   }
 }
 
-.dark {
-  .shiki code span.highlighted {
-    & span {
-      background-color: transparent !important;
-    }
+.dark .shiki code span.highlighted {
+  & span {
+    background-color: transparent !important;
   }
 }
 

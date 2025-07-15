@@ -8,10 +8,7 @@ export const blogPostFrontmatterSchema = z.object({
   title: z.string().trim(),
   publishedDate: z.string().trim(),
   modifiedDate: z.string().trim().optional(),
-  description: z
-    .string()
-    .trim()
-    .regex(/[\.\?]$/),
+  description: z.string().trim().regex(/[.?]$/),
   tags: z.array(z.string().trim()),
   priority: z.number().default(0),
   cover: z

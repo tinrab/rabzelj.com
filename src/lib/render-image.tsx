@@ -1,4 +1,4 @@
-import fontSansRaw from "@fontsource/roboto/files/roboto-latin-400-normal.woff?arraybuffer";
+import fontSans from "@fontsource/roboto/files/roboto-latin-400-normal.woff?arraybuffer";
 import { Resvg } from "@resvg/resvg-js";
 import type React from "react";
 import satori from "satori";
@@ -14,8 +14,7 @@ export async function renderImage(
       {
         name: "Roboto",
         style: "normal",
-        // data: sansFont,
-        data: fontSansRaw,
+        data: fontSans,
       },
     ],
   });

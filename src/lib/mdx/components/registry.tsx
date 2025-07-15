@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import type { MdxContentComponents } from "@temelj/mdx-react";
-import type React from "react";
 
 import { Typography } from "~/components/Typography";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -23,40 +23,27 @@ export function getMdxContentComponents({
   lowerHeadings?: boolean;
 } = {}): MdxContentComponents {
   return {
-    p: ({
-      className,
-      children,
-      ...restProps
-    }: React.HTMLAttributes<HTMLElement>) => (
-      <Typography
-        gutterBottom
-        // className={cn(className, "text-base/7 lg:text-lg/7")}
-        className={cn(className)}
-        asChild
-        {...restProps}
-      >
+    p: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
+      <Typography gutter asChild {...props}>
         <p>{children}</p>
       </Typography>
     ),
     a: ({
       href,
       children,
-      ...restProps
+      ...props
     }: React.HTMLAttributes<HTMLElement> & { href?: string }) => (
-      <Typography variant="a" asChild {...restProps}>
+      <Typography variant="a" asChild {...props}>
         <a href={href}>{children}</a>
       </Typography>
     ),
 
-    h1: ({ children, ...restProps }: React.HTMLAttributes<HTMLElement>) => (
+    h1: (props: React.HTMLAttributes<HTMLElement>) => (
       <MdxContentHeading
         lowerHeadings={lowerHeadings}
         variant="h1"
-        className="text-border underline decoration-dashed underline-offset-8"
-        {...restProps}
-      >
-        <span className="text-foreground">{children}</span>
-      </MdxContentHeading>
+        {...props}
+      />
     ),
     h2: (props: React.HTMLAttributes<HTMLElement>) => (
       <MdxContentHeading
@@ -75,33 +62,30 @@ export function getMdxContentComponents({
 
     blockquote: ({
       className,
-      ...restProps
+      ...props
     }: React.HTMLAttributes<HTMLElement>) => (
       <blockquote
-        className={cn(className, "my-6 border-l-2 pl-6 italic")}
-        {...restProps}
+        className={cn(className, "mt-4 border-l-2 pl-4 italic")}
+        {...props}
       />
     ),
-    ul: ({
-      className,
-      ...restProps
-    }: React.HTMLAttributes<HTMLUListElement>) => (
+    ul: ({ className, ...props }: React.HTMLAttributes<HTMLUListElement>) => (
       <ul
-        className={cn(className, "my-6 ml-6 list-disc [&>li]:mt-2")}
-        {...restProps}
+        className={cn(className, "mt-4 ml-4 list-disc [&>li]:mt-2")}
+        {...props}
       />
     ),
-    li: ({ children, ...restProps }: React.HTMLAttributes<HTMLElement>) => (
-      <Typography asChild {...restProps}>
+    li: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
+      <Typography asChild {...props}>
         <li>{children}</li>
       </Typography>
     ),
 
     table: ({
       className,
-      ...restProps
+      ...props
     }: React.HTMLAttributes<HTMLTableElement>) => (
-      <Table className={cn(className, "my-6")} {...restProps} />
+      <Table className={cn(className, "mt-4")} {...props} />
     ),
     thead: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
       <TableHeader {...props} />
@@ -122,8 +106,8 @@ export function getMdxContentComponents({
       <TableCell {...props} />
     ),
 
-    pre: ({ className, ...restProps }: React.HTMLAttributes<HTMLElement>) => (
-      <MdxCodeBlock className={cn("mb-4", className)} {...restProps} />
+    pre: ({ className, ...props }: React.HTMLAttributes<HTMLElement>) => (
+      <MdxCodeBlock className={cn("mt-4", className)} {...props} />
     ),
     code: (props: React.HTMLAttributes<HTMLElement>) => (
       <MdxInlineCode {...props} />
@@ -132,15 +116,14 @@ export function getMdxContentComponents({
     img: ({
       alt,
       className,
-      ...restProps
+      ...props
     }: React.ImgHTMLAttributes<HTMLImageElement>) => {
       if (!alt) {
         throw new Error("Image must have an alt attribute");
       }
       return (
         <span className="mx-auto flex flex-col gap-2 text-center">
-          {/* biome-ignore lint/a11y/useAltText: generated alt text */}
-          <img alt={alt} className={cn(className, "mx-auto")} {...restProps} />
+          <img alt={alt} className={cn(className, "mx-auto")} {...props} />
           <span className="font-normal text-muted-foreground text-sm leading-5">
             {alt}
           </span>
@@ -148,12 +131,45 @@ export function getMdxContentComponents({
       );
     },
 
-    Note: ({ children, ...restProps }) => {
+    Note: ({ children, ...props }) => {
       return (
-        <Alert variant="primary" className="mb-4" {...restProps}>
+        <Alert variant="primary" className="mb-4" {...props}>
           <AlertDescription className="[&>p]:m-0">{children}</AlertDescription>
         </Alert>
       );
     },
   };
 }
+
+const siteComponents: MdxContentComponents = {
+  a: ({ href, ref: _, ...props }) => {
+    if (typeof href !== "string") {
+      throw new TypeError("href must be a string");
+    }
+
+    const isExternal =
+      typeof href === "string" &&
+      (href.startsWith("http") || href.startsWith("mailto:"));
+
+    return (
+      <Typography variant="a" asChild {...props}>
+        <Link
+          to={href}
+          {...props}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noreferrer" : undefined}
+        />
+      </Typography>
+    );
+  },
+};
+
+export const mdxPageComponents: MdxContentComponents = {
+  ...getMdxContentComponents(),
+  ...siteComponents,
+};
+
+export const mdxPageLowerHeadingComponents: MdxContentComponents = {
+  ...getMdxContentComponents({ lowerHeadings: true }),
+  ...siteComponents,
+};

@@ -1,20 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
 import { BlogNoteAlert } from "~/components/blog/BlogNoteAlert";
 import { BlogPostFlatList } from "~/components/blog/BlogPostFlatList";
 import { BlogTagChip } from "~/components/blog/BlogTagChip";
-import { SiteLink } from "~/components/SiteLink";
 import { Typography } from "~/components/Typography";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
+import { pageMiddleware } from "~/lib/middleware";
 
-const loadRouteData = createServerFn({ type: "static", method: "GET" }).handler(
-  async () => {
+const loadRouteData = createServerFn({ method: "GET" })
+  .middleware([pageMiddleware])
+  .handler(async () => {
     return {
       posts: await loadBlogPosts({ selectNotes: true }),
     };
-  },
-);
+  });
 
 export const Route = createFileRoute("/blog/_index/_posts/notes")({
   component: RouteComponent,
@@ -33,7 +33,9 @@ function RouteComponent() {
         renderPost={(post) => (
           <div className="flex flex-col">
             <Typography variant="a" className="mb-1" asChild>
-              <SiteLink to={`/blog/${post.slug}`}>{post.title}</SiteLink>
+              <Link to="/blog/$slug" params={{ slug: post.slug }}>
+                {post.title}
+              </Link>
             </Typography>
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag) => (

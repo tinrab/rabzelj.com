@@ -12,7 +12,6 @@ interface BlogPostFlatListProps<T extends BlogPostCommon> {
 export function BlogPostFlatList<T extends BlogPostCommon>({
   posts,
   renderPost,
-  anchorSuffix = "",
 }: BlogPostFlatListProps<T>) {
   return (
     <div className="w-full font-sans">

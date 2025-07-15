@@ -28,7 +28,7 @@ export function NavigationListGroup({
   variant,
   className,
   children,
-  ...restProps
+  ...props
 }: NavigationListGroupProps) {
   const headingId = useId();
 
@@ -36,7 +36,7 @@ export function NavigationListGroup({
     <div
       role="presentation"
       className={cn(gutterBottom ? "mb-4" : "", className)}
-      {...restProps}
+      {...props}
     >
       {heading && (
         <div

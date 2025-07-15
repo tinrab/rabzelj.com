@@ -16,10 +16,19 @@ export const ServerRoute = createServerFileRoute(
       <div
         style={{
           fontFamily: "Roboto",
+          padding: "4rem",
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "rgb(10,10,10)",
+          color: "white",
         }}
-        tw="px-16 w-full h-full relative flex flex-col items-center justify-center bg-[rgb(10,10,10)] text-white"
       >
-        {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
+        {/** biome-ignore lint/a11y/noSvgWithoutTitle: not needed */}
         <svg
           style={{
             position: "absolute",
@@ -65,7 +74,7 @@ export const ServerRoute = createServerFileRoute(
           const size = 2000;
           return (
             <div
-              key={i}
+              key={String(i)}
               style={{
                 position: "absolute",
                 width: `${size}px`,
@@ -80,29 +89,44 @@ export const ServerRoute = createServerFileRoute(
           );
         })}
 
-        <div tw="flex flex-row items-center justify-center -mt-10">
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: "-2.5rem",
+          }}
+        >
           <img
-            tw="mr-8 rounded-full border-2"
+            style={{
+              marginRight: "2rem",
+              borderRadius: "9999px",
+              border: "2px solid #737373",
+            }}
             src={`${serverConfig.app.url}${pathLocator.assets.avatar}`}
             alt={serverConfig.app.title}
             width="210"
             height="210"
-            style={{
-              borderColor: "#737373",
-            }}
           />
-          <div tw="flex flex-col">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             <div
-              tw="text-6xl mb-10"
               style={{
+                fontSize: "3.75rem",
                 lineHeight: "1.75rem",
+                marginBottom: "2.5rem",
               }}
             >
               {serverConfig.app.title}
             </div>
             <div
-              tw="text-6xl"
               style={{
+                fontSize: "3.75rem",
                 lineHeight: "1.75rem",
                 color: "#737373",
               }}

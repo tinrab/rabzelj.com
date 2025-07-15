@@ -13,13 +13,13 @@ export function LinearLoader({
   square,
   slotProps = {},
   className,
-  ...restProps
+  ...props
 }: LinearLoaderProps) {
   return (
     <div
       className={cn("h-1 text-primary", square ? "" : "rounded-sm", className)}
-      aria-label={restProps["aria-label"] ?? "loading"}
-      {...restProps}
+      aria-label={props["aria-label"] ?? "loading"}
+      {...props}
     >
       <div
         className={cn(

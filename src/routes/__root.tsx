@@ -12,6 +12,7 @@ import type React from "react";
 import { Toaster } from "~/components/ui/sonner";
 import { loadClientConfig } from "~/config/client";
 import { makeClientConfigScript } from "~/config/utility";
+import { pageMiddleware } from "~/lib/middleware";
 import { pathLocator } from "~/lib/path-locator";
 import { getThemeServerFn } from "~/lib/theme/fn";
 import { ThemeProvider } from "~/lib/theme/theme-context";
@@ -19,11 +20,12 @@ import { Theme } from "~/lib/theme/types";
 import mainCss from "~/styles/main.css?url";
 
 const loadClientConfigServerFn = createServerFn({
-  type: "static",
   method: "GET",
-}).handler(async () => {
-  return loadClientConfig();
-});
+})
+  .middleware([pageMiddleware])
+  .handler(async () => {
+    return loadClientConfig();
+  });
 
 export const Route = createRootRoute({
   loader: async () => {
@@ -98,16 +100,6 @@ export const Route = createRootRoute({
         { rel: "manifest", href: "/manifest.json" },
         { rel: "icon", href: "/favicon.ico" },
 
-        { rel: "preconnect", href: "https://fonts.googleapis.com" },
-        {
-          rel: "preconnect",
-          href: "https://fonts.gstatic.com",
-          crossOrigin: "",
-        },
-        {
-          rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap",
-        },
         // Katex
         // <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">
         {

@@ -1,8 +1,6 @@
-import { useLocation } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 
-import { SiteLink } from "~/components/SiteLink";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { pathLocator } from "~/lib/path-locator";
 
 type BlogTabId = "personal" | "notes" | "external";
 
@@ -16,15 +14,15 @@ export function BlogTabList() {
 
   return (
     <Tabs defaultValue="all" value={id}>
-      <TabsList variant="pill">
-        <TabsTrigger value="personal" variant="pill" asChild>
-          <SiteLink to={pathLocator.blog.index}>Personal</SiteLink>
+      <TabsList>
+        <TabsTrigger value="personal" asChild>
+          <Link to="/blog">Personal</Link>
         </TabsTrigger>
-        <TabsTrigger value="notes" variant="pill" asChild>
-          <SiteLink to={pathLocator.blog.notes}>Notes</SiteLink>
+        <TabsTrigger value="notes" asChild>
+          <Link to="/blog/notes">Notes</Link>
         </TabsTrigger>
-        <TabsTrigger value="external" variant="pill" asChild>
-          <SiteLink to={pathLocator.blog.external}>External</SiteLink>
+        <TabsTrigger value="external" asChild>
+          <Link to="/blog/external">External</Link>
         </TabsTrigger>
       </TabsList>
     </Tabs>

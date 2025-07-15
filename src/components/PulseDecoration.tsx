@@ -8,10 +8,7 @@ interface PulseDecorationProps extends React.ComponentProps<"div"> {
   numCircles?: number;
 }
 
-export function PulseDecoration({
-  className,
-  ...restProps
-}: PulseDecorationProps) {
+export function PulseDecoration({ className, ...props }: PulseDecorationProps) {
   const n = 6;
 
   return (
@@ -20,13 +17,13 @@ export function PulseDecoration({
         "hidden items-center justify-center opacity-65 md:flex",
         className,
       )}
-      {...restProps}
+      {...props}
     >
       {Array.from({ length: n }, (_, i) => {
         const size = 600 + i * 100;
         return (
           <div
-            key={i}
+            key={String(i)}
             className="absolute animate-pulse rounded-md border bg-foreground/20"
             style={
               {
