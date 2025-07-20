@@ -11,7 +11,9 @@ export default defineConfig({
   },
   plugins: [
     tsConfigPaths(),
-    tanstackStart({ target: "vercel", customViteReactPlugin: true }),
+    tanstackStart({
+      customViteReactPlugin: true,
+    }),
     reactPlugin(),
     tailwindcss(),
     arraybufferPlugin(),

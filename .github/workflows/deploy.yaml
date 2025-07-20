@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [develop]
+    branches: [main]
 
 env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          node-version: 24
+          node-version: 22
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4

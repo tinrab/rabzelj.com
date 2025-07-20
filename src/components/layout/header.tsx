@@ -7,7 +7,6 @@ import {
   HeaderContextProvider,
   useHeaderContext,
 } from "~/components/layout/header-context";
-import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utility";
 
 export type HeaderProps = React.HtmlHTMLAttributes<HTMLDivElement>;
@@ -61,9 +60,9 @@ export function HeaderTitle({ className, ...props }: HeaderTitleProps) {
     >
       <div className="flex h-[24px] w-auto gap-2 font-bold text-foreground">
         <span>Tin Rabzelj</span>
-        <Badge className="bg-red-700 font-bold text-white">
+        {/* <Badge className="bg-red-700 font-bold text-white">
           looking for work
-        </Badge>
+        </Badge> */}
       </div>
       <span className="sr-only">Tin Rabzelj</span>
     </div>
