@@ -1,0 +1,464 @@
+---
+title: "Efficient Estimation of Word Representations in Vector Space"
+description: "Paper notes for Efficient Estimation of Word Representations in Vector Space."
+tags:
+  - paper-notes
+  - ai
+  - python
+publishedDate: 2025-07-20
+---
+
+This paper introduces two model architectures for efficiently computing high-quality continuous vector representations of words from large datasets.
+
+It introduces the Continuous Bag-of-Words (CBoW) model and the Continuous Skip-gram model.
+These new log-linear model architectures are designed to minimize computational complexity while still producing effective word representations.
+A "log-linear model" is a mathematical and statistical modeling technique where the logarithm of an outcome variable is expressed as a linear combination of parameters and predictor variables.
+
+The paper shows that these new architectures achieve large improvements in accuracy at a much lower computational cost compared to previous neural network-based methods, capable of learning high-quality word vectors from a 1.6 billion word dataset in less than a day.
+It demonstrates that the resulting word vectors provide state-of-the-art performance on tasks measuring syntactic and semantic word similarities.
+The paper designs a new, comprehensive test set for this purpose, which measures five types of semantic and nine types of syntactic regularities.
+It highlights that these vectors can capture complex linguistic regularities, such as "King - Man + Woman" being closest to "Queen".
+
+# CBoW
+
+The CBoW model tries to predict a single word from a window of surrounding context words.
+
+Architecture:
+
+- **Input Layer:** The model takes the context words surrounding a target word as input.
+For example, in the sentence "The cat sat on the mat," if the target word is "sat" and the context window is two words before and two words after, the input words would be "The," "cat," "on," and "the."
+
+- **Projection Layer:** The input words are projected into a continuous vector space.
+These vectors are then averaged to form a single vector that represents the overall context.
+Because the vectors are averaged, the order of the context words does not impact the projection.
+
+- **Output Layer:**: The averaged context vector is then used to predict the original target word.
+The model is trained to maximize the probability of correctly predicting this target word.
+
+# Continuous Skip-gram
+
+The core idea behind the Skip-gram model is to predict the surrounding context words given a single target word.
+It's kind of the opposite to the CBoW model.
+
+Architecture:
+
+- **Input Layer:** The model takes a single target word as input.
+For example, in the sentence, "The quick brown fox jumps over the lazy dog," if the target word is "fox," the model will try to predict the words around it, like "quick," "brown," "jumps," and "over."
+
+- **Projection (or Hidden) Layer:** The input word is projected into a lower-dimensional vector space.
+This learned vector is the word embedding that captures the semantic meaning of the word.
+
+- **Output Layer:** The embedding is used to predict the context words within a certain window.
+For instance, it tries to predict that "quick" and "brown" are likely to appear before "fox," and "jumps" and "over" are likely to appear after it.
+
+The primary goal is to learn the high-quality word embeddings from the hidden layer.
+This architecture is particularly good at capturing the meaning of rare words and has been influential in the field of natural language processing.
+
+# Implementation
+
+CBoW.
+
+```python { "fileName": "cbow.py" }
+import os
+import re
+from collections import deque, Counter
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from datasets import load_dataset
+
+from config import *
+from utils import word_analogy
+
+MODEL_FILE = os.path.join(MODEL_DIR, "cbow_model.pth")
+VOCAB_FILE = os.path.join(MODEL_DIR, "cbow_vocab.pth")
+
+
+def load_data():
+    """
+    Loads and preprocesses the data.
+    """
+
+    # Purposefully small vocab dataset. It's easier to experiment with.
+    dataset = load_dataset("roneneldan/TinyStories", split="train")
+
+    # Combine and tokenize the text.
+    text = " ".join([item for item in dataset[:DATASET_SIZE]["text"]])
+    text = text.lower()
+    text = re.sub(r"<[^>]+>", "", text)  # Remove HTML tags
+    tokens = re.findall(r"\b\w+\b", text)  # Split into words
+
+    # Build vocabulary.
+    word_counts = Counter(tokens)
+    frequent_word_list = sorted(
+        [word for word, count in word_counts.items() if count > 5]
+    )
+    vocab = {word: i for i, word in enumerate(frequent_word_list)}
+    vocab_size = len(vocab)
+    print(f"Vocabulary size: {vocab_size}")
+
+    # Create context-target pairs for training.
+    data = []
+    window = deque(maxlen=2 * CONTEXT_SIZE + 1)
+    for word in tokens:
+        word_idx = vocab.get(word)
+        if word_idx is None:
+            # Skip words not in our filtered vocabulary.
+            continue
+
+        window.append(word_idx)
+        if len(window) == 2 * CONTEXT_SIZE + 1:
+            target = window[CONTEXT_SIZE]
+            context = [
+                window[i] for i in range(2 * CONTEXT_SIZE + 1) if i != CONTEXT_SIZE
+            ]
+            data.append((context, target))
+
+    print(f"Created {len(data)} context-target pairs.")
+
+    return data, vocab, vocab_size
+
+
+class CBOWModel(nn.Module):
+    def __init__(self, vocab_size, embedding_dim):
+        super(CBOWModel, self).__init__()
+        # The embedding layer maps word indices to dense vectors.
+        self.embeddings = nn.Embedding(vocab_size, embedding_dim)
+        # The linear layer predicts the target word from the averaged context embeddings.
+        self.linear = nn.Linear(embedding_dim, vocab_size)
+
+    def forward(self, inputs):
+        # inputs shape: (batch_size, 2 * CONTEXT_SIZE)
+        embeds = self.embeddings(inputs)
+        # shape: (batch_size, 2 * CONTEXT_SIZE, embedding_dim)
+
+        # Average the embeddings of the context words.
+        avg_embeds = torch.mean(embeds, dim=1)
+        # shape: (batch_size, embedding_dim)
+
+        out = self.linear(avg_embeds)
+        # shape: (batch_size, vocab_size)
+
+        return out
+
+
+def train():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    data, vocab, vocab_size = load_data()
+    if not data or vocab_size == 0:
+        print(
+            "No training data or vocabulary generated. Check DATASET_SIZE and filtering criteria."
+        )
+        return None, None
+
+    model = CBOWModel(vocab_size, EMBEDDING_DIM).to(device)
+    loss_function = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+
+    # Ensure the model directory exists.
+    os.makedirs(MODEL_DIR, exist_ok=True)
+
+    print("\nStarting training...")
+    for epoch in range(EPOCHS):
+        total_loss = 0
+
+        # Recalculate number of batches in case of leftover data.
+        num_batches = len(data) // BATCH_SIZE
+        if num_batches == 0:
+            print(
+                "Not enough data to form a single batch. Consider reducing BATCH_SIZE."
+            )
+            break
+
+        for i in range(0, len(data) - BATCH_SIZE + 1, BATCH_SIZE):
+            batch = data[i : i + BATCH_SIZE]
+            context_words, target_word = zip(*batch)
+
+            context_tensors = torch.LongTensor(context_words).to(device)
+            target_tensor = torch.LongTensor(target_word).to(device)
+
+            model.zero_grad()
+            logits = model(context_tensors)
+            loss = loss_function(logits, target_tensor)
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        epoch_model_path = os.path.join(MODEL_DIR, f"cbow_model_epoch_{epoch + 1}.pth")
+        torch.save(model.state_dict(), epoch_model_path)
+        print(
+            f"Epoch {epoch + 1}/{EPOCHS}, Loss: {total_loss / num_batches:.4f}, Model saved to {epoch_model_path}"
+        )
+
+    # Save the final model and the vocabulary.
+    torch.save(model.state_dict(), MODEL_FILE)
+    torch.save(vocab, VOCAB_FILE)
+    print(f"Training finished. Final model saved to {MODEL_FILE}")
+    print(f"Vocabulary saved to {VOCAB_FILE}")
+
+    return model, vocab
+
+
+def load_model(model_path, vocab_path):
+    try:
+        vocab = torch.load(vocab_path)
+        vocab_size = len(vocab)
+
+        model = CBOWModel(vocab_size, EMBEDDING_DIM)
+
+        model.load_state_dict(torch.load(model_path))
+
+        model.eval()
+
+        print(f"Model loaded successfully from {model_path}")
+        return model, vocab
+    except FileNotFoundError:
+        print(
+            f"Error: Model or vocabulary not found. Searched for '{model_path}' and '{vocab_path}'."
+        )
+        return None, None
+
+
+def main():
+    train()
+
+    model, vocab = load_model(MODEL_FILE, VOCAB_FILE)
+    for a, b, c in [["boy", "he", "she"]]:
+        print(
+            f"\nAnalogy: {a} - {b} + {c} = {word_analogy(model.embeddings.weight.data, vocab, a, b, c)}"
+        )
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Continuous Skip-gram.
+
+```python { "fileName": "csg.py" }
+import os
+import re
+from collections import deque, Counter
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from datasets import load_dataset
+
+from config import *
+from utils import word_analogy
+
+
+MODEL_FILE = os.path.join(MODEL_DIR, "csg_model.pth")
+VOCAB_FILE = os.path.join(MODEL_DIR, "csg_vocab.pth")
+
+
+def load_data():
+    print("Loading and preprocessing data for Skip-gram...")
+
+    dataset = load_dataset("roneneldan/TinyStories", split="train")
+
+    text = " ".join([item for item in dataset[:DATASET_SIZE]["text"]])
+    text = text.lower()
+    text = re.sub(r"<[^>]+>", "", text)
+    tokens = re.findall(r"\b\w+\b", text)
+
+    word_counts = Counter(tokens)
+    frequent_word_list = sorted(
+        [word for word, count in word_counts.items() if count > 5]
+    )
+    vocab = {word: i for i, word in enumerate(frequent_word_list)}
+    vocab_size = len(vocab)
+    print(f"Vocabulary size: {vocab_size}")
+
+    # Create (input, output) pairs for training.
+    # In Skip-gram, the input is the center word and the output is a surrounding context word.
+    data = []
+    window = deque(maxlen=2 * CONTEXT_SIZE + 1)
+    for word in tokens:
+        word_idx = vocab.get(word)
+        if word_idx is None:
+            continue
+
+        window.append(word_idx)
+        if len(window) == 2 * CONTEXT_SIZE + 1:
+            center_word = window[CONTEXT_SIZE]
+            # Create a training pair for each word in the context.
+            for i in range(2 * CONTEXT_SIZE + 1):
+                if i != CONTEXT_SIZE:
+                    context_word = window[i]
+                    data.append((center_word, context_word))
+
+    print(f"Created {len(data)} (center, context) training pairs.")
+    return data, vocab, vocab_size
+
+
+class SkipGramModel(nn.Module):
+    def __init__(self, vocab_size, embedding_dim):
+        super(SkipGramModel, self).__init__()
+        # The input embedding layer maps the center word index to a dense vector.
+        self.embeddings = nn.Embedding(vocab_size, embedding_dim)
+        # The linear layer predicts the context words from the center word's embedding.
+        self.linear = nn.Linear(embedding_dim, vocab_size)
+
+    def forward(self, inputs):
+        # inputs shape: (batch_size, 1) or (batch_size)
+        embeds = self.embeddings(inputs)
+        # shape: (batch_size, embedding_dim)
+
+        out = self.linear(embeds)
+        # shape: (batch_size, vocab_size)
+
+        return out
+
+
+def train():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    data, vocab, vocab_size = load_data()
+    if not data or vocab_size == 0:
+        print(
+            "No training data or vocabulary generated. Check DATASET_SIZE and filtering criteria."
+        )
+        return None, None
+
+    model = SkipGramModel(vocab_size, EMBEDDING_DIM).to(device)
+    loss_function = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+
+    # Ensure the model directory exists.
+    os.makedirs(MODEL_DIR, exist_ok=True)
+
+    print("\nStarting Skip-gram training...")
+    for epoch in range(EPOCHS):
+        total_loss = 0
+
+        num_batches = len(data) // BATCH_SIZE
+        if num_batches == 0:
+            print("Not enough data to form a single batch. Try reducing BATCH_SIZE.")
+            break
+
+        for i in range(0, len(data) - BATCH_SIZE + 1, BATCH_SIZE):
+            batch = data[i : i + BATCH_SIZE]
+            center_words, context_words = zip(*batch)
+
+            center_tensors = torch.LongTensor(center_words).to(device)
+            context_tensors = torch.LongTensor(context_words).to(device)
+
+            model.zero_grad()
+            logits = model(center_tensors)
+            loss = loss_function(logits, context_tensors)
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        epoch_model_path = os.path.join(MODEL_DIR, f"csg_model_epoch_{epoch + 1}.pth")
+        torch.save(model.state_dict(), epoch_model_path)
+        print(
+            f"Epoch {epoch + 1}/{EPOCHS}, Loss: {total_loss / num_batches:.4f}, Model saved to {epoch_model_path}"
+        )
+
+    # Save the final model and vocabulary.
+    # torch.save(model.state_dict(), MODEL_FILE)
+    torch.save(vocab, VOCAB_FILE)
+    print(f"Training finished. Final model saved to {MODEL_FILE}")
+    print(f"Vocabulary saved to {VOCAB_FILE}")
+
+    return model, vocab
+
+
+def load_model(model_path, vocab_path):
+    try:
+        vocab = torch.load(vocab_path)
+        vocab_size = len(vocab)
+        model = SkipGramModel(vocab_size, EMBEDDING_DIM)
+        model.load_state_dict(torch.load(model_path))
+        model.eval()
+        print(f"Skip-gram model loaded successfully from {model_path}")
+        return model, vocab
+    except FileNotFoundError:
+        print(
+            f"Error: Model or vocabulary not found. Searched for '{model_path}' and '{vocab_path}'."
+        )
+        return None, None
+
+
+def main():
+    train()
+
+    model, vocab = load_model(MODEL_FILE, VOCAB_FILE)
+    for a, b, c in [["boy", "he", "she"]]:
+        print(
+            f"\nAnalogy: {a} - {b} + {c} = {word_analogy(model.embeddings.weight.data, vocab, a, b, c)}"
+        )
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Additional files.
+
+```python { "fileName": "config.py" }
+import os
+
+EMBEDDING_DIM = 60
+CONTEXT_SIZE = (
+    2  # Number of words on each side of the target word (2 words before, 2 words after)
+)
+EPOCHS = 1
+LEARNING_RATE = 0.01  # 0.001
+BATCH_SIZE = 128
+DATASET_SIZE = 5_000
+
+MODEL_DIR = "checkpoint"
+```
+
+```python { "fileName": "utils.py" }
+import torch
+
+
+def word_analogy(word_embeddings, vocab, word1, word2, word3, top_n=5):
+    """
+    Performs word analogy task (e.g., "king - man + woman").
+    """
+    if not vocab:
+        print("Cannot perform analogy: vocabulary is empty.")
+        return
+
+    inv_vocab = {i: word for word, i in vocab.items()}
+    for word in [word1, word2, word3]:
+        if word not in vocab:
+            print(f"Word '{word}' not in vocabulary.")
+            return
+
+    # Get the vectors for the input words.
+    vec1 = word_embeddings[vocab[word1]]
+    vec2 = word_embeddings[vocab[word2]]
+    vec3 = word_embeddings[vocab[word3]]
+
+    # Perform the vector arithmetic.
+    result_vec = vec1 - vec2 + vec3
+
+    # Find the most similar words to the result vector.
+    distances = torch.nn.functional.cosine_similarity(
+        result_vec.unsqueeze(0), word_embeddings
+    )
+    top_results = torch.topk(distances, top_n + 3)
+
+    count = 0
+    words = []
+    for i in top_results.indices:
+        word = inv_vocab[i.item()]
+        if word not in [word1, word2, word3]:
+            words.append(word)
+            count += 1
+            if count == top_n:
+                break
+
+    return words
+```
