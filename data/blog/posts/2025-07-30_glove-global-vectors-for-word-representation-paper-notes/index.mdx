@@ -1,0 +1,335 @@
+---
+title: "GloVe: Global Vectors for Word Representation | Paper Notes"
+description: "Paper notes for GloVe: Global Vectors for Word Representation."
+tags:
+  - paper-notes
+  - ai
+  - python
+publishedDate: 2025-07-30
+---
+
+The key point is that rations of co-occurrence probabilities contain more meaningful information than raw probabilities.
+For words related to ice but not steam, the ration is large: $P(solid|ice)/P(solid|steam)=8.9$.
+For words related to steam but not ice, the ration is small: $P(gas|ice)/P(gas|steam)=8.5\times 10^{-2}$.
+For words related to both or neither (like "water" or "fashion"), the ration is close to $1$.
+
+The GloVe model uses statistical information by training only on the nonzero elements in a word-word co-occurrence matrix, rather than the entire spares matrix or individual context windows.
+It captures global stats.
+
+To train the model we start with tokenization.
+The paper uses "Stanford tokenizer."
+Vocabulary is built from the most frequent words (top 400k words in the paper).
+Out-of-vocab words are replaced by special tokens.
+
+Then we built the co-occurrence matrix.
+The context window is 10 words left and right.
+Use decreasing weights.
+Words that are $d$ positions apart contribute $1/d$ to the count.
+Result is stored in $X_{ij}$, number of times word $j$ appears in context of word $i$.
+We only store nonzero entries.
+
+Training revolves around minimizing a weighted least squares regression cost function.
+The cost function is defined as:
+
+$$
+J = \sum_{i,j=1}^{V} f(X_{ij}) (w_i^T \tilde{w}_j + b_i + \tilde{b}_j - \log X_{ij})^2.
+$$
+
+Components:
+- $w_i$ and $\tilde{w}_j$: word vectors for word $i$ and context word $j$, which the model learns.
+- $b_i$ and $\tilde{b}_j$: bias terms for word $i$ and context word $j$, which help restore symmetry in the model formulation.
+- $\log X_{ij}$: the logarithm of the co-occurrence count.
+The model addresses the issue of the logarithm diverging when $X_{ij}$ is zero by incorporating a weighting function.
+- $f(X_{ij})$: a weighting function that addresses the problem of sparse or highly frequent co-occurrences.
+It ensures that:
+  * $f(0) = 0$, meaning zero co-occurrences contribute nothing to the cost.
+  * It is non-decreasing, so rare co-occurrences are not overweighted.
+  * It is relatively small for large values of x, preventing very frequent co-occurrences from dominating the cost.
+  * The parameters they choose are: $f(x) = (x/x_{max})^\alpha$ if $x < x_{max}$, and $1$ otherwise. $x_{max}$ is typically set to $100$, and $\alpha$ to $3/4$, which offers an improvement over a linear version ($\alpha=1$).
+
+The model is trained by stochastically sampling nonzero elements from the co-oc matrix $X$.
+This is efficient because it focuses only on the observed co-occurrences, rather than the entire sparse matrix or individual context windows.
+
+For the sampled entry $X_{ij}$, we calculate the error using a weighted least squares regression objective function.
+The AdaGrad optimizer is then used to update the word vectors ($w_i$, $\tilde{w}_j$) and bias terms ($b_i$, $\tilde{b}_j$).
+AdaGrad adaptively adjusts the learning rate for each parameter, giving larger updates to less frequent parameters and smaller updates to more frequent ones.
+It starts with an initial learning rate of $0.05$.
+
+
+# Implementation
+
+```python { "fileName": "model.py" }
+import torch
+import torch.nn as nn
+
+
+class GloVeModel(nn.Module):
+    def __init__(self, vocab_size, embedding_dim, x_max, alpha):
+        super(GloVeModel, self).__init__()
+
+        # Word embedding layers.
+        self.target_embeddings = nn.Embedding(vocab_size, embedding_dim)
+        self.context_embeddings = nn.Embedding(vocab_size, embedding_dim)
+
+        # Bias layers.
+        self.target_biases = nn.Embedding(vocab_size, 1)
+        self.context_biases = nn.Embedding(vocab_size, 1)
+
+        # Initialize embeddings and biases.
+        init_range = 0.5 / embedding_dim
+        self.target_embeddings.weight.data.uniform_(-init_range, init_range)
+        self.context_embeddings.weight.data.uniform_(-init_range, init_range)
+        self.target_biases.weight.data.zero_()
+        self.context_biases.weight.data.zero_()
+
+        self.x_max = x_max
+        self.alpha = alpha
+
+    def forward(self, target_indices, context_indices, cooc_values):
+        """
+        Calculates the GloVe loss.
+        """
+        # Get embeddings and biases for the batch.
+        w_i = self.target_embeddings(target_indices)
+        w_j = self.context_embeddings(context_indices)
+        b_i = self.target_biases(target_indices).squeeze(1)
+        b_j = self.context_biases(context_indices).squeeze(1)
+
+        # Calculate the log-bilinear model term.
+        dot_product = torch.sum(w_i * w_j, dim=1)
+        log_cooc = torch.log(cooc_values)
+
+        # Calculate the weighting function f(X_ij).
+        weights = torch.pow(cooc_values / self.x_max, self.alpha)
+        weights = torch.clamp(weights, max=1.0)
+
+        # Calculate the final loss.
+        loss = weights * torch.pow(dot_product + b_i + b_j - log_cooc, 2)
+        return torch.mean(loss)
+
+    def get_combined_embeddings(self):
+        """
+        Returns the sum of target and context embeddings, as suggested in the paper.
+        "Doing so typically gives a small boost in performance, with the biggest increase in the semantic analogy task."
+        """
+        return self.target_embeddings.weight.data + self.context_embeddings.weight.data
+```
+
+```python { "fileName": "data.py" }
+import re
+from collections import Counter
+from datasets import load_dataset
+from scipy.sparse import lil_matrix
+import numpy as np
+
+DATASET_SIZE = 10_000
+# Minimum frequency for a word to be included in the vocabulary.
+MIN_WORD_FREQ = 5
+# Context window size (words to the left and right).
+WINDOW_SIZE = 8
+
+
+def load_data():
+    print("Loading and preparing data...")
+    dataset = load_dataset("roneneldan/TinyStories", split="train")
+
+    # Combine and tokenize the text from a subset of the dataset.
+    text = " ".join([item["text"] for item in dataset.select(range(DATASET_SIZE))])
+    text = text.lower()
+    text = re.sub(r"<[^>]+>", "", text)  # Remove HTML-like tags
+    tokens = re.findall(r"\b\w+\b", text)  # Split into words
+
+    # Build vocabulary.
+    word_counts = Counter(tokens)
+    vocab = {word for word, count in word_counts.items() if count >= MIN_WORD_FREQ}
+    word_to_ix = {word: i for i, word in enumerate(vocab)}
+    ix_to_word = {i: word for word, i in word_to_ix.items()}
+    vocab_size = len(word_to_ix)
+
+    if vocab_size == 0:
+        return {}, {}, []
+
+    print(f"Vocabulary size: {vocab_size}")
+
+    # Build co-occurrence matrix using a sparse matrix for memory efficiency.
+    cooc_matrix = lil_matrix((vocab_size, vocab_size), dtype=np.float32)
+    print("Building co-occurrence matrix...")
+    for i, token in enumerate(tokens):
+        if token not in word_to_ix:
+            continue
+        token_id = word_to_ix[token]
+
+        start = max(0, i - WINDOW_SIZE)
+        end = min(len(tokens), i + WINDOW_SIZE + 1)
+
+        for j in range(start, end):
+            if i == j:
+                continue
+
+            context_token = tokens[j]
+            if context_token not in word_to_ix:
+                continue
+
+            context_token_id = word_to_ix[context_token]
+            distance = abs(i - j)
+            # Weight co-occurrence by 1/distance.
+            cooc_matrix[token_id, context_token_id] += 1.0 / distance
+
+    # Convert the sparse matrix to a list of (row, col, value) triplets for training.
+    cooc_coo = cooc_matrix.tocoo()
+    cooc_data = [
+        (r, c, val) for r, c, val in zip(cooc_coo.row, cooc_coo.col, cooc_coo.data)
+    ]
+
+    print(f"Number of non-zero co-occurrence entries: {len(cooc_data)}")
+
+    return word_to_ix, ix_to_word, cooc_data
+```
+
+```python { "fileName": "main.py" }
+import os
+from data import load_data
+import torch
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+import numpy as np
+
+from model import GloVeModel
+
+EMBEDDING_DIM = 60
+LEARNING_RATE = 0.05
+EPOCHS = 20
+BATCH_SIZE = 1024
+X_MAX = 100
+ALPHA = 0.75  # 3/4, as per the paper
+
+CHECKPOINT_DIR = "./checkpoint"
+MODEL_FILE = os.path.join(CHECKPOINT_DIR, "glove_model.pth")
+VOCAB_FILE = os.path.join(CHECKPOINT_DIR, "glove_vocab.pth")
+EMBEDDINGS_FILE = os.path.join(CHECKPOINT_DIR, "glove_embeddings.npy")
+
+
+def train(word_to_ix, cooc_data):
+    vocab_size = len(word_to_ix)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    # Prepare data for DataLoader.
+    target_indices = torch.LongTensor([item[0] for item in cooc_data])
+    context_indices = torch.LongTensor([item[1] for item in cooc_data])
+    cooc_values = torch.FloatTensor([item[2] for item in cooc_data])
+    dataset = TensorDataset(target_indices, context_indices, cooc_values)
+    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+
+    # Initialize model and optimizer.
+    model = GloVeModel(vocab_size, EMBEDDING_DIM, X_MAX, ALPHA).to(device)
+    optimizer = optim.Adagrad(model.parameters(), lr=LEARNING_RATE)
+
+    os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+
+    print("Starting training...")
+
+    for epoch in range(EPOCHS):
+        total_loss = 0
+        for i, (targets, contexts, values) in enumerate(dataloader):
+            targets, contexts, values = (
+                targets.to(device),
+                contexts.to(device),
+                values.to(device),
+            )
+
+            optimizer.zero_grad()
+            loss = model(targets, contexts, values)
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        print(f"Epoch {epoch + 1}/{EPOCHS}, Loss: {total_loss / len(dataloader):.4f}")
+
+    print("Training finished.")
+
+    # Save artifacts.
+    torch.save(model.state_dict(), MODEL_FILE)
+    print(f"Model state dictionary saved to {MODEL_FILE}")
+
+    torch.save(word_to_ix, VOCAB_FILE)
+    print(f"Vocabulary saved to {VOCAB_FILE}")
+
+    final_embeddings = model.get_combined_embeddings().cpu().numpy()
+    np.save(EMBEDDINGS_FILE, final_embeddings)
+    print(f"Final embeddings saved to {EMBEDDINGS_FILE}")
+
+
+def find_analogy(a, b, c, embeddings, word_to_ix, ix_to_word):
+    print(f"\nAnalogy: {a} is to {b} as {c} is to ?")
+
+    # Check if all words are in the vocabulary.
+    for word in [a, b, c]:
+        if word not in word_to_ix:
+            print(f"Error: '{word}' is not in the vocabulary.")
+            return
+
+    # Get word vectors.
+    w1_vec = embeddings[word_to_ix[a]]
+    w2_vec = embeddings[word_to_ix[b]]
+    w3_vec = embeddings[word_to_ix[c]]
+
+    # Calculate the target vector based on the analogy: vec(b) - vec(a) + vec(c).
+    target_vec = w2_vec - w1_vec + w3_vec
+
+    # Find the most similar word in the vocabulary using cosine similarity.
+    similarities = {}
+    for word, index in word_to_ix.items():
+        if word in [a, b, c]:
+            continue
+
+        vec = embeddings[index]
+        cos_sim = np.dot(target_vec, vec) / (
+            np.linalg.norm(target_vec) * np.linalg.norm(vec)
+        )
+        similarities[word] = cos_sim
+
+    # Sort by similarity in descending order.
+    sorted_candidates = sorted(
+        similarities.items(), key=lambda item: item[1], reverse=True
+    )
+
+    if not sorted_candidates:
+        print("Could not find any suitable candidates.")
+        return
+
+    print(f"Result: {sorted_candidates[0][0]}")
+    print("Top 5 candidates:")
+    for i, (word, sim) in enumerate(sorted_candidates[:5]):
+        print(f"{i + 1}. {word} (Similarity: {sim:.4f})")
+
+
+def evaluate():
+    # Load the vocabulary and embeddings.
+    word_to_ix = torch.load(VOCAB_FILE)
+    embeddings = np.load(EMBEDDINGS_FILE)
+
+    # Recreate the inverse mapping from the loaded vocabulary.
+    ix_to_word = {i: word for word, i in word_to_ix.items()}
+
+    for a, b, c in [
+        ("he", "boy", "she"),
+        ("go", "went", "see"),
+    ]:
+        find_analogy(a, b, c, embeddings, word_to_ix, ix_to_word)
+
+
+def main():
+    word_to_ix, _, cooc_data = load_data()
+    if not cooc_data:
+        print("No co-occurrence data was generated.")
+        return
+    train(word_to_ix, cooc_data)
+
+    evaluate()
+
+
+if __name__ == "__main__":
+    main()
+```
