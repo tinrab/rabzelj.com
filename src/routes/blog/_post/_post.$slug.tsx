@@ -35,15 +35,7 @@ const loadRouteData = createServerFn({ method: "GET" })
       throw notFound();
     }
 
-    const title = post.tags.some(
-      (tag) =>
-        tag.slug === BLOG_TAG_SLUG_NOTES ||
-        tag.slug === BLOG_TAG_SLUG_PAPER_NOTES,
-    )
-      ? `${post.title} | Paper Notes`
-      : post.title;
-
-    return { post, title };
+    return { post };
   });
 
 export const Route = createFileRoute("/blog/_post/_post/$slug")({
@@ -53,12 +45,12 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
     if (loaderData === undefined) {
       return {};
     }
-    const { post, title } = loaderData;
+    const { post } = loaderData;
 
     return {
       meta: makeSeo({
         path: match.pathname,
-        title,
+        title: post.title,
         description: post.description,
         image: `${clientConfig.app.url}${pathLocator.assets.blogPostCover(post.slug)}`,
         properties: {
@@ -75,7 +67,7 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
 });
 
 function RouteComponent() {
-  const { post, title } = Route.useLoaderData();
+  const { post } = Route.useLoaderData();
 
   const content = post.artifact?.compiled
     ? createMdxContent(
@@ -94,7 +86,7 @@ function RouteComponent() {
   return (
     <article className="mx-auto max-w-3xl break-words px-4 py-8 md:py-12">
       <Typography className="text-balance" variant="h1">
-        {title}
+        {post.title}
       </Typography>
 
       {isNote ? <BlogNoteAlert className="mt-4" /> : undefined}
