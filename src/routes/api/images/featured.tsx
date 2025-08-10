@@ -142,7 +142,7 @@ export const ServerRoute = createServerFileRoute(
       },
     );
 
-    return new Response(image, {
+    return new Response(image as BufferSource, {
       status: 200,
       headers: {
         "Content-Type": "image/png",
