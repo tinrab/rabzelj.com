@@ -75,6 +75,12 @@ export function getMdxContentComponents({
         {...props}
       />
     ),
+    ol: ({ className, ...props }: React.HTMLAttributes<HTMLOListElement>) => (
+      <ol
+        className={cn(className, "mt-4 ml-4 list-decimal [&>li]:mt-2")}
+        {...props}
+      />
+    ),
     li: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
       <Typography asChild {...props}>
         <li>{children}</li>
