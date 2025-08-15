@@ -1,0 +1,73 @@
+---
+title: "Improving Language Understanding by Generative Pre-Training | Paper Notes"
+description: "Paper notes for Improving Language Understanding by Generative Pre-Training."
+tags:
+  - paper-notes
+  - ai
+  - python
+  - natural-language-processing
+publishedDate: 2025-08-14
+---
+
+https://openai.com/index/language-unsupervised/
+
+https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf
+
+In NLP, task-specific datasets are scarce.
+They show that it's possible to pre-train transformer models on large unlabeled text corpora and then fine-tune them on each specific task.
+Previous deep learning methods largely depend on substantial amounts of manually labeled data, which restricts their applicability in many domains lacking annotated resources.
+
+They propose semi-supervised approach combining unsupervised pre-training and supervised fine-tuning.
+The first stage involves training a high-capacity language model on a large corpus of unlabeled text, such as the BooksCorpus, using a standard language modeling objective.
+This stage aims to enable the model to learn a significant amount of world knowledge and the ability to process long-range dependencies.
+
+Many NLP tasks have structured inputs like sentence pairs, question-answer pairs, or multiple choice options.
+Rather than redesigning the model architecture for each task, the authors developed an approach to convert these structured inputs into sequences that the pre-trained model could process.
+They've used task-specific input transformations that convert structured inputs into ordered token sequences.
+
+Some transformations:
+
+- **Text classification**: Single input text sequence is surrounded with a start and an end token.
+- **Textual entailment**: concatenate the premise and hypothesis sentences with delimiter token "$".
+- **Similarity tasks**: No ordering between sentences. Modify input sequence to contain both possible orderings with a delimiter in between.
+
+# Spec
+
+## Architecture
+- **Type**: 12-layer decoder-only Transformer with masked self-attention
+- **Hidden Size**: 768 dimensions
+- **Attention Heads**: 12 heads
+- **Feed-Forward Network**: 3,072 dimensional inner states
+- **Context Length**: 512 tokens per sequence
+
+## Training Setup
+- **Dataset**: BooksCorpus (7,000+ unpublished books)
+- **Vocabulary**: 40,000 merges using Byte-Pair Encoding (BPE)
+- **Batch Size**: 64 randomly sampled contiguous sequences
+- **Training Duration**: 100 epochs
+- **Achieved Perplexity**: 18.4 on BooksCorpus
+
+## Optimization
+- **Optimizer**: Adam
+- **Learning Rate**: 2.5e-4 (max), with linear warmup over first 2,000 updates
+- **Learning Rate Schedule**: Cosine annealing to 0
+- **Weight Initialization**: N(0, 0.02)
+- **Regularization**:
+  - Dropout rate: 0.1 (residual, embedding, attention)
+  - Modified L2 regularization (w = 0.01) on non-bias/gain weights
+
+## Implementation Details
+- **Normalization**: LayerNorm used extensively
+- **Activation Function**: GELU (Gaussian Error Linear Unit)
+- **Position Embeddings**: Learned (not sinusoidal)
+- **Text Processing**: ftfy library for cleaning, spaCy tokenizer
+
+## Fine-Tuning Settings
+- **Learning Rate**: 6.25e-5
+- **Batch Size**: 32
+- **Training Epochs**: 3 (sufficient for most tasks)
+- **Dropout**: 0.1 for classifier layer
+- **Warmup**: Linear learning rate decay with 0.2% warmup
+- **Auxiliary Loss Weight**: λ = 0.5
+
+This was a relatively compact model by today's standards but represented a significant breakthrough in demonstrating the effectiveness of the pre-training + fine-tuning paradigm for NLP.
