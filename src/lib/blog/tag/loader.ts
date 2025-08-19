@@ -8,6 +8,7 @@ import {
   type BlogTagPostCountData,
   blogTagFrontmatterSchema,
 } from "~/lib/blog/tag/schema";
+import { blogTagIsNote } from "~/lib/blog/tag/utility";
 import { getMdxCompiler } from "~/lib/mdx/compiler";
 
 const TAGS_DIR = path.join(
@@ -54,8 +55,10 @@ export async function loadBlogTagPostCounts(
   { used }: { used?: boolean } = { used: true },
 ): Promise<BlogTagPostCountData[]> {
   const tags = await loadBlogTags();
-  const posts = await loadBlogPosts();
   const selectedTags: BlogTagPostCountData[] = [];
+
+  let posts = await loadBlogPosts();
+  posts = posts.filter((post) => !post.tags.some(blogTagIsNote));
 
   for (const tag of tags) {
     const postCount = posts.filter((post) =>
