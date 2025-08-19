@@ -1,0 +1,49 @@
+---
+title: "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding | Paper Notes"
+description: "Paper notes for BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding."
+tags:
+  - paper-notes
+  - ai
+  - natural-language-processing
+publishedDate: 2025-08-19
+---
+
+BERT is an encoder-only model.
+It has bidirectional architecture, which means it can attend to context from both directions simultaneously.
+This is achieved through the Masked Language Model (MLM) pre-training objective, where random tokens are masked and predicted using full bidirectional context.
+
+# Pre-training
+
+Pre-training is done on large unlabeled corpora using masked language model (MLM) and next sentence prediction task (NSP).
+
+Instead of predicting the next word, MLM randomly masks some words in a sentence and asks the model to predict what those masked words should be, using context from both directions.
+Masking strategy is:
+- 80% of the time replace a token with `[MASK]` token
+- 10% of the time replace a token with a random token
+- 10% of the time keep unchanged
+
+The `[MASK]` token never appears during fine-tuning, so using it 100% of the time would create a mismatch.
+Random replacements forces the model to learn from the context rather than the token itself.
+
+MLM forces the model to learn:
+- Syntax: "The cat [MASK]" -> likely a verb
+- Semantics: "It's raining, so I need my [MASK]" -> "umbrella"
+- World knowledge: "The capital of France is [MASK]" -> "Paris"
+
+NSP helps the model learn relationships between sentences.
+It is a binary classification task.
+Given two sentences $A$ and $B$, predict whether $B$ follows $A$ in the original document, or if $B$ is a random sentence from elsewhere.
+
+Input format uses `[CLS]` (classification token) token at the beginning and `[SEP]` seperator token between $A$ and $B$ sentences.
+
+`[CLS]` token serves as an aggregate representation of the entire input.
+For classification tasks (like sentiment analysis or next sentence prediction), BERT uses only the `[CLS]` token's final representation as input to a simple classifier, rather than trying to combine representations from all tokens.
+This provides a consistent way to extract a fixed-size representation for variable-length inputs.
+Because the `[CLS]` token doesn't correspond to any actual word, it can freely learn to capture whatever sequence-level information is most useful for the task.
+
+# Fine-tuning
+
+BERT is trained to perform downstream tasks with minimal task-specific parameters.
+
+Task-specific parameters are typically just a single linear layer for text classification, or start/end position vectors for question answering.
+All of BERT's parameters are updated end-to-end using the downstream task's objective.

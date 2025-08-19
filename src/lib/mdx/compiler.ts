@@ -14,7 +14,6 @@ async function loadMdxCompiler(): Promise<MdxCompiler> {
 
   return (
     new MdxCompiler()
-      // @ts-ignore invalid types
       .withRemarkPlugin(remarkMath)
       .withRehypePlugin(headingIdPlugin, { prefix: "h-" })
       .withRehypePlugin(syntaxHighlightPlugin, {

@@ -12,7 +12,6 @@ import type {
 async function loadFlinect(): Promise<BlogPostCommon[]> {
   const posts: BlogPostCommon[] = [];
 
-  // @ts-ignore no types
   const sitemapper = new SiteMapper();
   const sitemap: { sites: string[] } = await sitemapper.fetch(
     "https://www.flinect.com/sitemap.xml",

@@ -10,10 +10,7 @@ import { Typography } from "~/components/Typography";
 import { Separator } from "~/components/ui/separator";
 import { clientConfig } from "~/config/client";
 import { loadBlogPost } from "~/lib/blog/post/loader";
-import {
-  BLOG_TAG_SLUG_NOTES,
-  BLOG_TAG_SLUG_PAPER_NOTES,
-} from "~/lib/blog/tag/constants";
+import { blogTagIsNote } from "~/lib/blog/tag/utility";
 import { mdxPageLowerHeadingComponents } from "~/lib/mdx/components/registry";
 import { pageMiddleware } from "~/lib/middleware";
 import { pathLocator } from "~/lib/path-locator";
@@ -77,11 +74,7 @@ function RouteComponent() {
         mdxPageLowerHeadingComponents,
       )
     : undefined;
-  const isNote = post.tags.some(
-    (tag) =>
-      tag.slug === BLOG_TAG_SLUG_NOTES ||
-      tag.slug === BLOG_TAG_SLUG_PAPER_NOTES,
-  );
+  const isNote = post.tags.some(blogTagIsNote);
 
   return (
     <article className="mx-auto max-w-3xl break-words px-4 py-8 md:py-12">

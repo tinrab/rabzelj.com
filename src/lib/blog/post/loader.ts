@@ -13,14 +13,11 @@ import {
   type ExternalBlogData,
   type RelatedBlogPost,
 } from "~/lib/blog/post/schema";
-import {
-  BLOG_TAG_SLUG_NOTES,
-  BLOG_TAG_SLUG_PAPER_NOTES,
-} from "~/lib/blog/tag/constants";
 import { loadBlogTags } from "~/lib/blog/tag/loader";
 import type { BlogTagData } from "~/lib/blog/tag/schema";
 import { getMdxCompiler } from "~/lib/mdx/compiler";
 import { pathLocator } from "~/lib/path-locator";
+import { blogTagIsNote } from "~/lib/blog/tag/utility";
 
 const DATA_DIR = path.join(process.cwd(), serverConfig.app.dataDir);
 const POSTS_DIR = path.join(DATA_DIR, "blog/posts");
@@ -68,12 +65,7 @@ export async function loadBlogPosts({
 
   if (selectNotes !== undefined) {
     posts = posts.filter(
-      (post) =>
-        post.tags.some(
-          (tag) =>
-            tag.slug === BLOG_TAG_SLUG_NOTES ||
-            tag.slug === BLOG_TAG_SLUG_PAPER_NOTES,
-        ) === selectNotes,
+      (post) => post.tags.some(blogTagIsNote) === selectNotes,
     );
   }
 
