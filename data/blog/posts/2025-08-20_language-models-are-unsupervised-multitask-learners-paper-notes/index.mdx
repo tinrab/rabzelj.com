@@ -1,0 +1,56 @@
+---
+title: "Language Models are Unsupervised Multitask Learners | Paper Notes"
+description: "Paper notes for Language Models are Unsupervised Multitask Learners."
+tags:
+  - paper-notes
+  - ai
+  - natural-language-processing
+publishedDate: 2025-08-20
+---
+
+Introduces GPT-2 and explains how task-specific training can be avoided.
+A sufficiently large language model can learn to perform various NLP tasks in a "zero-shot" setting.
+
+# Architecture
+
+The GPT-2 model is a large, decoder-only Transformer architecture.
+It's based on the original GPT model with a few modifications:
+- **Layer Normalization**: Layernorm was moved to the input of each transformer sub-block.
+Similar to pre-activation in residual networks.
+- **Additional Normalization**: An extra layernorm was added after the final self-attention block.
+- **Modified Initialization**: The weights of the residual layers were scaled at initialization by a factor of $1/\sqrt{N}$ (where N is the number of residual layers).
+Residual connections help the values from growing too large.
+- **Increased Scale**: The vocabulary was expanded to 50,257 tokens, and the context size was doubled from 512 to 1024.
+
+They trained 4 different sizes to see how performance scaled with size.
+
+# BPE
+
+The authors wanted a way to handle any text without running into "unknown word" issues.
+A standard character-level encoding is not efficient enough.
+The common middle-ground is Byte-Pair Encoding (BPE), which wasn't ideal.
+Because BPE is frequency-based, it would create many different tokens for the same word with different punctuation, such as `dog.`, `dog!`, and `dog?`.
+
+They modified BPE by preventing it from merging across character categories.
+Meaning, that a letter would not be merged with a punctuation mark.
+
+When evaluating GPT-2 model on various benchmark datasets, they needed to work with datasets having their own specific pre-processing and tokenization rules.
+They used "invertible de-tokenizers" on the benchmark datasets before feeding them to the model.
+This reversed the tokenization artifacts, making the text look more like the data GPT-2 was trained on.
+They describe this as a simple form of domain adaptation.
+Since the de-tokenizers were "invertible," they could still calculate the probability for the evaluation.
+
+# WebText dataset
+
+They created a new dataset called **WebText**.
+Scraping the web randomly often results in low-quality text.
+Instead, they scraped all outbound links from Reddit that had received at least 3 karma.
+
+After cleaning and de-duplicating, they got 8 million documents totaling 40 GB of text.
+They removed all Wikipedia articles from WebText to ensure model's performance on benchmark tests wasn't just due to memorizing overlapping content.
+
+They perfomed an analysis of duplicates in the dataset.
+They created bloom filters of all the "8-grams" (sequences of eight consecutive words) in the WebText training data.
+Then took the test sets of various benchmarks (like LAMBADA, CoQA, etc.) and checked what percentage of their 8-grams were also present in the WebText training set.
+There was some overlap (around 3.2%), but it was not the main reason for the model's high performance.
+Other datasets also had high overlap between train and test sets (around 5.9%).
