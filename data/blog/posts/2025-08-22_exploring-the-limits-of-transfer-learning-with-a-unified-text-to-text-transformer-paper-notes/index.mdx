@@ -1,0 +1,73 @@
+---
+title: "Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer | Paper Notes"
+description: "Paper notes for Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer."
+tags:
+  - paper-notes
+  - ai
+  - natural-language-processing
+publishedDate: 2025-08-22
+---
+
+https://arxiv.org/abs/1910.10683
+
+This paper contains a lot of info and an overview of the entire field.
+The paper can be looked at as a survey.
+
+It proposes a unified text-to-text framework that transforms all text-based language problems into a text-to-text format.
+A single model, objective, training procedure, and decoding process can be applied on a diverse set of NLP tasks.
+
+They introduce a new cleaned dataset called C4 (Colossal Clean Crawled Corpus).
+"Many of the scraped pages contained warnings stating that Javascript should be enabled so we removed any line with the word Javascript." Lmao.
+
+They systematically tested different approaches to scaling.
+"You were just given 4x more compute. How should you use it?"
+Different architectures, training objectives, datasets, and scaling strategies.
+
+Key findings:
+- Encoder-decoder architecture works best for the text-to-text approach (vs decoder-only models).
+- Denoising objectives beat language modeling for pre-training (corrupting text and having the model reconstruct it).
+- Scale is good, bigger models and more data consistently help.
+- Multi-task pre-training can work but isn't clearly better than the standard pre-train then fine-tune approach.
+
+They use "sentinel tokens" when corrupting text.
+Each consecutive span of tokens is replaced by a sentinel token (e.g. &lt;X&gt; and &lt;Y&gt;) that is unique over the example.
+
+Example:
+
+Original:
+```
+Thank you [for inviting] me to your party [last] week.
+```
+
+Inputs:
+```
+Thank you <X> me to your party <Y> week.
+```
+
+Targets:
+```
+<X> for inviting <Y> last <Z>
+```
+
+They do this for efficiency.
+The sentinel tokens create a clear mapping between what was removed and what needs to be reconstructed.
+Instead of predicting every single token in the original sequence, you only predict the corrupted parts. This makes training faster.
+The model learns to reconstruct meaningful chunks of text, not just individual words.
+
+HPO on large language models is tough.
+They do hyperparameter searches on smaller models (like T5-Small).
+They train these smaller models for a fraction of the total time and find the optimal learning rate, warmup steps, weight decay, etc., at that scale.
+The assumption is that hyperparameters that work well on a smaller model will be a very good starting point for the larger model.
+
+They use a "coordinate ascent" approach.
+They're not looking for the best model, dataset, and objective all at once, they do a baseline and then alter one aspect at a time.
+For example, they keep the objective and data fixed and only compare different model architectures, and they use the best architecture from the previous step and only compare different pre-training objectives.
+This systematic one-variable-at-a-time exploration is much more manageable than a combinatorial search.
+The model is also similar to BERT, so they use similar parameters as a starting point.
+
+They use AdaFactor optimizer, which is supposed to be more memory-efficient and less sensitive to hyperparameter choices.
+It often works well without LR tuning.
+
+They watch the training loss curves.
+If the loss explodes or plateaus unexpectedly, they might manually intervene by stopping the training, lowering the learning rate, and resuming from a recent checkpoint.
+"We use a constant learning rate of $0.001$ when fine-tuning. We save a checkpoint every $5,000$ steps and report results on the model checkpoint corresponding to the highest validation performance."
