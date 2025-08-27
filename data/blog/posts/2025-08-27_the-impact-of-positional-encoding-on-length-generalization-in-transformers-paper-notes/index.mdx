@@ -1,0 +1,32 @@
+---
+title: "The Impact of Positional Encoding on Length Generalization in Transformers | Paper Notes"
+description: "Paper notes for The Impact of Positional Encoding on Length Generalization in Transformers."
+tags:
+  - paper-notes
+  - ai
+  - natural-language-processing
+  - large-language-model
+publishedDate: 2025-08-27
+---
+
+https://arxiv.org/abs/2305.19466
+
+Explores how decoder-only Transformer without positional encodings (NoPE) models outperform other methods in generalizing to longer sequences.
+
+Length generalization is the ability for a model to generalize from smaller training context sizes to longer ones.
+Training a Transformer with larger context size is costly.
+The number of longer training examples also drops as the sequence length increases, in which case generalization is desirable.
+
+Encoder-only Transformers (such as BERT) become bag-of-words models in the absence of positional encoding.
+Decoder-only Transformers with causal attention mask are not permutation invariant and can model sequences even without explicit position information.
+
+They talk about how NoPE still learns positions.
+They introduce two theorems:
+- "Absolute Encoding": The model's first layer can learn to recover the absolute position of each token.
+It can use the causal attention mask and the presence of a beginning-of-sequence (`<bos>`) token to essentially "count" the positions and write this information into the hidden state for subsequent layers to use.
+- "Relative Encoding": If the absolute position information is present in the hidden state (as established by Theorem 1), the self-attention mechanism in subsequent layers can be configured to implement a relative positional encoding.
+This means the attention score between two tokens can be made dependent on their relative distance (e.g., $n-m$) rather than their absolute positions.
+
+It's theoretically capable of learning either method, the paper investigates what the NoPE model actually learns during training.
+They compared the attention patterns of the NoPE model with models trained using various explicit positional encodings (T5's Relative PE, ALiBi, Rotary, and APE).
+They found that the attention patterns of the NoPE model were most similar to those of the T5's Relative PE model.

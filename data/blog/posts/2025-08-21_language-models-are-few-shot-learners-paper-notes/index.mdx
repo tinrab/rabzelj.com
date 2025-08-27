@@ -1,0 +1,65 @@
+---
+title: "Language Models are Few-Shot Learners | Paper Notes"
+description: "Paper notes for Language Models are Few-Shot Learners."
+tags:
+  - paper-notes
+  - ai
+  - natural-language-processing
+  - large-language-model
+publishedDate: 2025-08-21
+---
+
+https://arxiv.org/abs/2005.14165
+
+Introduces GPT-3, a 175-billion parameter autoregressive language model, and evaluates its performance on various NLP tasks.
+Shows that large transformer models exhibit good few-shot and zero-shot learning.
+
+# In-context learning
+
+The model learns to perform a task at inference time based on the info provided in the prompt.
+No weights are updated.
+
+They explore three settings for this:
+- Few-shot: The model is given a small number of examples (typically 10 to 100) to learn from at inference time.
+- One-shot: The model is given only one example.
+- Zero-shot: The model is given only a natural language description of the task.
+
+The reason to distinguish one-shot from few-shot and zero-shot is that it most closely matches the way in which some tasks are communicated to humans.
+This way we communicate the desired format for the output.
+
+# Architecture
+
+The architecture is the same as GPT-2, with minimal changes.
+They focused on scale rather than novel components.
+
+It uses same key features as GPT-2, including pre-normalization (applying layer normalization before the attention and feed-forward sub-layers for better training stability) and a modified initialization scheme.
+
+It also incorporates alternating dense and locally banded sparse attention patterns in its layers.
+This is similar to the approach used in the "Sparse Transformer."
+In "sparse" attention, each token only attends to a limited, predefined subset of other tokens.
+The model can be computationally efficient without sacrificing too much performance, which is important for a model of this size.
+
+They've trained several sizes, the largest one is called GPT-3 (175B parameters).
+
+# Dataset
+
+The primary source was CommonCrawl dataset.
+To improve its quality, they augmented the data with several other more curated datasets:
+- An expanded version of the WebText dataset, which is a collection of text from outbound links on Reddit.
+- Two internet-based books corpora (Books1 and Books2).
+- The English-language Wikipedia.
+
+During training, the model didn't sample from these datasets proportionally to their size.
+The higher-quality datasets like Wikipedia and the books corpora were "up-weighted," meaning the model was trained on them more frequently to improve its overall performance.
+
+They've built a classifier model to distinguish between high and low quality documents.
+The classifier was trained on their WebText dataset as a positive example of high quality text and CommonCrawl as a negative example.
+
+They used fuzzy deduplication to reduce redundancy and prevent the model from overfitting on repated content.
+This removed documents that were highly similar.
+
+There was some train-test overlap, "data contamination," in the datasets.
+This is to be expected with huge text datasets.
+They've tried removing overlaps, but they report that a bug in their filtering process meant that some of these overlaps were not successfully removed, and the immense cost of training prevented them from retraining.
+
+After a post-training analysis, they found that performance difference was negligible.

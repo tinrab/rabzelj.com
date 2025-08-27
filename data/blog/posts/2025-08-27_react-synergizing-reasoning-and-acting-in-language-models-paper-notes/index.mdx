@@ -1,0 +1,34 @@
+---
+title: "ReAct: Synergizing Reasoning and Acting in Language Models | Paper Notes"
+description: "Paper notes for ReAct: Synergizing Reasoning and Acting in Language Models."
+tags:
+  - paper-notes
+  - ai
+  - natural-language-processing
+  - large-language-model
+  - reasoning-language-model
+publishedDate: 2025-08-27
+---
+
+https://arxiv.org/abs/2210.03629
+
+"ReAct" approach is a framework that enables LLMs to solve complex tasks by dynamically combining internal reasoning with external actions.
+The model generates both reasoning traces and task-specific actions in an interleaved way.
+
+One limit of CoT is that their reasoning is static.
+It cannot interact with the external world to update their knowledge or verify their thoughts.
+This can lead to error propagation or hallucinations.
+"Acting-only" models generate actions but they can't do high-level planning.
+
+ReAct addresses these issues by prompting the LLM to generate a sequence of thoughts, actions, and observations.
+That creates a loop for solving problems:
+- Thought: The model first reasons about the task.
+It analyzes the current situation, decomposes the goal into smaller steps, and comes up with a plan.
+- Act: Based on that, the model generates an action to be executed in the environment.
+- Observation: The model receives an observation from the environment as a result of its action.
+This provides feedback.
+
+This "Thought => Act => Observation" cycle repeats, and the model adjusts its plan.
+This synergy is described in the paper as:
+- Reason to Act: The reasoning traces help the model update high-level plans.
+- Act to Reason: The actions allow the model to interface with external sources to improve its reasoning.

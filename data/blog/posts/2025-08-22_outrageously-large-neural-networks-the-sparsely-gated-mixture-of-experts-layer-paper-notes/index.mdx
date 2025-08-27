@@ -1,0 +1,31 @@
+---
+title: "Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer | Paper Notes"
+description: "Paper notes for Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer."
+tags:
+  - paper-notes
+  - ai
+  - natural-language-processing
+  - large-language-model
+  - mixture-of-experts
+publishedDate: 2025-08-22
+---
+
+https://arxiv.org/abs/1701.06538
+
+Conditional computation is a technique that lets neural networks selectively activate only parts of the model for each input, rather than using the entire network every time.
+The challenge is learning how to intelligently route inputs to the right parts of the network
+They use a trainable gating mechanism.
+
+A "sparsely-gated mixture-of-experts layer" has a number of experts (each a FFN) and a trainable gating network which selects a parse combination of the experts to process each input.
+
+Let $G(x)$ be the output of the gating network and $E_i(x)$ the output of the $i$-th expert.
+
+$$
+y=\sum_{i=1}^{n}G(x)_iE_i(x)
+$$
+
+We save computation based on the sparsity of the output of $G(x)$.
+Wherever $G(x)_i=0$, we need not compute $E_i(x)$.
+
+They also implement hierarchical MoE to solve scalability problem with the gating mechanism.
+When you have lots of experts, the gating network needs to compute a probability score for every single expert for every input.
