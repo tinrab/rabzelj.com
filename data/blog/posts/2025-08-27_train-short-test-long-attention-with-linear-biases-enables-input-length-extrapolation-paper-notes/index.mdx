@@ -1,0 +1,37 @@
+---
+title: "Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation | Paper Notes"
+description: "Paper notes for Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation."
+tags:
+  - paper-notes
+  - ai
+  - natural-language-processing
+  - large-language-model
+publishedDate: 2025-08-27
+---
+
+https://arxiv.org/abs/2108.12409
+
+Introduces Attention with Linear Biases (ALiBi) technique that aims to improve LLM's ability to extrapolate to longer sequences than it was trained on.
+
+ALiBi negatively biases attention scores with a linearly decreasing penalty proportional to the distance between the relevant key and query.
+Their approach "eliminates position embeddings."
+
+Training on shorter sequences costs less.
+Their 1.3B model trained on $L=1024$ tokens with ALiBi achieves the same perplexity as a sinusoidal PE model trained on $L=2048$ when both are tested on sequences of 2048 tokens, even though their model is 11% faster and uses 11% less memory.
+
+In classic approach, position embeddings are added to the word embeddings at the bottom of the network.
+For an input subsequence of length $L$, the attention sublayer computes the attention scores of the $i$-th query $q_i\in \mathbb{R}^{1\times d},(1\le i\le L)$ in each head, given the first $i$ keys $K\in \mathbb{R}^{i\times d}$, where $d$ is the head dimension:
+
+$$
+softmax(q_iK^{T}).
+$$
+
+These scores are then multiplied by the values.
+
+ALiBi addds a static, non-learned bias after the query-key dot product:
+
+$$
+\text{softmax}(q_i {K}^T + m \cdot [-(i-1), \ldots, -2, -1, 0]),
+$$
+
+where $m$ is a head-specific slope fixed before training.

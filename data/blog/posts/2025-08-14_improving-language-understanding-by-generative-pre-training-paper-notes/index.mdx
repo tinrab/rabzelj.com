@@ -5,6 +5,7 @@ tags:
   - paper-notes
   - ai
   - natural-language-processing
+  - large-language-model
 publishedDate: 2025-08-14
 ---
 
@@ -23,6 +24,9 @@ This stage aims to enable the model to learn a significant amount of world knowl
 Many NLP tasks have structured inputs like sentence pairs, question-answer pairs, or multiple choice options.
 Rather than redesigning the model architecture for each task, the authors developed an approach to convert these structured inputs into sequences that the pre-trained model could process.
 They've used task-specific input transformations that convert structured inputs into ordered token sequences.
+
+They show how transferring a specific number of layers impacts accuracy.
+Accuracy increases as they transfer more layers from unsupervised pre-training to the supervised target task.
 
 Some transformations:
 

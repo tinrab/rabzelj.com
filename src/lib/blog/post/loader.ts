@@ -69,10 +69,13 @@ export async function loadBlogPosts({
     );
   }
 
-  return posts.sort(
-    (a, b) =>
-      new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime(),
-  );
+  return posts.sort((a, b) => {
+    const dateCmp = new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime();
+    if (dateCmp !== 0) {
+      return dateCmp;
+    }
+    return a.slug.localeCompare(b.slug);
+  });
 }
 
 export async function loadBlogPost(
