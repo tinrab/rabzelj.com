@@ -70,7 +70,8 @@ export async function loadBlogPosts({
   }
 
   return posts.sort((a, b) => {
-    const dateCmp = new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime();
+    const dateCmp =
+      new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime();
     if (dateCmp !== 0) {
       return dateCmp;
     }
