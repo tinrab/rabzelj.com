@@ -1,0 +1,35 @@
+---
+title: "Longformer: The Long-Document Transformer | Paper Notes"
+description: "Paper notes for Longformer: The Long-Document Transformer."
+tags:
+  - paper-notes
+  - ai
+  - natural-language-processing
+  - large-language-model
+publishedDate: 2025-08-28
+---
+
+https://arxiv.org/abs/2004.05150
+
+Sliding window attention is a strategy designed to solve the standard Transformers' problem of efficiently processing long documents.
+Every token calculates an attention score with every other token, which is $O(n^2)$ with sequence length $n$.
+
+The two main points of sliding window attention pattern are: local context is most important and computation must scale linearly.
+Each token pays attention to a fixed-size window ($w$) of tokens to its left and right.
+The complexity becomes $O(n\times w)$.
+
+In a transformer with $l$ layers, the receptive field size at the top layer is $l\times w$.
+"Receptive field" refers to the extent of the input data that a particular neuron is influenced by.
+
+Sliding window can be dilated, which they call "dilated sliding window."
+The window has gaps of size dilation $d$.
+Assuming a fixed $d$ and $w$ for all layers, the receptive field is $l\times d\times w$.
+In a multi-head attention, each head can have its own $d$, which they found improves performance because some heads focus on local context and others on longer context.
+
+The sliding window is good for efficiently building local context, but they note that it is not flexible enough to learn task-specific representations.
+Certain NLP tasks require specific tokens to gather information from the entire sequence, not just their local neighborhood.
+"Global attention" is applied to a few task-specific tokens.
+
+Sliding window attention is a sparse operation.
+It only needs to compute a few diagonals of the full attention matrix.
+They provide their own implementations of the kernel.

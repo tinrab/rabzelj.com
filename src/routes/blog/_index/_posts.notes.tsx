@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
 import { BlogNoteAlert } from "~/components/blog/BlogNoteAlert";
-import { BlogPostFlatList } from "~/components/blog/BlogPostFlatList";
 import { BlogTagChip } from "~/components/blog/BlogTagChip";
 import { Typography } from "~/components/Typography";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
@@ -28,11 +27,14 @@ function RouteComponent() {
     <>
       <BlogNoteAlert className="mb-4" />
 
-      <BlogPostFlatList
-        posts={posts}
-        renderPost={(post) => (
+      <div className="flex flex-col gap-2">
+        {posts.map((post) => (
           <div className="flex flex-col">
-            <Typography variant="a" className="mb-1" asChild>
+            <Typography
+              variant="a"
+              className="mb-1 text-balance text-xl tracking-tight"
+              asChild
+            >
               <Link to="/blog/$slug" params={{ slug: post.slug }}>
                 {post.title}
               </Link>
@@ -48,8 +50,8 @@ function RouteComponent() {
               ))}
             </div>
           </div>
-        )}
-      />
+        ))}
+      </div>
     </>
   );
 }

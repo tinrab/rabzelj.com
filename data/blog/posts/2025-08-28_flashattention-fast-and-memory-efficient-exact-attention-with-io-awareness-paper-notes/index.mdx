@@ -1,0 +1,22 @@
+---
+title: "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness | Paper Notes"
+description: "Paper notes for FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness."
+tags:
+  - paper-notes
+  - ai
+  - natural-language-processing
+publishedDate: 2025-08-28
+---
+
+https://arxiv.org/abs/2205.14135
+
+Basically, splits input $Q$, $K$ and $V$ into blocks, loads them from slow HBM to fast SRAM, then computes normalized attention output per block, then adds them up to the correct result at the end.
+
+FlashAttention is an algorithm designed to make the attention mechanism in Transformers faster and more memory-efficient without sacrificing accuracy.
+Standard attention is often memory-bound, because reading and writing large intermediate attention matrices to and from the GPU's High Bandwidth Memory (HBM) is slow.
+FlashAttention restructures the computation using tiling and recomputation.
+
+It splits the input matrices into smaller blocks (tiling) that can fit into the GPU's much faster on-chip SRAM.
+All computation for these blocks is then performed within this fast memory.
+To avoid storing the large attention matrix for the backward pass, it instead stores a small softmax normalization factor and recomputes the attention matrix on-chip during backprop.
+This reduces the number of slow memory accesses.
