@@ -80,3 +80,19 @@ def apply_rope(x: torch.Tensor, base:float=10000.0) -> torch.Tensor:
 
     return rotated
 ```
+
+RoPE rotates the token's embedding vector in a multi-dimensional space.
+For a token at position $m$ in the sequence, it applies a rotation proportional to $m$.
+It happens in pairs of dimensions.
+Like spinning in multiple 2D planes at once.
+
+The angle use different "frequencies" for each pair, where lower dims rotate slowly and higher ones quickly.
+This rotation is done via a special rotary matrix, which makes it efficient to compute and doesn't add extra learnable parameters.
+
+RoPE works because it turns absolute positions into relative ones.
+Transformers care more about relative distances than global positions, so that's why it's good.
+Relative encoding is also more intuitive for languages.
+
+It's flexible for different sequences lengths.
+It helps models generalize to longer texts because rotation patterns repeat in predictable (geometric) way.
+It's efficient and stable because the rotation matrix is orthogonal and preserves vector lengths which avoids exploding values.

@@ -1,0 +1,39 @@
+---
+title: "YaRN: Efficient Context Window Extension of Large Language Models | Paper Notes"
+description: "Paper notes for YaRN: Efficient Context Window Extension of Large Language Models."
+tags:
+  - paper-notes
+  - ai
+publishedDate: 2025-09-06
+---
+
+https://arxiv.org/abs/2309.00071
+
+YaRN is a technique to efficiently extend the effective context window of large language models that use RoPE.
+
+It modifies the existing RoPE mechanism.
+It improves upon position interpolation, where we stretch positional dims equally to fit a longer context.
+Indiscriminately scaling all dimensions can lead to a loss of high-frequency information, which is important for understanding the relationships between nearby tokens.
+It uses "NTK-by-parts" interpolation, which avoids interpolating the high-frequency dims while still scaling the low-frequency ones.
+
+The "wavelength" is a way to distinguish between the positional dims that track local information (short wavelength) and global (long wavelength) information.
+YaRN selectively modifies only the long wavelength dimensions.
+They define the "ramp function" for defining the boundary of the two interpolation strategies.
+
+YaRN uses a temperature scaling factor applied to the attention logits before the softmax function.
+This helps to stabilize the attention mechanism over very long sequences.
+
+$$
+softmax(\frac{q_m^T k_n}{t\sqrt{\left| D \right|}})
+$$
+
+Temperature scaling sharpens attention, which allows it to pick out most relevant info.
+Normal attention ($t=1$), YaRN ($t\lt 1$).
+
+YaRN works with existing ML libraries because scaling doesn't require rewriting the kernels.
+Instead of changing the operation, they change the inputs to the operation.
+
+`(Q*K)/t` is mathematically identical to `(Q/sqrt(t)) * (K / sqrt(t))`.
+We can get the same final score by dividing original Q and K vectors by `sqrt(t)`, then doing regular dot-product.
+
+RoPE is applied to initial vectors, so they need to pre-scale RoPE embeddings based on $t$.
