@@ -1,0 +1,32 @@
+---
+title: "Effective Long-Context Scaling of Foundation Models | Paper Notes"
+description: "Paper notes for Effective Long-Context Scaling of Foundation Models."
+tags:
+  - paper-notes
+  - ai
+publishedDate: 2025-09-09
+---
+
+https://arxiv.org/abs/2309.16039
+
+Talks about RoPE scaling.
+With increased distance between two tokens, the model's ability to see the relationship between weakens.
+
+They propose RoPE ABF (adjusted base frequency).
+It's a minimal modification to RoPE.
+The "base frequency" hyperparameter is increased from 10k to 500k.
+The change reduces the decaying effect of RoPE for distant tokens.
+
+# Comparing with position interpolation (PI) and XPos
+
+PI works by rescaling the input positions.
+If the original model was trained for 4096 tokens and you want to handle 16384, PI squeezes the new range of positions (0 to 16383) down into the original range (0 to 4095).
+
+xPos is a variant of rotary encoding designed to address the "oscillation" present in the original RoPE's attention scores.
+It aims to smooth out these high-frequency components, which could be undesirable for language modeling.
+
+RoPE ABF does not change the input positions.
+By increasing the base frequency, it reduces the angle of rotation for each positional embedding.
+This slows down how quickly the embeddings change over distance, and reduces the decay of attention scores for distant tokens.
+
+RoPE ABF is the only variant that can maintain its performance up to the full 32,768-token context window on the "FIRST-SENTENCE-RETRIEVAL" task.
