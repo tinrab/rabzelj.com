@@ -1,0 +1,34 @@
+---
+title: "GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints | Paper Notes"
+description: "Paper notes for GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints."
+tags:
+  - paper-notes
+  - ai
+publishedDate: 2025-09-10
+---
+
+https://arxiv.org/abs/2305.13245
+
+Introduces grouped-query attention (GQA).
+
+It interpolates between multi-head attention (MHA) and multi-query attention (MQA).
+Groups query heads and shares key-value pairs within groups.
+It achieves quality close to MHA while maintaining speed comparable to MQA.
+
+GQA divides the query heads into a number of groups.
+`GQA-G` refers to a grouped-query with `G` groups.
+`GQA-1` is equivalent to MQA, while `GQA-H` with groups equal to number of heads is equivalent to MHA.
+
+They convert a MHA model checkpoint to GQA by mean-pooling al the original heads within a group.
+
+They test it with the T5 models.
+The key and value heads are mean-pooled to the appropriate MQA or GQA structure, and then pre-trained for a further $\alpha$ proportion of original pre-training steps with the original pre-training setup and dataset.
+
+They compared different methods for converting a MHA checkpoint, and find that mean-pooling the key and value heads worked best because it preserves the most information from the original model.
+It outperformed methods like selecting a single head or random initialization.
+
+They investigated the amount of additional pre-training required after conversion.
+They showed that while GQA achieves reasonable performance immediately, both MQA and GQA benefit significantly from a small amount of uptraining (around 5% of the original), with diminishing returns thereafter.
+
+They tested the effect of the number of groups on inference speed.
+They showed that increasing the groups from one (MQA) to eight results in only a modest slowdown, which confirms that an intermediate number of groups provides a favorable balance between the speed of MQA and the quality of MHA.
