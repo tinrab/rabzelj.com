@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "NITRO_PRESET=node-server vite build && tsc --noEmit",
-    "build:vercel": "NITRO_PRESET=vercel vite build && shx cp -r ./data ./.vercel/output/functions/__nitro.func/data",
+    "build:vercel": "NITRO_PRESET=vercel vite build && shx cp -r ./data ./.vercel/output/functions/__fallback.func/data",
     "clean": "shx rm -rf ./.output ./.tanstack ./.nitro ./.vercel/output",
     "dev": "vite dev --port 3000",
     "format": "biome format --write .",
