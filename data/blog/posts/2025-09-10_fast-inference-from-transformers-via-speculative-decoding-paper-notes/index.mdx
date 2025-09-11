@@ -1,0 +1,33 @@
+---
+title: "Fast Inference from Transformers via Speculative Decoding | Paper Notes"
+description: "Paper notes for Fast Inference from Transformers via Speculative Decoding."
+tags:
+  - paper-notes
+  - ai
+publishedDate: 2025-09-10
+---
+
+https://arxiv.org/abs/2211.17192
+
+Speculative decoding accelerates decoding from a large autoregressive model $M_p$ by using a smaller model $M_q$ to generate completions then use the target model $M_p$ to evaluate all of the guesses in parallel.
+All tokens that lead to an identical distribution are accepted.
+We sample an additional token from an adjusted distribution to fix the first one that was rejected, or add an additional one if they are all accepted.
+
+Speculative decoding is an algorithm designed to accelerate inference from large autoregressive models, such as Transformers, without changing their architecture, retraining them, or altering their output distribution.
+The core idea is to use a faster approximation model ($M_q$) to predict a sequence of several future tokens, and then have the large target model ($M_p$) verify these predictions in a single parallel step.
+
+The process:
+1. Speculation: The fast approximation model generates a "draft" of several tokens autoregressively.
+2. Verification: The large target model takes the original input and the entire draft sequence and evaluates them all at once in a single parallel forward pass.
+This pass yields the probability distributions the target model would have predicted for each token in the sequence.
+3. Acceptance and rejection: The algorithm iterates through the draft tokens, comparing the approximation model's predictions to the target model's.
+It accepts a prefix of the draft tokens as long as they are consistent (using the rules of speculative sampling).
+The first token that is rejected terminates the acceptance process.
+4. Correction: If a token is rejected, a single new token is sampled from the target model's corrected probability distribution.
+If all draft tokens are accepted, an additional new token is sampled from the target model's distribution for the next position.
+
+At least one new token is guaranteed to be generated in every iteration, but potentially many more.
+
+Any model can be used as the approximation model, even simple ones (like n-gram) or just randomness.
+
+They provide equations for choosing parameters (like how many guesses to generate) and expected improvements.
