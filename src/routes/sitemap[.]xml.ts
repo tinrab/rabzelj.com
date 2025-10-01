@@ -1,50 +1,55 @@
-import { createServerFileRoute } from "@tanstack/react-start/server";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { loadServerConfig } from "~/config/server";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
 import { loadBlogTagPostCounts } from "~/lib/blog/tag/loader";
 import { pathLocator } from "~/lib/path-locator";
 
-export const ServerRoute = createServerFileRoute("/sitemap.xml").methods({
-  GET: async () => {
-    const config = loadServerConfig();
-    const now = new Date();
-    const thisWeek = new Date(now);
-    thisWeek.setDate(now.getDate() - now.getDay());
+export const Route = createFileRoute("/sitemap.xml")({
+  server: {
+    handlers: {
+      GET: async () => {
+        const config = loadServerConfig();
+        const now = new Date();
+        const thisWeek = new Date(now);
+        thisWeek.setDate(now.getDate() - now.getDay());
 
-    const staticRoutes: SitemapUrl[] = ["/", pathLocator.blog.index].map(
-      (path) => ({
-        url: `${config.app.url}${path}`,
-        changeFrequency: "weekly",
-        lastModified: thisWeek,
-      }),
-    );
+        const staticRoutes: SitemapUrl[] = ["/", pathLocator.blog.index].map(
+          (path) => ({
+            url: `${config.app.url}${path}`,
+            changeFrequency: "weekly",
+            lastModified: thisWeek,
+          }),
+        );
 
-    const posts = await loadBlogPosts();
-    const blogPostRoutes: SitemapUrl[] = posts.map((post) => ({
-      url: `${config.app.url}${pathLocator.blog.post.index(post.slug)}`,
-      changeFrequency: "weekly",
-      lastModified: new Date(post.modifiedDate ?? post.publishedDate),
-    }));
+        const posts = await loadBlogPosts();
+        const blogPostRoutes: SitemapUrl[] = posts.map((post) => ({
+          url: `${config.app.url}${pathLocator.blog.post.index(post.slug)}`,
+          changeFrequency: "weekly",
+          lastModified: new Date(post.modifiedDate ?? post.publishedDate),
+        }));
 
-    const tags = await loadBlogTagPostCounts();
-    const blogTagRoutes: SitemapUrl[] = tags.map((tag) => ({
-      url: `${config.app.url}${pathLocator.blog.tags.page(tag.slug)}`,
-      changeFrequency: "weekly",
-      lastModified: thisWeek,
-    }));
+        const tags = await loadBlogTagPostCounts();
+        const blogTagRoutes: SitemapUrl[] = tags.map((tag) => ({
+          url: `${config.app.url}${pathLocator.blog.tags.page(tag.slug)}`,
+          changeFrequency: "weekly",
+          lastModified: thisWeek,
+        }));
 
-    return new Response(
-      makeSitemap([...staticRoutes, ...blogPostRoutes, ...blogTagRoutes]),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/xml",
-          "X-Content-Type-Options": "nosniff",
-          "Cache-Control": "public, max-age=3600, stale-while-revalidate=3600",
-        },
+        return new Response(
+          makeSitemap([...staticRoutes, ...blogPostRoutes, ...blogTagRoutes]),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/xml",
+              "X-Content-Type-Options": "nosniff",
+              "Cache-Control":
+                "public, max-age=3600, stale-while-revalidate=3600",
+            },
+          },
+        );
       },
-    );
+    },
   },
 });
 

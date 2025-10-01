@@ -12,7 +12,7 @@ import { pageMiddleware } from "~/lib/middleware";
 
 const loadRouteData = createServerFn({ method: "GET" })
   .middleware([pageMiddleware])
-  .validator(z.object({ slug: z.string().min(1) }))
+  .inputValidator(z.object({ slug: z.string().min(1) }))
   .handler(async ({ data: { slug } }) => {
     const tag = await loadBlogTag(slug);
     if (!tag) {
