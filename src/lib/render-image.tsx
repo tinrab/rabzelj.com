@@ -1,5 +1,5 @@
 import fontSans from "@fontsource/roboto/files/roboto-latin-400-normal.woff?arraybuffer";
-import { Resvg } from "@resvg/resvg-js";
+// import { Resvg } from "@resvg/resvg-js";
 import type React from "react";
 import satori from "satori";
 
@@ -18,6 +18,8 @@ export async function renderImage(
       },
     ],
   });
+
+  const { Resvg } = await import("@resvg/resvg-js");
 
   const resvg = new Resvg(svg);
   const pngData = resvg.render();

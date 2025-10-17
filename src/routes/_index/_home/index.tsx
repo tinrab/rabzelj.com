@@ -3,7 +3,6 @@ import { useState } from "react";
 import { FaBluesky, FaGithub, FaLinkedin, FaXTwitter } from "react-icons/fa6";
 
 import { Typography } from "~/components/Typography";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { clientConfig } from "~/config/client";
 import { pathLocator } from "~/lib/path-locator";
@@ -47,10 +46,13 @@ function RouteComponent() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col items-center break-words px-4 pt-6 pb-8 md:pt-12">
-      <Avatar className="mb-3 h-28 w-28">
-        <AvatarImage src={pathLocator.assets.avatar} alt="Tin Rabzelj" />
-        <AvatarFallback>TR</AvatarFallback>
-      </Avatar>
+      <img
+        className="mb-3 relative flex shrink-0 rounded-full aspect-square"
+        src={`${clientConfig.app.url}${pathLocator.assets.avatar}`}
+        alt="Tin Rabzelj"
+        width={128}
+        height={128}
+      />
       <Typography variant="h1" className="mb-3 text-4xl md:text-5xl">
         Tin Rabzelj
       </Typography>

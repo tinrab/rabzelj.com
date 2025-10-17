@@ -18,7 +18,7 @@ import { makeSeo } from "~/lib/seo";
 
 const loadRouteData = createServerFn({ method: "GET" })
   .middleware([pageMiddleware])
-  .validator(
+  .inputValidator(
     z.object({
       slug: z.string().min(1),
     }),
