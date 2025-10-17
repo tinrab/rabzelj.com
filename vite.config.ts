@@ -1,11 +1,12 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+
 import tailwindcss from "@tailwindcss/vite";
+import { nitroV2Plugin } from "@tanstack/nitro-v2-vite-plugin";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { defineConfig } from "vite";
 import arraybufferPlugin from "vite-plugin-arraybuffer";
 import tsConfigPaths from "vite-tsconfig-paths";
-import { nitroV2Plugin } from "@tanstack/nitro-v2-vite-plugin";
-import fs from "node:fs/promises";
-import path from "node:path";
 
 const routeRules: Record<string, unknown> = {};
 for (const fileName of await fs.readdir("public")) {
@@ -46,4 +47,17 @@ export default defineConfig({
     tailwindcss(),
     arraybufferPlugin(),
   ],
+  build: {
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (
+          warning.code === "MODULE_LEVEL_DIRECTIVE" ||
+          warning.code === "SOURCEMAP_ERROR"
+        ) {
+          return;
+        }
+        warn(warning);
+      },
+    },
+  },
 });

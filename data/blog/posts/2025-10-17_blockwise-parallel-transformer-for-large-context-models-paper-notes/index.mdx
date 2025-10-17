@@ -1,0 +1,19 @@
+---
+title: "Blockwise Parallel Transformer for Large Context Models | Paper Notes"
+description: "Paper notes for Blockwise Parallel Transformer for Large Context Models."
+tags:
+  - paper-notes
+  - ai
+publishedDate: 2025-10-17
+---
+
+https://arxiv.org/abs/2305.19370
+
+Introduces Blockwise Parallel Transformer (BPT), that leverages blockwise computation of self-attention and FFN fusion to minimize memory costs.
+
+It fuses blockwise self-attention and FFN computations.
+In a standard Transformer, these two operations are performed sequentially.
+For each block of the input sequence, it calculates the self-attention and then immediately applies the FFN to the result of that block.
+This avoids storing intermediate outputs (activations) for the entire sequence.
+
+In comparison to FlashAttention, which computes via tiling, BPT doesn't require the output of the entire sequence for FFN.
