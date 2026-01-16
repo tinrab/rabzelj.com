@@ -1,5 +1,5 @@
+import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
-import { Slot as SlotPrimitive } from "radix-ui";
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 
 import { cn } from "~/lib/utility";
@@ -99,7 +99,7 @@ export function Typography<
   ...props
 }: PolymorphicTypographyProps<E, V>) {
   const Comp = asChild
-    ? SlotPrimitive.Slot
+    ? Slot
     : (asElement ?? (variant ? variantElementMap[variant] : "p"));
 
   return (

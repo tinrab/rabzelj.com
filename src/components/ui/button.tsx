@@ -1,80 +1,61 @@
+import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot as SlotPrimitive } from "radix-ui";
-import type React from "react";
+import type * as React from "react";
 
 import { cn } from "~/lib/utility";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium text-sm transition-colors focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium text-sm outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default:
-          "border border-border bg-primary text-primary-foreground hover:bg-primary/90",
-        secondary:
-          "border border-border bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        error:
-          "border border-border bg-error text-error-foreground hover:bg-error/90",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
-          "border border-border bg-background hover:bg-accent hover:text-accent-foreground",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "font-normal text-link underline-offset-4 hover:underline",
+          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost:
+          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+        link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        xs: "h-6 rounded-sm px-2 text-xs",
-        sm: "h-8 rounded-md px-3 text-xs",
-        md: "h-9 rounded-md px-4 py-2",
-        lg: "h-10 rounded-md px-8",
+        default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
+        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        icon: "size-9",
+        "icon-sm": "size-8",
+        "icon-lg": "size-10",
       },
     },
     defaultVariants: {
       variant: "default",
-      size: "md",
+      size: "default",
     },
   },
 );
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
-}
-
 function Button({
   className,
-  variant,
-  size,
+  variant = "default",
+  size = "default",
   asChild = false,
-  disabled,
-  ref,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
   }) {
-  const Comp = asChild ? SlotPrimitive.Slot : "button";
+  const Comp = asChild ? Slot : "button";
 
   return (
-    <div
-      className={cn(
-        "group pointer-events-auto relative overflow-hidden",
-        "inline-flex items-center justify-center",
-        "focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-background",
-        size === "xs" ? "rounded-sm" : "rounded-md",
-      )}
-    >
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        disabled={disabled}
-        {...props}
-        ref={ref}
-      />
-      {!disabled ? (
-        <div className="pointer-events-none absolute inset-0 flex h-full w-full select-none justify-center [transform:skew(-24deg)_translateX(-100%)] group-hover:duration-800 group-hover:[transform:skew(-24deg)_translateX(100%)]">
-          <div className="relative h-full w-4 bg-foreground/20" />
-        </div>
-      ) : undefined}
-    </div>
+    <Comp
+      data-slot="button"
+      data-variant={variant}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
   );
 }
 

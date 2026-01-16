@@ -9,11 +9,12 @@
     "ignoreUnknown": false,
     "includes": [
       "**",
-      "!**/node_modules",
-      "!**/.output",
-      "!**/.tanstack",
-      "!**/.nitro",
-      "!**/.vercel",
+      "!node_modules",
+      "!dist",
+      "!.output",
+      "!.tanstack",
+      "!.nitro",
+      "!.vercel",
       "!src/routeTree.gen.ts"
     ]
   },
@@ -63,5 +64,6 @@
       }
     }
   },
-  "javascript": { "formatter": { "quoteStyle": "double" } }
+  "javascript": { "formatter": { "quoteStyle": "double" } },
+  "css": { "parser": { "tailwindDirectives": true } }
 }

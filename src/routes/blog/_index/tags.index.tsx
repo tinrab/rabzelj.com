@@ -34,7 +34,7 @@ function RouteComponent() {
       </section>
 
       <section className="block max-w-5xl text-center">
-        <div className="flex flex-wrap items-center justify-center ">
+        <div className="flex flex-wrap items-center justify-center">
           {data.tags.map((tag) => (
             <Typography
               key={tag.slug}

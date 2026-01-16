@@ -3,8 +3,8 @@ import type React from "react";
 import { useId } from "react";
 import { MdCheck, MdContentCopy } from "react-icons/md";
 
-import { IconButton } from "~/components/IconButton";
 import { ProgrammingLanguageIcon } from "~/components/ProgrammingLanguageIcon";
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utility";
 
 type MdxCodeBlockProps = {
@@ -48,15 +48,15 @@ export function MdxCodeBlock({
             {fileName}
           </div>
 
-          <IconButton
+          <Button
             variant="outline"
-            size="sm"
+            size="icon-sm"
             aria-label="copy code"
             onClick={handleCopyClick}
             disabled={copyMutation.isPending}
           >
             {copyMutation.isPending ? <MdCheck /> : <MdContentCopy />}
-          </IconButton>
+          </Button>
         </div>
       ) : undefined}
 
@@ -73,15 +73,15 @@ export function MdxCodeBlock({
         </pre>
         {!fileName ? (
           <div className="absolute top-0 right-0 z-10 hidden p-2 text-muted-foreground group-hover:block">
-            <IconButton
+            <Button
               variant="outline"
-              size="sm"
+              size="icon-sm"
               aria-label="copy code"
               onClick={handleCopyClick}
               disabled={copyMutation.isPending}
             >
               {copyMutation.isPending ? <MdCheck /> : <MdContentCopy />}
-            </IconButton>
+            </Button>
           </div>
         ) : undefined}
       </div>

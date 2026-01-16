@@ -2,8 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import tailwindcss from "@tailwindcss/vite";
-import { nitroV2Plugin } from "@tanstack/nitro-v2-vite-plugin";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import viteReact from "@vitejs/plugin-react";
+import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 import arraybufferPlugin from "vite-plugin-arraybuffer";
 import tsConfigPaths from "vite-tsconfig-paths";
@@ -31,10 +32,19 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  optimizeDeps: {
+    exclude: ["@resvg/resvg-js"],
+  },
   plugins: [
     tsConfigPaths(),
-    tanstackStart({ sitemap: { enabled: true } }),
-    nitroV2Plugin({
+    tanstackStart({
+      srcDirectory: "src",
+      sitemap: { enabled: false },
+    }),
+    tailwindcss(),
+    arraybufferPlugin(),
+    viteReact(),
+    nitro({
       routeRules: {
         "/assets/**": {
           headers: {
@@ -44,8 +54,6 @@ export default defineConfig({
         ...routeRules,
       },
     }),
-    tailwindcss(),
-    arraybufferPlugin(),
   ],
   build: {
     rollupOptions: {

@@ -1,9 +1,15 @@
 import type React from "react";
 import { MdMenu } from "react-icons/md";
 
-import { IconButton } from "~/components/IconButton";
 import { useHeaderContext } from "~/components/layout/header-context";
-import { Sheet, SheetContent } from "~/components/ui/sheet";
+import { Button } from "~/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "~/components/ui/sheet";
 import { cn } from "~/lib/utility";
 
 type HeaderMobileProps = React.ComponentProps<"div">;
@@ -25,6 +31,17 @@ export function HeaderMobile({
   );
 }
 
+type HeaderMobileTitleProps = React.ComponentProps<typeof SheetTitle>;
+
+export function HeaderMobileTitle({ ...props }: HeaderMobileTitleProps) {
+  return (
+    <SheetHeader {...props}>
+      <SheetTitle>Tin Rabzelj</SheetTitle>
+      <SheetDescription>Software engineer.</SheetDescription>
+    </SheetHeader>
+  );
+}
+
 type HeaderMobileTriggerProps = React.HTMLAttributes<HTMLButtonElement>;
 
 export function HeaderMobileTrigger({
@@ -33,8 +50,9 @@ export function HeaderMobileTrigger({
 }: HeaderMobileTriggerProps) {
   const { onMenuOpenChange } = useHeaderContext();
   return (
-    <IconButton
+    <Button
       variant="outline"
+      size="icon"
       className={cn("shrink-0 md:hidden", className)}
       onClick={() => {
         console.log("menu clicked");
@@ -45,6 +63,6 @@ export function HeaderMobileTrigger({
     >
       <MdMenu />
       <span className="sr-only">Toggle navigation menu</span>
-    </IconButton>
+    </Button>
   );
 }

@@ -28,7 +28,7 @@ async function loadMdxCompiler(): Promise<MdxCompiler> {
           },
         },
       })
-      // @ts-ignore invalid types
+      // @ts-expect-error invalid types
       .withRehypePlugin(rehypeKatex)
   );
 }

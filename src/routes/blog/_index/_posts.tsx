@@ -2,8 +2,8 @@ import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { FaRss } from "react-icons/fa6";
 
 import { BlogTabList } from "~/components/blog/BlogTabList";
-import { IconButton } from "~/components/IconButton";
 import { Typography } from "~/components/Typography";
+import { Button } from "~/components/ui/button";
 import { clientConfig } from "~/config/client";
 import { pathLocator } from "~/lib/path-locator";
 
@@ -20,7 +20,7 @@ function RouteComponent() {
             <h1>Blog</h1>
           </Typography>
 
-          <IconButton size="sm" variant="ghost" asChild>
+          <Button size="icon-sm" variant="ghost" asChild>
             <a
               href={`${clientConfig.app.url}${pathLocator.blog.rss}`}
               aria-label="Blog RSS feed"
@@ -28,7 +28,7 @@ function RouteComponent() {
               <span className="sr-only">Blog RSS feed</span>
               <FaRss aria-hidden="true" />
             </a>
-          </IconButton>
+          </Button>
         </div>
 
         <Typography variant="a" asChild>

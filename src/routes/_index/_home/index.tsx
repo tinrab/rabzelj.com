@@ -47,7 +47,7 @@ function RouteComponent() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col items-center break-words px-4 pt-6 pb-8 md:pt-12">
       <img
-        className="mb-3 relative flex shrink-0 rounded-full aspect-square"
+        className="relative mb-3 flex aspect-square shrink-0 rounded-full"
         src={`${clientConfig.app.url}${pathLocator.assets.avatar}`}
         alt="Tin Rabzelj"
         width={128}

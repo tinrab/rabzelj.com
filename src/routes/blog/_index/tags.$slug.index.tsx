@@ -57,12 +57,7 @@ function RouteComponent() {
             </Typography>
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag) => (
-                <BlogTagChip
-                  key={tag.slug}
-                  tag={tag}
-                  variant="ghost"
-                  size="xs"
-                />
+                <BlogTagChip key={tag.slug} tag={tag} variant="ghost" />
               ))}
             </div>
           </div>
