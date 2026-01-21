@@ -36,25 +36,28 @@ function RouteComponent() {
   return (
     <div className="mx-auto max-w-3xl px-4 pt-6 pb-8 md:pt-12">
       <div className="mb-8">
-        <Typography variant="h2" asChild gutterBottom>
-          <h1>{tag.title}</h1>
-        </Typography>
-        <Typography>{tag.description}</Typography>
+        <Typography variant="h2" gutterBottom render={<h1>{tag.title}</h1>} />
+        <Typography variant="body">{tag.description}</Typography>
 
-        <Typography variant="a" asChild>
-          <Link to="/blog/tags">See all tags.</Link>
-        </Typography>
+        <Typography
+          variant="a"
+          render={<Link to="/blog/tags">See all tags.</Link>}
+        />
       </div>
 
       <BlogPostList
         posts={groupedPosts}
         renderPost={(post) => (
           <div className="flex flex-col">
-            <Typography variant="a" className="mb-1" asChild>
-              <Link to="/blog/$slug" params={{ slug: post.slug }}>
-                {post.title}
-              </Link>
-            </Typography>
+            <Typography
+              variant="a"
+              className="mb-1"
+              render={
+                <Link to="/blog/$slug" params={{ slug: post.slug }}>
+                  {post.title}
+                </Link>
+              }
+            />
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag) => (
                 <BlogTagChip key={tag.slug} tag={tag} variant="ghost" />

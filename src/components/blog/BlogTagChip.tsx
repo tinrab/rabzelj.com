@@ -21,13 +21,14 @@ export function BlogTagChip({
   return (
     <Button
       variant={variant}
-      asChild
-      className={cn("h-6 rounded-sm px-2 text-xs", className)}
+      className={cn("h-6 px-2 text-xs", className)}
+      nativeButton={false}
       {...props}
-    >
-      <Link to="/blog/tags/$slug" params={{ slug: tag.slug }}>
-        {tag.title}
-      </Link>
-    </Button>
+      render={
+        <Link to="/blog/tags/$slug" params={{ slug: tag.slug }}>
+          {tag.title}
+        </Link>
+      }
+    />
   );
 }

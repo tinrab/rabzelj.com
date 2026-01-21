@@ -1,6 +1,6 @@
+import { IconSlash } from "@tabler/icons-react";
 import type React from "react";
 import { useState } from "react";
-import { RxSlash } from "react-icons/rx";
 
 import { DashedLine } from "~/components/DashedLine";
 import {
@@ -79,7 +79,7 @@ export function HeaderDivider({
   ...props
 }: HeaderDividerProps) {
   return (
-    <RxSlash
+    <IconSlash
       className={cn(
         "size-5 shrink-0 text-border",
         desktopOnly ? "hidden md:inline-flex" : "",

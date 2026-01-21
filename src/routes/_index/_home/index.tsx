@@ -1,6 +1,11 @@
+import {
+  IconBrandBluesky,
+  IconBrandGithub,
+  IconBrandLinkedin,
+  IconBrandX,
+} from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { FaBluesky, FaGithub, FaLinkedin, FaXTwitter } from "react-icons/fa6";
 
 import { Typography } from "~/components/Typography";
 import { Button } from "~/components/ui/button";
@@ -19,7 +24,7 @@ const socialLinks = [
       href: clientConfig.social.twitterUrl,
       "aria-label": "X, formerly Twitter",
     },
-    Icon: FaXTwitter,
+    Icon: IconBrandX,
   },
   {
     title: "Bluesky",
@@ -27,17 +32,17 @@ const socialLinks = [
       href: clientConfig.social.blueskyUrl,
       "aria-label": "Bluesky",
     },
-    Icon: FaBluesky,
+    Icon: IconBrandBluesky,
   },
   {
     title: "GitHub",
     props: { href: clientConfig.social.githubUrl, "aria-label": "GitHub" },
-    Icon: FaGithub,
+    Icon: IconBrandGithub,
   },
   {
     title: "Linkedin",
     props: { href: clientConfig.social.linkedinUrl, "aria-label": "Linkedin" },
-    Icon: FaLinkedin,
+    Icon: IconBrandLinkedin,
   },
 ];
 
@@ -45,7 +50,7 @@ function RouteComponent() {
   const [email, setEmail] = useState<string>();
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col items-center break-words px-4 pt-6 pb-8 md:pt-12">
+    <div className="wrap-break-word mx-auto flex max-w-3xl flex-col items-center px-4 pt-6 pb-8 md:pt-12">
       <img
         className="relative mb-3 flex aspect-square shrink-0 rounded-full"
         src={`${clientConfig.app.url}${pathLocator.assets.avatar}`}
@@ -59,24 +64,24 @@ function RouteComponent() {
       <h2 className="mb-6 text-muted-foreground">Software Engineer</h2>
 
       <div className="mb-5 text-center">
-        <Typography>
+        <Typography variant="body">
           Personal blog:{" "}
-          <Typography variant="a" asChild>
-            <Link to="/blog">/blog</Link>
-          </Typography>
-          .
+          <Typography variant="a" render={<Link to="/blog">/blog</Link>} />.
         </Typography>
-        <Typography>
+        <Typography variant="body">
           Find my OSS projects on{" "}
-          <Typography variant="a" asChild>
-            <a
-              href="https://github.com/tinrab"
-              target="_blank"
-              rel="noreferrer"
-            >
-              GitHub
-            </a>
-          </Typography>
+          <Typography
+            variant="a"
+            render={
+              <a
+                href="https://github.com/tinrab"
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub
+              </a>
+            }
+          />
           .
         </Typography>
       </div>
@@ -104,21 +109,20 @@ function RouteComponent() {
 
       <Button
         variant="secondary"
-        asChild
         onClick={() => {
-          console.log("email");
-
           if (!email) {
             setEmail(stringCipher(clientConfig.social.email, -3));
           }
         }}
-      >
-        {email?.length ? (
-          <a href={`mailto:${email}`}>Contact Email</a>
-        ) : (
-          <span className="cursor-pointer">View Email</span>
-        )}
-      </Button>
+        nativeButton={false}
+        render={
+          email?.length ? (
+            <a href={`mailto:${email}`}>Contact Email</a>
+          ) : (
+            <span className="cursor-pointer">View Email</span>
+          )
+        }
+      />
     </div>
   );
 }

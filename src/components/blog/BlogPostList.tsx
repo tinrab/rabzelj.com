@@ -30,12 +30,12 @@ export function BlogPostList<T extends BlogPostCommon>({
                   id={`h-${yearGroup.year}${anchorSuffix}`}
                   variant="a"
                   className="text-muted-foreground hover:no-underline"
-                  asChild
-                >
-                  <a href={`#h-${yearGroup.year}${anchorSuffix}`}>
-                    <h2>{yearGroup.year}</h2>
-                  </a>
-                </Typography>
+                  render={
+                    <a href={`#h-${yearGroup.year}${anchorSuffix}`}>
+                      <h2>{yearGroup.year}</h2>
+                    </a>
+                  }
+                />
               </div>
 
               {yearGroup.months.map((monthGroup) => (
@@ -47,14 +47,14 @@ export function BlogPostList<T extends BlogPostCommon>({
                     id={`h-${yearGroup.year}-${monthGroup.month}${anchorSuffix}`}
                     variant="a"
                     className="mb-2 text-muted-foreground hover:no-underline"
-                    asChild
-                  >
-                    <a
-                      href={`#h-${yearGroup.year}-${monthGroup.month.toLowerCase()}${anchorSuffix}`}
-                    >
-                      <h3>{monthGroup.month}</h3>
-                    </a>
-                  </Typography>
+                    render={
+                      <a
+                        href={`#h-${yearGroup.year}-${monthGroup.month.toLowerCase()}${anchorSuffix}`}
+                      >
+                        <h3>{monthGroup.month}</h3>
+                      </a>
+                    }
+                  />
 
                   <ul className="list-disc pl-4 md:pl-8">
                     {monthGroup.posts.map((post) => (

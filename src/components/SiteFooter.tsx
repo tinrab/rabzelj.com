@@ -26,12 +26,12 @@ export function SiteFooter() {
             key={title}
             variant="a"
             className="block text-muted-foreground underline"
-            asChild
-          >
-            <a href={to} target="_blank" rel="noreferrer">
-              {title}
-            </a>
-          </Typography>
+            render={
+              <a href={to} target="_blank" rel="noreferrer">
+                {title}
+              </a>
+            }
+          />
         ))}
       </div>
     </LayoutFooter>

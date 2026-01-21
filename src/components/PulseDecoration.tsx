@@ -24,7 +24,7 @@ export function PulseDecoration({ className, ...props }: PulseDecorationProps) {
         return (
           <div
             key={String(i)}
-            className="absolute animate-pulse rounded-md border bg-foreground/20"
+            className="absolute animate-pulse border bg-foreground/20"
             style={
               {
                 "--index": i,

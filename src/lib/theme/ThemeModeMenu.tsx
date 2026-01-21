@@ -1,5 +1,5 @@
+import { IconMoonStars, IconSun } from "@tabler/icons-react";
 import type React from "react";
-import { MdDarkMode, MdLightMode } from "react-icons/md";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -33,13 +33,15 @@ export function ThemeModeMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <MdLightMode className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <MdDarkMode className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" size="icon">
+            <IconSun className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <IconMoonStars className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+        }
+      />
       <DropdownMenuContent align="end">
         {themes.map((theme) => (
           <DropdownMenuItem

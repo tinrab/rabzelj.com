@@ -1,12 +1,13 @@
-import { Slot } from "@radix-ui/react-slot";
-import { cva } from "class-variance-authority";
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
+import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "~/lib/utility";
 
 export const typographyVariants = cva("", {
   variants: {
     variant: {
+      span: "",
       h1: "scroll-m-20 text-balance font-extrabold text-4xl tracking-tight",
       h2: "scroll-m-20 text-balance font-semibold text-3xl tracking-tight",
       h3: "scroll-m-20 text-balance font-semibold text-2xl tracking-tight",
@@ -26,20 +27,33 @@ export const typographyVariants = cva("", {
 });
 
 const topGutters: Record<string, string> = {
-  h1: "mt-14 lg:mt-16",
+  h1: "mt-12 lg:mt-14",
   h2: "mt-10 lg:mt-12",
   h3: "mt-8",
   h4: "mt-8",
-  body: "mt-4",
+  body: "mt-6",
+  quote: "mt-6",
+  lead: "mt-6",
+  large: "mt-6",
+  small: "mt-6",
+  muted: "mt-6",
 };
 
 const bottomGutters: Record<string, string> = {
-  h1: "mb-2",
-  h2: "mb-2",
-  h3: "mb-2",
+  h1: "mb-4",
+  h2: "mb-3",
+  h3: "mb-3",
+  h4: "mb-2",
+  body: "mb-3",
+  quote: "mb-4",
+  lead: "mb-4",
+  large: "mb-4",
+  small: "mb-4",
+  muted: "mb-4",
 };
 
 const variantElementMap = {
+  span: "span",
   h1: "h1",
   h2: "h2",
   h3: "h3",
@@ -54,65 +68,53 @@ const variantElementMap = {
   mutedLink: "a",
 } as const;
 
-type TypographyVariant = keyof typeof variantElementMap;
+type VariantElementMap = typeof variantElementMap;
+type TypographyVariant = keyof VariantElementMap;
 
-// Define the component's own specific props.
-interface TypographyOwnProps {
-  asChild?: boolean;
+type TypographyOwnProps = Omit<
+  VariantProps<typeof typographyVariants>,
+  "variant"
+> & {
   gutterTop?: boolean;
   gutterBottom?: boolean;
   gutter?: boolean;
-  variant?: TypographyVariant;
-  className?: string;
-  children?: ReactNode;
-}
+};
 
-type PolymorphicTypographyProps<
-  E extends ElementType | undefined,
-  V extends TypographyVariant | undefined,
-> = TypographyOwnProps &
-  Omit<
-    ComponentPropsWithoutRef<
-      E extends ElementType
-        ? E
-        : V extends TypographyVariant
-          ? (typeof variantElementMap)[V]
-          : (typeof variantElementMap)["body"]
-    >,
-    keyof TypographyOwnProps
-  > & {
-    asElement?: E;
-    variant?: V;
-  };
+export type TypographyProps<V extends TypographyVariant> = {
+  variant?: V;
+} & TypographyOwnProps &
+  useRender.ComponentProps<VariantElementMap[V]>;
 
-export function Typography<
-  V extends TypographyVariant | undefined = "body",
-  E extends ElementType | undefined = undefined,
->({
-  asChild,
-  variant = "body" as V,
+export function Typography<V extends TypographyVariant = "span">({
+  render,
+  variant,
   gutterTop,
   gutterBottom,
   gutter,
-  asElement,
   className,
   ...props
-}: PolymorphicTypographyProps<E, V>) {
-  const Comp = asChild
-    ? Slot
-    : (asElement ?? (variant ? variantElementMap[variant] : "p"));
+}: TypographyProps<V>) {
+  const safeVariant = (variant ?? "span") as TypographyVariant;
+  const defaultTagName = variantElementMap[safeVariant];
 
-  return (
-    <Comp
-      data-slot="typography"
-      className={cn(
-        typographyVariants({ variant }),
-        (gutterTop || gutter) && variant && topGutters[variant],
-        (gutterBottom || gutter) && variant && bottomGutters[variant],
-        (gutterTop || gutterBottom || gutter) && "block",
-        className,
-      )}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName,
+    props: mergeProps(
+      {
+        className: cn(
+          typographyVariants({ variant: safeVariant }),
+          (gutterTop || gutter) && topGutters[safeVariant],
+          (gutterBottom || gutter) && bottomGutters[safeVariant],
+          (gutterTop || gutterBottom || gutter) && "block",
+          className,
+        ),
+      },
+      props,
+    ),
+    render,
+    state: {
+      slot: "typography",
+      variant: safeVariant,
+    },
+  });
 }

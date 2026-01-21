@@ -24,11 +24,17 @@ export function MdxContentHeading({
 
   if (id) {
     return (
-      <Typography id={id} gutter variant={effectiveVariant} asChild {...props}>
-        <a href={`#${id}`} className="no-underline">
-          <VariantComponent>{children}</VariantComponent>
-        </a>
-      </Typography>
+      <Typography
+        id={id}
+        gutter
+        variant={effectiveVariant}
+        render={
+          <a href={`#${id}`} className="no-underline">
+            <VariantComponent>{children}</VariantComponent>
+          </a>
+        }
+        {...props}
+      />
     );
   }
   return (

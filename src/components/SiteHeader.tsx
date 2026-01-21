@@ -1,6 +1,6 @@
+import { IconMenu } from "@tabler/icons-react";
 import { Link, type ToOptions, useLocation } from "@tanstack/react-router";
 import type React from "react";
-import { MdMenu } from "react-icons/md";
 
 import { Header, HeaderRow, HeaderTitle } from "~/components/layout/header";
 import { useHeaderContext } from "~/components/layout/header-context";
@@ -48,16 +48,18 @@ export function SiteHeader() {
             <NavigationMenuList>
               {links.map((link) => (
                 <NavigationMenuItem key={link.to}>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to={link.to}
-                      className={cn(
-                        location.pathname === link.to && "text-foreground",
-                      )}
-                    >
-                      {link.title}
-                    </Link>
-                  </NavigationMenuLink>
+                  <NavigationMenuLink
+                    render={
+                      <Link
+                        to={link.to}
+                        className={cn(
+                          location.pathname === link.to && "text-foreground",
+                        )}
+                      >
+                        {link.title}
+                      </Link>
+                    }
+                  />
                 </NavigationMenuItem>
               ))}
             </NavigationMenuList>
@@ -79,10 +81,8 @@ export function SiteHeader() {
                 key={link.to}
                 variant="solid"
                 selected={location.href === link.to}
-                asChild
-              >
-                <Link to={link.to}>{link.title}</Link>
-              </NavigationListLink>
+                render={<Link to={link.to}>{link.title}</Link>}
+              />
             ))}
           </NavigationListGroup>
         </NavigationList>
@@ -106,7 +106,7 @@ export function HeaderMobileTrigger({
       onClick={() => onMenuOpenChange(true)}
       {...props}
     >
-      <MdMenu />
+      <IconMenu />
       <span className="sr-only">Toggle navigation menu</span>
     </Button>
   );

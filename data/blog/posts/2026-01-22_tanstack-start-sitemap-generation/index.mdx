@@ -1,0 +1,150 @@
+---
+title: Generating Sitemaps in TanStack Start
+description: How can we generate a sitemap in a TanStack Start app?
+tags:
+  - typescript
+  - react
+  - tanstack-start
+publishedDate: 2026-01-22
+---
+
+TanStack Start comes with sitemap generation capabilities out of the box.
+It analyzes file-based routing tree and generates a `sitemap.xml` during the build process.
+
+To enable it, we modify the `vite.config.ts`.
+
+```typescript
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [
+    tanstackStart({
+      srcDirectory: "src",
+      prerender: {
+        enabled: true,
+        crawlLinks: true,
+      },
+      sitemap: {
+        enabled: true,
+        host: "https://rabzelj.com",
+      },
+    }),
+    // ...
+  ],
+});
+```
+
+You have to enable prerendering.
+
+This is fine for static pages.
+But, consider a blog route declared in `src/routes/blog/post/$slug.tsx`.
+The build tool knows this route exists, but it doesn't know which values exist for `$slug`.
+
+# The Manual Way
+
+To handle dynamic content, we need to define a server-side handler that builds the sitemap XML at runtime.
+
+First, we disable the automatic generation in `vite.config.ts` (or leave it disabled, as is the default) to prevent conflicts.
+
+Next, we create a specific route for the sitemap: `src/routes/sitemap[.]xml.ts`.
+The brackets `[.]` are used for escaping.
+
+Here is the implementation used for this very site.
+
+```typescript
+import { createFileRoute } from "@tanstack/react-router";
+import { loadServerConfig } from "~/config/server";
+import { loadBlogPosts } from "~/lib/blog/post/loader";
+import { loadBlogTagPostCounts } from "~/lib/blog/tag/loader";
+import { pathLocator } from "~/lib/path-locator";
+
+export const Route = createFileRoute("/sitemap.xml")({
+  server: {
+    handlers: {
+      GET: async () => {
+        const config = loadServerConfig();
+        const posts = await loadBlogPosts();
+        const tags = await loadBlogTagPostCounts();
+
+        // Define static routes manually
+        const staticRoutes = [
+          "/",
+          pathLocator.pricing.index,
+          pathLocator.legal.privacyPolicy,
+          pathLocator.blog.index,
+        ].map((path) => ({
+          url: `${config.app.url}${path}`,
+          changeFrequency: "weekly",
+          lastModified: new Date(),
+        }));
+
+        // Generate dynamic post routes
+        const blogPostRoutes = posts.map((post) => ({
+          url: `${config.app.url}${pathLocator.blog.post(post.slug).index}`,
+          changeFrequency: "weekly",
+          lastModified: new Date(post.modifiedDate ?? post.publishedDate),
+        }));
+
+        // Generate dynamic tag routes
+        const blogTagRoutes = tags.map((tag) => ({
+          url: `${config.app.url}${pathLocator.blog.tags.page(tag.slug)}`,
+          changeFrequency: "weekly",
+          lastModified: new Date(),
+        }));
+
+        // Return the XML response
+        return new Response(
+          makeSitemap([
+            ...staticRoutes,
+            ...blogPostRoutes,
+            ...blogTagRoutes,
+          ]),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/xml",
+              "X-Content-Type-Options": "nosniff",
+              "Cache-Control":
+                "public, max-age=3600, stale-while-revalidate=3600",
+            },
+          },
+        );
+      },
+    },
+  },
+});
+```
+
+I typically centralize all route and URL patterns in a single `pathLocator` object so links across the codebase are defined in one place and can be updated centrally.
+
+```typescript
+const blogPostUrl = `${config.app.url}${pathLocator.blog.post(post.slug).index}`;
+```
+
+Finally, we need to render the XML string.
+This is standard string interpolation.
+
+```typescript
+function makeSitemap(urls: SitemapUrl[]): string {
+  const xmlUrls: string[] = [];
+  for (const url of urls) {
+    xmlUrls.push(`
+      <url>
+        <loc>${url.url}</loc>
+        <lastmod>${url.lastModified.toISOString()}</lastmod>
+        <changefreq>${url.changeFrequency}</changefreq>
+      </url>
+    `);
+  }
+
+  return `
+    <?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      ${xmlUrls.join("\n")}
+    </urlset>
+  `.trim();
+}
+```
+
+- [TanStack Start SEO Documentation](https://tanstack.com/start/latest/docs/framework/react/guide/seo)

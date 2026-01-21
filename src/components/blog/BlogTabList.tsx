@@ -15,15 +15,21 @@ export function BlogTabList() {
   return (
     <Tabs defaultValue="all" value={id}>
       <TabsList>
-        <TabsTrigger value="personal" asChild>
-          <Link to="/blog">Personal</Link>
-        </TabsTrigger>
-        <TabsTrigger value="notes" asChild>
-          <Link to="/blog/notes">Notes</Link>
-        </TabsTrigger>
-        <TabsTrigger value="external" asChild>
-          <Link to="/blog/external">External</Link>
-        </TabsTrigger>
+        <TabsTrigger
+          value="personal"
+          nativeButton={false}
+          render={<Link to="/blog">Personal</Link>}
+        />
+        <TabsTrigger
+          value="notes"
+          nativeButton={false}
+          render={<Link to="/blog/notes">Notes</Link>}
+        />
+        <TabsTrigger
+          value="external"
+          nativeButton={false}
+          render={<Link to="/blog/external">External</Link>}
+        />
       </TabsList>
     </Tabs>
   );

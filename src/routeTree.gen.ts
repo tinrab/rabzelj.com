@@ -114,18 +114,18 @@ const ApiImagesBlogPostCoverSlugRoute =
 
 export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/': typeof IndexHomeIndexRoute
   '/blog': typeof BlogPostPostRouteWithChildren
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/resources': typeof ResourcesIndexRouteWithChildren
   '/api/images/featured': typeof ApiImagesFeaturedRoute
-  '/': typeof IndexHomeIndexRoute
   '/resources/': typeof ResourcesIndexIndexRoute
   '/blog/external': typeof BlogIndexPostsExternalRoute
   '/blog/notes': typeof BlogIndexPostsNotesRoute
   '/blog/$slug': typeof BlogPostPostSlugRoute
   '/blog/': typeof BlogIndexPostsIndexRoute
-  '/blog/tags': typeof BlogIndexTagsIndexRoute
-  '/blog/tags/$slug': typeof BlogIndexTagsSlugIndexRoute
+  '/blog/tags/': typeof BlogIndexTagsIndexRoute
+  '/blog/tags/$slug/': typeof BlogIndexTagsSlugIndexRoute
   '/api/images/blog/post/cover/$slug': typeof ApiImagesBlogPostCoverSlugRoute
 }
 export interface FileRoutesByTo {
@@ -166,18 +166,18 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/sitemap.xml'
+    | '/'
     | '/blog'
     | '/blog/rss.xml'
     | '/resources'
     | '/api/images/featured'
-    | '/'
     | '/resources/'
     | '/blog/external'
     | '/blog/notes'
     | '/blog/$slug'
     | '/blog/'
-    | '/blog/tags'
-    | '/blog/tags/$slug'
+    | '/blog/tags/'
+    | '/blog/tags/$slug/'
     | '/api/images/blog/post/cover/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -258,7 +258,7 @@ declare module '@tanstack/react-router' {
     '/_index/_home': {
       id: '/_index/_home'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof IndexHomeRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -300,7 +300,7 @@ declare module '@tanstack/react-router' {
     '/blog/_index/tags/': {
       id: '/blog/_index/tags/'
       path: '/tags'
-      fullPath: '/blog/tags'
+      fullPath: '/blog/tags/'
       preLoaderRoute: typeof BlogIndexTagsIndexRouteImport
       parentRoute: typeof BlogIndexRoute
     }
@@ -335,7 +335,7 @@ declare module '@tanstack/react-router' {
     '/blog/_index/tags/$slug/': {
       id: '/blog/_index/tags/$slug/'
       path: '/tags/$slug'
-      fullPath: '/blog/tags/$slug'
+      fullPath: '/blog/tags/$slug/'
       preLoaderRoute: typeof BlogIndexTagsSlugIndexRouteImport
       parentRoute: typeof BlogIndexRoute
     }

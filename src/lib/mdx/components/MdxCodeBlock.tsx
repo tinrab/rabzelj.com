@@ -1,7 +1,7 @@
+import { IconCheck, IconCopy } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import type React from "react";
 import { useId } from "react";
-import { MdCheck, MdContentCopy } from "react-icons/md";
 
 import { ProgrammingLanguageIcon } from "~/components/ProgrammingLanguageIcon";
 import { Button } from "~/components/ui/button";
@@ -55,7 +55,7 @@ export function MdxCodeBlock({
             onClick={handleCopyClick}
             disabled={copyMutation.isPending}
           >
-            {copyMutation.isPending ? <MdCheck /> : <MdContentCopy />}
+            {copyMutation.isPending ? <IconCheck /> : <IconCopy />}
           </Button>
         </div>
       ) : undefined}
@@ -80,7 +80,7 @@ export function MdxCodeBlock({
               onClick={handleCopyClick}
               disabled={copyMutation.isPending}
             >
-              {copyMutation.isPending ? <MdCheck /> : <MdContentCopy />}
+              {copyMutation.isPending ? <IconCheck /> : <IconCopy />}
             </Button>
           </div>
         ) : undefined}

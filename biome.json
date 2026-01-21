@@ -46,17 +46,11 @@
           "level": "on",
           "options": {
             "groups": [
-              [":BUN:", ":NODE:"],
+              [":NODE:"],
               ":BLANK_LINE:",
               [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:"],
               ":BLANK_LINE:",
-              [
-                "@my/lib",
-                "@my/lib/**",
-                "!@my/lib/special",
-                "!@my/lib/special/**",
-                "@/**"
-              ],
+              ["~/**"],
               ":BLANK_LINE:"
             ]
           }
