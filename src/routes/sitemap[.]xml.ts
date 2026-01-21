@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { loadServerConfig } from "~/config/server";
+import { serverConfig } from "~/config/server";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
 import { loadBlogTagPostCounts } from "~/lib/blog/tag/loader";
 import { pathLocator } from "~/lib/path-locator";
@@ -9,14 +9,13 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const config = loadServerConfig();
         const now = new Date();
         const thisWeek = new Date(now);
         thisWeek.setDate(now.getDate() - now.getDay());
 
         const staticRoutes: SitemapUrl[] = ["/", pathLocator.blog.index].map(
           (path) => ({
-            url: `${config.app.url}${path}`,
+            url: `${serverConfig.app.url}${path}`,
             changeFrequency: "weekly",
             lastModified: thisWeek,
           }),
@@ -24,14 +23,14 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         const posts = await loadBlogPosts();
         const blogPostRoutes: SitemapUrl[] = posts.map((post) => ({
-          url: `${config.app.url}${pathLocator.blog.post.index(post.slug)}`,
+          url: `${serverConfig.app.url}${pathLocator.blog.post.index(post.slug)}`,
           changeFrequency: "weekly",
           lastModified: new Date(post.modifiedDate ?? post.publishedDate),
         }));
 
         const tags = await loadBlogTagPostCounts();
         const blogTagRoutes: SitemapUrl[] = tags.map((tag) => ({
-          url: `${config.app.url}${pathLocator.blog.tags.page(tag.slug)}`,
+          url: `${serverConfig.app.url}${pathLocator.blog.tags.page(tag.slug)}`,
           changeFrequency: "weekly",
           lastModified: thisWeek,
         }));

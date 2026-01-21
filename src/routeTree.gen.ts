@@ -8,13 +8,11 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from '@tanstack/react-router'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResourcesIndexRouteImport } from './routes/resources/_index'
-import { Route as BlogIndexRouteImport } from './routes/blog/_index'
 import { Route as BlogRssDotxmlRouteImport } from './routes/blog/rss[.]xml'
+import { Route as BlogIndexRouteImport } from './routes/blog/_index'
 import { Route as IndexHomeRouteImport } from './routes/_index/_home'
 import { Route as ResourcesIndexIndexRouteImport } from './routes/resources/_index.index'
 import { Route as IndexHomeIndexRouteImport } from './routes/_index/_home/index'
@@ -29,36 +27,25 @@ import { Route as BlogIndexPostsExternalRouteImport } from './routes/blog/_index
 import { Route as BlogIndexTagsSlugIndexRouteImport } from './routes/blog/_index/tags.$slug.index'
 import { Route as ApiImagesBlogPostCoverSlugRouteImport } from './routes/api/images/blog.post.cover.$slug'
 
-const ResourcesRouteImport = createFileRoute('/resources')()
-const BlogRouteImport = createFileRoute('/blog')()
-
-const ResourcesRoute = ResourcesRouteImport.update({
-  id: '/resources',
-  path: '/resources',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResourcesIndexRoute = ResourcesIndexRouteImport.update({
-  id: '/_index',
-  getParentRoute: () => ResourcesRoute,
-} as any)
-const BlogIndexRoute = BlogIndexRouteImport.update({
-  id: '/_index',
-  getParentRoute: () => BlogRoute,
+  id: '/resources/_index',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRssDotxmlRoute = BlogRssDotxmlRouteImport.update({
-  id: '/rss.xml',
-  path: '/rss.xml',
-  getParentRoute: () => BlogRoute,
+  id: '/blog/rss.xml',
+  path: '/blog/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/_index',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const IndexHomeRoute = IndexHomeRouteImport.update({
   id: '/_index/_home',
@@ -75,8 +62,9 @@ const IndexHomeIndexRoute = IndexHomeIndexRouteImport.update({
   getParentRoute: () => IndexHomeRoute,
 } as any)
 const BlogPostPostRoute = BlogPostPostRouteImport.update({
-  id: '/_post/_post',
-  getParentRoute: () => BlogRoute,
+  id: '/blog/_post/_post',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const BlogIndexPostsRoute = BlogIndexPostsRouteImport.update({
   id: '/_posts',
@@ -126,27 +114,27 @@ const ApiImagesBlogPostCoverSlugRoute =
 
 export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/': typeof IndexHomeIndexRoute
   '/blog': typeof BlogPostPostRouteWithChildren
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/resources': typeof ResourcesIndexRouteWithChildren
   '/api/images/featured': typeof ApiImagesFeaturedRoute
-  '/': typeof IndexHomeIndexRoute
   '/resources/': typeof ResourcesIndexIndexRoute
   '/blog/external': typeof BlogIndexPostsExternalRoute
   '/blog/notes': typeof BlogIndexPostsNotesRoute
   '/blog/$slug': typeof BlogPostPostSlugRoute
   '/blog/': typeof BlogIndexPostsIndexRoute
-  '/blog/tags': typeof BlogIndexTagsIndexRoute
-  '/blog/tags/$slug': typeof BlogIndexTagsSlugIndexRoute
+  '/blog/tags/': typeof BlogIndexTagsIndexRoute
+  '/blog/tags/$slug/': typeof BlogIndexTagsSlugIndexRoute
   '/api/images/blog/post/cover/$slug': typeof ApiImagesBlogPostCoverSlugRoute
 }
 export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/blog': typeof BlogIndexPostsIndexRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
-  '/resources': typeof ResourcesIndexIndexRoute
   '/api/images/featured': typeof ApiImagesFeaturedRoute
   '/': typeof IndexHomeIndexRoute
+  '/resources': typeof ResourcesIndexIndexRoute
   '/blog/external': typeof BlogIndexPostsExternalRoute
   '/blog/notes': typeof BlogIndexPostsNotesRoute
   '/blog/$slug': typeof BlogPostPostSlugRoute
@@ -158,10 +146,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_index/_home': typeof IndexHomeRouteWithChildren
-  '/blog': typeof BlogRouteWithChildren
   '/blog/_index': typeof BlogIndexRouteWithChildren
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
-  '/resources': typeof ResourcesRouteWithChildren
   '/resources/_index': typeof ResourcesIndexRouteWithChildren
   '/api/images/featured': typeof ApiImagesFeaturedRoute
   '/blog/_index/_posts': typeof BlogIndexPostsRouteWithChildren
@@ -180,27 +166,27 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/sitemap.xml'
+    | '/'
     | '/blog'
     | '/blog/rss.xml'
     | '/resources'
     | '/api/images/featured'
-    | '/'
     | '/resources/'
     | '/blog/external'
     | '/blog/notes'
     | '/blog/$slug'
     | '/blog/'
-    | '/blog/tags'
-    | '/blog/tags/$slug'
+    | '/blog/tags/'
+    | '/blog/tags/$slug/'
     | '/api/images/blog/post/cover/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sitemap.xml'
     | '/blog'
     | '/blog/rss.xml'
-    | '/resources'
     | '/api/images/featured'
     | '/'
+    | '/resources'
     | '/blog/external'
     | '/blog/notes'
     | '/blog/$slug'
@@ -211,10 +197,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/sitemap.xml'
     | '/_index/_home'
-    | '/blog'
     | '/blog/_index'
     | '/blog/rss.xml'
-    | '/resources'
     | '/resources/_index'
     | '/api/images/featured'
     | '/blog/_index/_posts'
@@ -233,28 +217,16 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   IndexHomeRoute: typeof IndexHomeRouteWithChildren
-  BlogRoute: typeof BlogRouteWithChildren
-  ResourcesRoute: typeof ResourcesRouteWithChildren
+  BlogIndexRoute: typeof BlogIndexRouteWithChildren
+  BlogRssDotxmlRoute: typeof BlogRssDotxmlRoute
+  ResourcesIndexRoute: typeof ResourcesIndexRouteWithChildren
   ApiImagesFeaturedRoute: typeof ApiImagesFeaturedRoute
+  BlogPostPostRoute: typeof BlogPostPostRouteWithChildren
   ApiImagesBlogPostCoverSlugRoute: typeof ApiImagesBlogPostCoverSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/resources': {
-      id: '/resources'
-      path: '/resources'
-      fullPath: '/resources'
-      preLoaderRoute: typeof ResourcesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -267,26 +239,26 @@ declare module '@tanstack/react-router' {
       path: '/resources'
       fullPath: '/resources'
       preLoaderRoute: typeof ResourcesIndexRouteImport
-      parentRoute: typeof ResourcesRoute
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/rss.xml': {
+      id: '/blog/rss.xml'
+      path: '/blog/rss.xml'
+      fullPath: '/blog/rss.xml'
+      preLoaderRoute: typeof BlogRssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/blog/_index': {
       id: '/blog/_index'
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogIndexRouteImport
-      parentRoute: typeof BlogRoute
-    }
-    '/blog/rss.xml': {
-      id: '/blog/rss.xml'
-      path: '/rss.xml'
-      fullPath: '/blog/rss.xml'
-      preLoaderRoute: typeof BlogRssDotxmlRouteImport
-      parentRoute: typeof BlogRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_index/_home': {
       id: '/_index/_home'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof IndexHomeRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -306,10 +278,10 @@ declare module '@tanstack/react-router' {
     }
     '/blog/_post/_post': {
       id: '/blog/_post/_post'
-      path: ''
+      path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogPostPostRouteImport
-      parentRoute: typeof BlogRoute
+      parentRoute: typeof rootRouteImport
     }
     '/blog/_index/_posts': {
       id: '/blog/_index/_posts'
@@ -328,7 +300,7 @@ declare module '@tanstack/react-router' {
     '/blog/_index/tags/': {
       id: '/blog/_index/tags/'
       path: '/tags'
-      fullPath: '/blog/tags'
+      fullPath: '/blog/tags/'
       preLoaderRoute: typeof BlogIndexTagsIndexRouteImport
       parentRoute: typeof BlogIndexRoute
     }
@@ -363,7 +335,7 @@ declare module '@tanstack/react-router' {
     '/blog/_index/tags/$slug/': {
       id: '/blog/_index/tags/$slug/'
       path: '/tags/$slug'
-      fullPath: '/blog/tags/$slug'
+      fullPath: '/blog/tags/$slug/'
       preLoaderRoute: typeof BlogIndexTagsSlugIndexRouteImport
       parentRoute: typeof BlogIndexRoute
     }
@@ -421,32 +393,6 @@ const BlogIndexRouteWithChildren = BlogIndexRoute._addFileChildren(
   BlogIndexRouteChildren,
 )
 
-interface BlogPostPostRouteChildren {
-  BlogPostPostSlugRoute: typeof BlogPostPostSlugRoute
-}
-
-const BlogPostPostRouteChildren: BlogPostPostRouteChildren = {
-  BlogPostPostSlugRoute: BlogPostPostSlugRoute,
-}
-
-const BlogPostPostRouteWithChildren = BlogPostPostRoute._addFileChildren(
-  BlogPostPostRouteChildren,
-)
-
-interface BlogRouteChildren {
-  BlogIndexRoute: typeof BlogIndexRouteWithChildren
-  BlogRssDotxmlRoute: typeof BlogRssDotxmlRoute
-  BlogPostPostRoute: typeof BlogPostPostRouteWithChildren
-}
-
-const BlogRouteChildren: BlogRouteChildren = {
-  BlogIndexRoute: BlogIndexRouteWithChildren,
-  BlogRssDotxmlRoute: BlogRssDotxmlRoute,
-  BlogPostPostRoute: BlogPostPostRouteWithChildren,
-}
-
-const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
-
 interface ResourcesIndexRouteChildren {
   ResourcesIndexIndexRoute: typeof ResourcesIndexIndexRoute
 }
@@ -459,24 +405,26 @@ const ResourcesIndexRouteWithChildren = ResourcesIndexRoute._addFileChildren(
   ResourcesIndexRouteChildren,
 )
 
-interface ResourcesRouteChildren {
-  ResourcesIndexRoute: typeof ResourcesIndexRouteWithChildren
+interface BlogPostPostRouteChildren {
+  BlogPostPostSlugRoute: typeof BlogPostPostSlugRoute
 }
 
-const ResourcesRouteChildren: ResourcesRouteChildren = {
-  ResourcesIndexRoute: ResourcesIndexRouteWithChildren,
+const BlogPostPostRouteChildren: BlogPostPostRouteChildren = {
+  BlogPostPostSlugRoute: BlogPostPostSlugRoute,
 }
 
-const ResourcesRouteWithChildren = ResourcesRoute._addFileChildren(
-  ResourcesRouteChildren,
+const BlogPostPostRouteWithChildren = BlogPostPostRoute._addFileChildren(
+  BlogPostPostRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   IndexHomeRoute: IndexHomeRouteWithChildren,
-  BlogRoute: BlogRouteWithChildren,
-  ResourcesRoute: ResourcesRouteWithChildren,
+  BlogIndexRoute: BlogIndexRouteWithChildren,
+  BlogRssDotxmlRoute: BlogRssDotxmlRoute,
+  ResourcesIndexRoute: ResourcesIndexRouteWithChildren,
   ApiImagesFeaturedRoute: ApiImagesFeaturedRoute,
+  BlogPostPostRoute: BlogPostPostRouteWithChildren,
   ApiImagesBlogPostCoverSlugRoute: ApiImagesBlogPostCoverSlugRoute,
 }
 export const routeTree = rootRouteImport

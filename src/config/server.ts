@@ -1,14 +1,11 @@
+import { createServerOnlyFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { staticConfig } from "~/config/static";
 
-if (typeof window !== "undefined") {
-  throw new Error("This file should only be used on the server.");
-}
-
 const serverConfigSchema = z.object({
   app: z.object({
-    url: z.string().url(),
+    url: z.url(),
     domain: z.string(),
     title: z.string(),
     description: z.string(),
@@ -18,7 +15,7 @@ const serverConfigSchema = z.object({
 
 export type ServerConfig = z.infer<typeof serverConfigSchema>;
 
-export function loadServerConfig(): ServerConfig {
+const loadServerConfig = createServerOnlyFn((): ServerConfig => {
   const siteUrl = process.env.TIN_APP_URL?.replace(/\/$/, "");
 
   return serverConfigSchema.parse({
@@ -29,6 +26,6 @@ export function loadServerConfig(): ServerConfig {
       dataDir: process.env.TIN_APP_DATA_DIR,
     },
   });
-}
+});
 
 export const serverConfig = loadServerConfig();

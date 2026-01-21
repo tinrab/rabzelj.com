@@ -10,9 +10,11 @@ export function NotFound({ children }: { children?: React.ReactNode }) {
       </div>
       <p className="flex flex-wrap items-center gap-2">
         <Button onClick={() => window.history.back()}>Go back</Button>
-        <Button variant="outline" asChild>
-          <Link to="/">Start Over</Link>
-        </Button>
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={<Link to="/">Start Over</Link>}
+        />
       </p>
     </div>
   );

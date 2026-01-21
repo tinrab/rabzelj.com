@@ -1,7 +1,7 @@
+import { IconAlertTriangle } from "@tabler/icons-react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { createMdxContent } from "@temelj/mdx-react";
-import { MdReportProblem } from "react-icons/md";
 import { z } from "zod";
 
 import { BlogNoteAlert } from "~/components/blog/BlogNoteAlert";
@@ -99,7 +99,7 @@ function RouteComponent() {
       {new Date(post.publishedDate).getTime() <
         Date.now() - 1000 * 60 * 60 * 24 * 180 && (
         <Typography className="mb-4 flex items-center gap-2 text-error text-sm">
-          <MdReportProblem />
+          <IconAlertTriangle />
           This blog post is more than 6 months old and may contain outdated
           information.
         </Typography>
@@ -119,7 +119,11 @@ function RouteComponent() {
       </div>
 
       {!isNote ? (
-        <Typography className="mt-4 text-muted-foreground italic">
+        <Typography
+          variant="body"
+          gutter
+          className="mt-4 text-muted-foreground italic"
+        >
           {post.description}
         </Typography>
       ) : undefined}
@@ -152,17 +156,17 @@ function RouteComponent() {
                 <Typography
                   variant="a"
                   className="text-balance text-lg"
-                  asChild
-                >
-                  <Link
-                    to="/blog/$slug"
-                    params={{
-                      slug: relatedPost.slug,
-                    }}
-                  >
-                    {relatedPost.title}
-                  </Link>
-                </Typography>
+                  render={
+                    <Link
+                      to="/blog/$slug"
+                      params={{
+                        slug: relatedPost.slug,
+                      }}
+                    >
+                      {relatedPost.title}
+                    </Link>
+                  }
+                />
               </li>
             ))}
           </ul>

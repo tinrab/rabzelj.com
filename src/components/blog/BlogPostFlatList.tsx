@@ -31,7 +31,7 @@ export function BlogPostFlatList<T extends BlogPostCommon>({
             </li>
           ))}
         </ul>
-        <div className="-left-[2px] absolute top-0 h-full w-[4px] shrink-0 overflow-hidden bg-border" />
+        <div className="absolute top-0 -left-[2px] h-full w-[4px] shrink-0 overflow-hidden bg-border" />
       </div>
     </div>
   );

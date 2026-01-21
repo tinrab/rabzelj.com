@@ -9,11 +9,12 @@
     "ignoreUnknown": false,
     "includes": [
       "**",
-      "!**/node_modules",
-      "!**/.output",
-      "!**/.tanstack",
-      "!**/.nitro",
-      "!**/.vercel",
+      "!node_modules",
+      "!dist",
+      "!.output",
+      "!.tanstack",
+      "!.nitro",
+      "!.vercel",
       "!src/routeTree.gen.ts"
     ]
   },
@@ -45,17 +46,11 @@
           "level": "on",
           "options": {
             "groups": [
-              [":BUN:", ":NODE:"],
+              [":NODE:"],
               ":BLANK_LINE:",
               [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:"],
               ":BLANK_LINE:",
-              [
-                "@my/lib",
-                "@my/lib/**",
-                "!@my/lib/special",
-                "!@my/lib/special/**",
-                "@/**"
-              ],
+              ["~/**"],
               ":BLANK_LINE:"
             ]
           }
@@ -63,5 +58,6 @@
       }
     }
   },
-  "javascript": { "formatter": { "quoteStyle": "double" } }
+  "javascript": { "formatter": { "quoteStyle": "double" } },
+  "css": { "parser": { "tailwindDirectives": true } }
 }

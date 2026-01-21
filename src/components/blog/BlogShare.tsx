@@ -1,9 +1,9 @@
 import {
-  FaBluesky,
-  FaFacebookF,
-  FaLinkedin,
-  FaXTwitter,
-} from "react-icons/fa6";
+  IconBrandBluesky,
+  IconBrandFacebook,
+  IconBrandLinkedin,
+  IconBrandX,
+} from "@tabler/icons-react";
 
 import { Typography } from "~/components/Typography";
 import type { BlogPostData } from "~/lib/blog/post/schema";
@@ -27,7 +27,7 @@ export function BlogShare({ post, className, ...props }: BlogShareProps) {
         rel="noreferrer"
       >
         <span className="sr-only">X, formerly Twitter</span>
-        <FaXTwitter className="size-3" aria-hidden="true" />
+        <IconBrandX className="size-3" aria-hidden="true" />
       </a>
       <a
         className="text-base text-foreground/60 transition-colors hover:text-foreground/80"
@@ -37,7 +37,7 @@ export function BlogShare({ post, className, ...props }: BlogShareProps) {
         rel="noreferrer"
       >
         <span className="sr-only">Bluesky</span>
-        <FaBluesky className="size-3" aria-hidden="true" />
+        <IconBrandBluesky className="size-3" aria-hidden="true" />
       </a>
       <a
         className="text-base text-foreground/60 transition-colors hover:text-foreground/80"
@@ -47,7 +47,7 @@ export function BlogShare({ post, className, ...props }: BlogShareProps) {
         rel="noreferrer"
       >
         <span className="sr-only">Facebook</span>
-        <FaFacebookF className="size-3" aria-hidden="true" />
+        <IconBrandFacebook className="size-3" aria-hidden="true" />
       </a>
       <a
         className="text-base text-foreground/60 transition-colors hover:text-foreground/80"
@@ -57,7 +57,7 @@ export function BlogShare({ post, className, ...props }: BlogShareProps) {
         rel="noreferrer"
       >
         <span className="sr-only">LinkedIn</span>
-        <FaLinkedin className="size-3" aria-hidden="true" />
+        <IconBrandLinkedin className="size-3" aria-hidden="true" />
       </a>
     </section>
   );

@@ -28,18 +28,20 @@ function RouteComponent() {
   return (
     <div className="mx-auto max-w-3xl px-4 pt-6 pb-8 md:pt-12">
       <section>
-        <Typography variant="h2" asChild className="text-balance" gutterBottom>
-          <h1>Tags</h1>
-        </Typography>
+        <Typography
+          variant="h2"
+          className="text-balance"
+          gutterBottom
+          render={<h1>Tags</h1>}
+        />
       </section>
 
       <section className="block max-w-5xl text-center">
-        <div className="flex flex-wrap items-center justify-center ">
+        <div className="flex flex-wrap items-center justify-center">
           {data.tags.map((tag) => (
             <Typography
               key={tag.slug}
               variant="a"
-              asChild
               className="mx-2 inline-block"
               style={{
                 fontSize: `${
@@ -49,15 +51,16 @@ function RouteComponent() {
                 }rem`,
                 lineHeight: 1.3,
               }}
-            >
-              <Link
-                to="/blog/tags/$slug"
-                params={{ slug: tag.slug }}
-                className="mx-2 inline-block"
-              >
-                {tag.title}
-              </Link>
-            </Typography>
+              render={
+                <Link
+                  to="/blog/tags/$slug"
+                  params={{ slug: tag.slug }}
+                  className="mx-2 inline-block"
+                >
+                  {tag.title}
+                </Link>
+              }
+            />
           ))}
         </div>
       </section>

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import RSS from "rss";
 
-import { loadServerConfig } from "~/config/server";
+import { serverConfig } from "~/config/server";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
 import { pathLocator } from "~/lib/path-locator";
 
@@ -9,15 +9,14 @@ export const Route = createFileRoute("/blog/rss.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const config = loadServerConfig();
         const now = new Date();
 
         const feed = new RSS({
-          title: config.app.title,
-          description: config.app.description,
-          site_url: config.app.url,
-          feed_url: `${config.app.url}${pathLocator.blog.rss}`,
-          image_url: `${config.app.url}${pathLocator.assets.featured}`,
+          title: serverConfig.app.title,
+          description: serverConfig.app.description,
+          site_url: serverConfig.app.url,
+          feed_url: `${serverConfig.app.url}${pathLocator.blog.rss}`,
+          image_url: `${serverConfig.app.url}${pathLocator.assets.featured}`,
           pubDate: now,
           // 1 hour
           ttl: 60,
@@ -27,7 +26,7 @@ export const Route = createFileRoute("/blog/rss.xml")({
           feed.item({
             title: post.title,
             description: post.description,
-            url: `${config.app.url}${pathLocator.blog.post.index(post.slug)}`,
+            url: `${serverConfig.app.url}${pathLocator.blog.post.index(post.slug)}`,
             date: post.publishedDate,
             categories: post.tags.map((tag) => tag.slug),
           });

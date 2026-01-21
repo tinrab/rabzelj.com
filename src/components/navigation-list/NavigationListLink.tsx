@@ -1,11 +1,10 @@
+import { mergeProps, useRender } from "@base-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot as SlotPrimitive } from "radix-ui";
-import React from "react";
 
 import { cn } from "~/lib/utility";
 
 const navigationListLinkVariants = cva(
-  "relative flex w-full cursor-pointer items-center rounded-sm px-2 py-2 focus:outline-hidden data-disabled:pointer-events-none data-disabled:cursor-auto data-disabled:opacity-50",
+  "relative flex w-full cursor-pointer items-center px-2 py-2 focus:outline-hidden data-disabled:pointer-events-none data-disabled:cursor-auto data-disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -19,27 +18,35 @@ const navigationListLinkVariants = cva(
   },
 );
 
-export type NavigationListLinkProps = {
+interface NavigationListLinkProps
+  extends useRender.ComponentProps<"button">,
+    VariantProps<typeof navigationListLinkVariants> {
   selected?: boolean;
   disabled?: boolean;
-  asChild?: boolean;
-} & VariantProps<typeof navigationListLinkVariants> &
-  React.HTMLAttributes<HTMLElement>;
+}
 
-export const NavigationListLink = React.forwardRef<
-  HTMLButtonElement,
-  NavigationListLinkProps
->(({ asChild, selected, disabled, variant, className, ...props }, ref) => {
-  const Comp = asChild ? SlotPrimitive.Slot : "button";
-  return (
-    <Comp
-      ref={ref}
-      aria-selected={selected}
-      aria-disabled={disabled}
-      data-disabled={disabled}
-      className={cn(navigationListLinkVariants({ variant }), className)}
-      {...props}
-    />
-  );
-});
-NavigationListLink.displayName = "NavigationListLink";
+export function NavigationListLink({
+  selected,
+  disabled,
+  variant,
+  render,
+  className,
+  ...props
+}: NavigationListLinkProps) {
+  return useRender({
+    defaultTagName: "button",
+    render,
+    props: mergeProps<"button">(
+      {
+        className: cn(navigationListLinkVariants({ variant }), className),
+        "aria-selected": selected,
+        "aria-disabled": disabled,
+      },
+      { ["data-disabled" as string]: disabled },
+      props,
+    ),
+    state: {
+      slot: "navigation-list-link",
+    },
+  });
+}

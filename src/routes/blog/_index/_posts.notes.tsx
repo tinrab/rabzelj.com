@@ -29,24 +29,19 @@ function RouteComponent() {
 
       <div className="flex flex-col gap-2">
         {posts.map((post) => (
-          <div className="flex flex-col">
+          <div key={post.slug} className="flex flex-col">
             <Typography
               variant="a"
               className="mb-1 text-balance text-xl tracking-tight"
-              asChild
-            >
-              <Link to="/blog/$slug" params={{ slug: post.slug }}>
-                {post.title}
-              </Link>
-            </Typography>
+              render={
+                <Link to="/blog/$slug" params={{ slug: post.slug }}>
+                  {post.title}
+                </Link>
+              }
+            />
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag) => (
-                <BlogTagChip
-                  key={tag.slug}
-                  tag={tag}
-                  variant="ghost"
-                  size="xs"
-                />
+                <BlogTagChip key={tag.slug} tag={tag} variant="ghost" />
               ))}
             </div>
           </div>

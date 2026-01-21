@@ -5,22 +5,22 @@ import { extractClientConfig } from "~/config/utility";
 
 const clientConfigSchema = z.object({
   app: z.object({
-    url: z.string().url(),
+    url: z.url(),
     domain: z.string(),
     title: z.string(),
     description: z.string(),
   }),
   social: z.object({
-    email: z.string().email(),
-    twitterUrl: z.string().url(),
+    email: z.email(),
+    twitterUrl: z.url(),
     twitterId: z.string(),
-    githubUrl: z.string().url(),
+    githubUrl: z.url(),
     githubId: z.string(),
-    youtubeUrl: z.string().url(),
+    youtubeUrl: z.url(),
     youtubeId: z.string(),
-    blueskyUrl: z.string().url(),
+    blueskyUrl: z.url(),
     blueskyId: z.string(),
-    linkedinUrl: z.string().url(),
+    linkedinUrl: z.url(),
   }),
 });
 

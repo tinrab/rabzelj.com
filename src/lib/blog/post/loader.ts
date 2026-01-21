@@ -15,9 +15,9 @@ import {
 } from "~/lib/blog/post/schema";
 import { loadBlogTags } from "~/lib/blog/tag/loader";
 import type { BlogTagData } from "~/lib/blog/tag/schema";
+import { blogTagIsNote } from "~/lib/blog/tag/utility";
 import { getMdxCompiler } from "~/lib/mdx/compiler";
 import { pathLocator } from "~/lib/path-locator";
-import { blogTagIsNote } from "~/lib/blog/tag/utility";
 
 const DATA_DIR = path.join(process.cwd(), serverConfig.app.dataDir);
 const POSTS_DIR = path.join(DATA_DIR, "blog/posts");

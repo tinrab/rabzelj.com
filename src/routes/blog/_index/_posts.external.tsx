@@ -29,21 +29,22 @@ function RouteComponent() {
       <Typography
         id="h-flinect-posts"
         variant="h3"
-        asChild
         className="text-balance"
         gutter
-      >
-        <a href="#h-flinect-posts" className="text-foreground">
-          <h2>Posts on Flinect</h2>
-        </a>
-      </Typography>
+        render={
+          <a href="#h-flinect-posts" className="text-foreground">
+            <h2>Posts on Flinect</h2>
+          </a>
+        }
+      />
       <BlogPostList
         anchorSuffix="-flinect"
         posts={flinectPosts}
         renderPost={(post) => (
-          <Typography variant="a" asChild>
-            <Link to={post.url}>{post.title}</Link>
-          </Typography>
+          <Typography
+            variant="a"
+            render={<Link to={post.url}>{post.title}</Link>}
+          />
         )}
       />
     </section>

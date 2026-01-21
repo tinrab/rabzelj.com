@@ -29,14 +29,18 @@ function RouteComponent() {
       posts={groupedPosts}
       renderPost={(post) => (
         <div className="flex flex-col">
-          <Typography variant="a" className="mb-1" asChild>
-            <Link to="/blog/$slug" params={{ slug: post.slug }}>
-              {post.title}
-            </Link>
-          </Typography>
+          <Typography
+            variant="a"
+            className="mb-1"
+            render={
+              <Link to="/blog/$slug" params={{ slug: post.slug }}>
+                {post.title}
+              </Link>
+            }
+          />
           <div className="flex flex-wrap gap-2">
             {post.tags.map((tag) => (
-              <BlogTagChip key={tag.slug} tag={tag} variant="ghost" size="xs" />
+              <BlogTagChip key={tag.slug} tag={tag} variant="ghost" />
             ))}
           </div>
         </div>

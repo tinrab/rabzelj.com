@@ -24,8 +24,8 @@ export function getMdxContentComponents({
 } = {}): MdxContentComponents {
   return {
     p: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
-      <Typography gutter asChild {...props}>
-        <p>{children}</p>
+      <Typography variant="body" gutter {...props}>
+        {children}
       </Typography>
     ),
     a: ({
@@ -33,9 +33,11 @@ export function getMdxContentComponents({
       children,
       ...props
     }: React.HTMLAttributes<HTMLElement> & { href?: string }) => (
-      <Typography variant="a" asChild {...props}>
-        <a href={href}>{children}</a>
-      </Typography>
+      <Typography
+        variant="a"
+        render={<a href={href}>{children}</a>}
+        {...props}
+      />
     ),
 
     h1: (props: React.HTMLAttributes<HTMLElement>) => (
@@ -82,9 +84,7 @@ export function getMdxContentComponents({
       />
     ),
     li: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
-      <Typography asChild {...props}>
-        <li>{children}</li>
-      </Typography>
+      <Typography render={<li>{children}</li>} {...props} />
     ),
 
     table: ({
@@ -158,14 +158,18 @@ const siteComponents: MdxContentComponents = {
       (href.startsWith("http") || href.startsWith("mailto:"));
 
     return (
-      <Typography variant="a" asChild {...props}>
-        <Link
-          to={href}
-          {...props}
-          target={isExternal ? "_blank" : undefined}
-          rel={isExternal ? "noreferrer" : undefined}
-        />
-      </Typography>
+      <Typography
+        variant="a"
+        render={
+          <Link
+            to={href}
+            {...props}
+            target={isExternal ? "_blank" : undefined}
+            rel={isExternal ? "noreferrer" : undefined}
+          />
+        }
+        {...props}
+      />
     );
   },
 };
