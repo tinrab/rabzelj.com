@@ -35,6 +35,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ["@resvg/resvg-js"],
   },
+  ssr: {
+    noExternal: ["@tabler/icons-react"],
+  },
   plugins: [
     tsConfigPaths(),
     tanstackStart({
