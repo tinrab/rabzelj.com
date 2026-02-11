@@ -50,26 +50,26 @@ All services are defined inside [docker-compose.yaml](https://github.com/tinrab/
 Here's an extract for the account service:
 
 ```yaml
-version: '3.6'
+version: "3.6"
 
 services:
   account:
     build:
-      context: '.'
-      dockerfile: './account/app.dockerfile'
+      context: "."
+      dockerfile: "./account/app.dockerfile"
     depends_on:
-      - 'account_db'
+      - "account_db"
     environment:
-      DATABASE_URL: 'postgres://spidey:123456@account_db/spidey?sslmode=disable'
+      DATABASE_URL: "postgres://spidey:123456@account_db/spidey?sslmode=disable"
   account_db:
     build:
-      context: './account'
-      dockerfile: './db.dockerfile'
+      context: "./account"
+      dockerfile: "./db.dockerfile"
     environment:
-      POSTGRES_DB: 'spidey'
-      POSTGRES_USER: 'spidey'
-      POSTGRES_PASSWORD: '123456'
-    restart: 'unless-stopped'
+      POSTGRES_DB: "spidey"
+      POSTGRES_USER: "spidey"
+      POSTGRES_PASSWORD: "123456"
+    restart: "unless-stopped"
 ```
 
 The context is specifically set to ensure that `vendor` directory can be copied inside the Docker container. All services share the same dependencies and some need each other's definitions.

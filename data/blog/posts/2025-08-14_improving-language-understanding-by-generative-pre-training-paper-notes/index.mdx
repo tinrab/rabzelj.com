@@ -35,6 +35,7 @@ Some transformations:
 # Spec
 
 ## Architecture
+
 - **Type**: 12-layer decoder-only Transformer with masked self-attention
 - **Hidden Size**: 768 dimensions
 - **Attention Heads**: 12 heads
@@ -42,6 +43,7 @@ Some transformations:
 - **Context Length**: 512 tokens per sequence
 
 ## Training Setup
+
 - **Dataset**: BooksCorpus (7,000+ unpublished books)
 - **Vocabulary**: 40,000 merges using Byte-Pair Encoding (BPE)
 - **Batch Size**: 64 randomly sampled contiguous sequences
@@ -49,6 +51,7 @@ Some transformations:
 - **Achieved Perplexity**: 18.4 on BooksCorpus
 
 ## Optimization
+
 - **Optimizer**: Adam
 - **Learning Rate**: 2.5e-4 (max), with linear warmup over first 2,000 updates
 - **Learning Rate Schedule**: Cosine annealing to 0
@@ -58,12 +61,14 @@ Some transformations:
   - Modified L2 regularization (w = 0.01) on non-bias/gain weights
 
 ## Implementation Details
+
 - **Normalization**: LayerNorm used extensively
 - **Activation Function**: GELU (Gaussian Error Linear Unit)
 - **Position Embeddings**: Learned (not sinusoidal)
 - **Text Processing**: ftfy library for cleaning, spaCy tokenizer
 
 ## Fine-Tuning Settings
+
 - **Learning Rate**: 6.25e-5
 - **Batch Size**: 32
 - **Training Epochs**: 3 (sufficient for most tasks)

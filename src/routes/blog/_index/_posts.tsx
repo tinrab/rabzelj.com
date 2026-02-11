@@ -23,10 +23,7 @@ function RouteComponent() {
             variant="ghost"
             nativeButton={false}
             render={
-              <a
-                href={`${clientConfig.app.url}${pathLocator.blog.rss}`}
-                aria-label="Blog RSS feed"
-              >
+              <a href={`${clientConfig.app.url}${pathLocator.blog.rss}`} aria-label="Blog RSS feed">
                 <span className="sr-only">Blog RSS feed</span>
                 <IconRss aria-hidden="true" />
               </a>
@@ -34,10 +31,7 @@ function RouteComponent() {
           />
         </div>
 
-        <Typography
-          variant="a"
-          render={<Link to="/blog/tags">See tags.</Link>}
-        />
+        <Typography variant="a" render={<Link to="/blog/tags">See tags.</Link>} />
       </div>
 
       <div className="mb-8">

@@ -36,16 +36,17 @@ J = \sum_{i,j=1}^{V} f(X_{ij}) (w_i^T \tilde{w}_j + b_i + \tilde{b}_j - \log X_{
 $$
 
 Components:
+
 - $w_i$ and $\tilde{w}_j$: word vectors for word $i$ and context word $j$, which the model learns.
 - $b_i$ and $\tilde{b}_j$: bias terms for word $i$ and context word $j$, which help restore symmetry in the model formulation.
 - $\log X_{ij}$: the logarithm of the co-occurrence count.
-The model addresses the issue of the logarithm diverging when $X_{ij}$ is zero by incorporating a weighting function.
+  The model addresses the issue of the logarithm diverging when $X_{ij}$ is zero by incorporating a weighting function.
 - $f(X_{ij})$: a weighting function that addresses the problem of sparse or highly frequent co-occurrences.
-It ensures that:
-  * $f(0) = 0$, meaning zero co-occurrences contribute nothing to the cost.
-  * It is non-decreasing, so rare co-occurrences are not overweighted.
-  * It is relatively small for large values of x, preventing very frequent co-occurrences from dominating the cost.
-  * The parameters they choose are: $f(x) = (x/x_{max})^\alpha$ if $x < x_{max}$, and $1$ otherwise. $x_{max}$ is typically set to $100$, and $\alpha$ to $3/4$, which offers an improvement over a linear version ($\alpha=1$).
+  It ensures that:
+  - $f(0) = 0$, meaning zero co-occurrences contribute nothing to the cost.
+  - It is non-decreasing, so rare co-occurrences are not overweighted.
+  - It is relatively small for large values of x, preventing very frequent co-occurrences from dominating the cost.
+  - The parameters they choose are: $f(x) = (x/x_{max})^\alpha$ if $x < x_{max}$, and $1$ otherwise. $x_{max}$ is typically set to $100$, and $\alpha$ to $3/4$, which offers an improvement over a linear version ($\alpha=1$).
 
 The model is trained by stochastically sampling nonzero elements from the co-oc matrix $X$.
 This is efficient because it focuses only on the observed co-occurrences, rather than the entire sparse matrix or individual context windows.
@@ -54,7 +55,6 @@ For the sampled entry $X_{ij}$, we calculate the error using a weighted least sq
 The AdaGrad optimizer is then used to update the word vectors ($w_i$, $\tilde{w}_j$) and bias terms ($b_i$, $\tilde{b}_j$).
 AdaGrad adaptively adjusts the learning rate for each parameter, giving larger updates to less frequent parameters and smaller updates to more frequent ones.
 It starts with an initial learning rate of $0.05$.
-
 
 # Implementation
 

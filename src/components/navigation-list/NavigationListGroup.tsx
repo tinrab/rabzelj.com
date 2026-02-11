@@ -1,5 +1,6 @@
-import { cva, type VariantProps } from "class-variance-authority";
 import type React from "react";
+
+import { cva, type VariantProps } from "class-variance-authority";
 import { useId } from "react";
 
 import { cn } from "~/lib/utility";
@@ -33,11 +34,7 @@ export function NavigationListGroup({
   const headingId = useId();
 
   return (
-    <div
-      role="presentation"
-      className={cn(gutterBottom ? "mb-4" : "", className)}
-      {...props}
-    >
+    <div role="presentation" className={cn(gutterBottom ? "mb-4" : "", className)} {...props}>
       {heading && (
         <div
           className={cn(navigationListGroupHeadingVariants({ variant }))}

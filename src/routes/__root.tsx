@@ -1,13 +1,8 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  createRootRoute,
-  HeadContent,
-  Outlet,
-  ScriptOnce,
-  Scripts,
-} from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
 import type React from "react";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createRootRoute, HeadContent, Outlet, ScriptOnce, Scripts } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 
 import { Toaster } from "~/components/ui/sonner";
 import { loadClientConfig } from "~/config/client";
@@ -62,8 +57,7 @@ export const Route = createRootRoute({
         { name: "robots", content: "index, follow" },
         {
           name: "googlebot",
-          content:
-            "index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1",
+          content: "index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1",
         },
 
         { property: "og:title", content: tagline },
@@ -105,8 +99,7 @@ export const Route = createRootRoute({
         {
           rel: "stylesheet",
           href: "https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css",
-          integrity:
-            "sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib",
+          integrity: "sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib",
           crossOrigin: "anonymous",
         },
       ],
@@ -132,16 +125,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const themeClass = data.theme === Theme.DARK ? "dark" : "";
 
   return (
-    <html
-      lang="en"
-      data-theme={themeClass}
-      className={themeClass}
-      suppressHydrationWarning
-    >
+    <html lang="en" data-theme={themeClass} className={themeClass} suppressHydrationWarning>
       <head>
         {data.theme === Theme.SYSTEM ? (
           <ScriptOnce
-            // biome-ignore lint/correctness/noChildrenProp: need to inject theme
+            // oxlint-disable-next-line no-children-prop
             children={`window.matchMedia('(prefers-color-scheme: dark)').matches ? document.documentElement.classList.add('dark') : null`}
           />
         ) : undefined}
@@ -153,7 +141,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             {children}
             <Toaster />
             <script
-              // biome-ignore lint/security/noDangerouslySetInnerHtml: setting window.CONFIG
               dangerouslySetInnerHTML={{
                 __html: makeClientConfigScript(data.config),
               }}

@@ -4,11 +4,7 @@ import { cn } from "~/lib/utility";
 
 interface NavigationListItemProps extends useRender.ComponentProps<"div"> {}
 
-export function NavigationListItem({
-  render,
-  className,
-  ...props
-}: NavigationListItemProps) {
+export function NavigationListItem({ render, className, ...props }: NavigationListItemProps) {
   return useRender({
     defaultTagName: "div",
     render,

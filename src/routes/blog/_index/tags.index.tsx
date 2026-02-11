@@ -28,12 +28,7 @@ function RouteComponent() {
   return (
     <div className="mx-auto max-w-3xl px-4 pt-6 pb-8 md:pt-12">
       <section>
-        <Typography
-          variant="h2"
-          className="text-balance"
-          gutterBottom
-          render={<h1>Tags</h1>}
-        />
+        <Typography variant="h2" className="text-balance" gutterBottom render={<h1>Tags</h1>} />
       </section>
 
       <section className="block max-w-5xl text-center">
@@ -45,8 +40,7 @@ function RouteComponent() {
               className="mx-2 inline-block"
               style={{
                 fontSize: `${
-                  ((tag.postCount * 3 + data.maxPostCount) /
-                    data.maxPostCount) *
+                  ((tag.postCount * 3 + data.maxPostCount) / data.maxPostCount) *
                   (aboveLg ? 1.5 : aboveMd ? 1.2 : 0.8)
                 }rem`,
                 lineHeight: 1.3,

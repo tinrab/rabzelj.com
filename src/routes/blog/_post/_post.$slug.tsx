@@ -77,7 +77,7 @@ function RouteComponent() {
   const isNote = post.tags.some(blogTagIsNote);
 
   return (
-    <article className="mx-auto max-w-3xl break-words px-4 py-8 md:py-12">
+    <article className="mx-auto max-w-3xl px-4 py-8 break-words md:py-12">
       <Typography className="text-balance" variant="h1">
         {post.title}
       </Typography>
@@ -96,17 +96,15 @@ function RouteComponent() {
 
       <Separator className="my-4" />
 
-      {new Date(post.publishedDate).getTime() <
-        Date.now() - 1000 * 60 * 60 * 24 * 180 && (
-        <Typography className="mb-4 flex items-center gap-2 text-error text-sm">
+      {new Date(post.publishedDate).getTime() < Date.now() - 1000 * 60 * 60 * 24 * 180 && (
+        <Typography className="text-error mb-4 flex items-center gap-2 text-sm">
           <IconAlertTriangle />
-          This blog post is more than 6 months old and may contain outdated
-          information.
+          This blog post is more than 6 months old and may contain outdated information.
         </Typography>
       )}
 
       <div className="flex flex-wrap gap-2">
-        <Typography className="mr-auto text-muted-foreground text-sm">
+        <Typography className="text-muted-foreground mr-auto text-sm">
           {new Date(post.publishedDate).toLocaleDateString()}
         </Typography>
         {/* <BlogShare className="hidden sm:flex" post={post} /> */}
@@ -119,11 +117,7 @@ function RouteComponent() {
       </div>
 
       {!isNote ? (
-        <Typography
-          variant="body"
-          gutter
-          className="mt-4 text-muted-foreground italic"
-        >
+        <Typography variant="body" gutter className="text-muted-foreground mt-4 italic">
           {post.description}
         </Typography>
       ) : undefined}
@@ -139,7 +133,7 @@ function RouteComponent() {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Typography className="mr-auto text-muted-foreground text-sm">
+        <Typography className="text-muted-foreground mr-auto text-sm">
           {new Date(post.publishedDate).toLocaleDateString()}
         </Typography>
         {/* <BlogShare className="hidden sm:flex" post={post} /> */}
@@ -155,7 +149,7 @@ function RouteComponent() {
               <li key={relatedPost.slug}>
                 <Typography
                   variant="a"
-                  className="text-balance text-lg"
+                  className="text-lg text-balance"
                   render={
                     <Link
                       to="/blog/$slug"

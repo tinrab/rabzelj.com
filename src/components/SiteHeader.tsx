@@ -1,13 +1,11 @@
+import type React from "react";
+
 import { IconMenu } from "@tabler/icons-react";
 import { Link, type ToOptions, useLocation } from "@tanstack/react-router";
-import type React from "react";
 
 import { Header, HeaderRow, HeaderTitle } from "~/components/layout/header";
 import { useHeaderContext } from "~/components/layout/header-context";
-import {
-  HeaderMobile,
-  HeaderMobileTitle,
-} from "~/components/layout/header-mobile";
+import { HeaderMobile, HeaderMobileTitle } from "~/components/layout/header-mobile";
 import { NavigationList } from "~/components/navigation-list/NavigationList";
 import { NavigationListGroup } from "~/components/navigation-list/NavigationListGroup";
 import { NavigationListLink } from "~/components/navigation-list/NavigationListLink";
@@ -52,9 +50,7 @@ export function SiteHeader() {
                     render={
                       <Link
                         to={link.to}
-                        className={cn(
-                          location.pathname === link.to && "text-foreground",
-                        )}
+                        className={cn(location.pathname === link.to && "text-foreground")}
                       >
                         {link.title}
                       </Link>
@@ -93,10 +89,7 @@ export function SiteHeader() {
 
 type HeaderMobileTriggerProps = React.HTMLAttributes<HTMLButtonElement>;
 
-export function HeaderMobileTrigger({
-  className,
-  ...props
-}: HeaderMobileTriggerProps) {
+export function HeaderMobileTrigger({ className, ...props }: HeaderMobileTriggerProps) {
   const { onMenuOpenChange } = useHeaderContext();
   return (
     <Button

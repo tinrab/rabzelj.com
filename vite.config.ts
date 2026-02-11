@@ -1,10 +1,9 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { nitro } from "nitro/vite";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { defineConfig } from "vite";
 import arraybufferPlugin from "vite-plugin-arraybuffer";
 import tsConfigPaths from "vite-tsconfig-paths";
@@ -48,6 +47,9 @@ export default defineConfig({
     arraybufferPlugin(),
     viteReact(),
     nitro({
+      rollupConfig: {
+        external: ["@resvg/resvg-js"],
+      },
       routeRules: {
         "/assets/**": {
           headers: {
@@ -61,10 +63,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       onwarn(warning, warn) {
-        if (
-          warning.code === "MODULE_LEVEL_DIRECTIVE" ||
-          warning.code === "SOURCEMAP_ERROR"
-        ) {
+        if (warning.code === "MODULE_LEVEL_DIRECTIVE" || warning.code === "SOURCEMAP_ERROR") {
           return;
         }
         warn(warning);

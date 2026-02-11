@@ -143,7 +143,7 @@ What is going on here?
 
 It turns out that the two pointers are not actually the same, even though they are pointing to the same memory location.
 
-The extra information that pointers have is called *provenance*.
+The extra information that pointers have is called _provenance_.
 It tells the compiler where a pointer came from, its origin.
 
 Provenance isn't visible in-code or in the compiled assembly, it's just a compiler thing so it knows what kind of optimizations can be done.
@@ -171,7 +171,7 @@ This can be a clue about what went wrong in the example.
 These include heap allocations, stack, statics and constants.
 
 The variables `a` and `b` in the example are allocated on the stack as separate allocated objects.
-Using `wrapping_offset` on them is therefore invalid, which means *undefined behavior*.
+Using `wrapping_offset` on them is therefore invalid, which means _undefined behavior_.
 
 # Optimizations
 

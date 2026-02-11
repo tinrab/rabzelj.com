@@ -1,13 +1,9 @@
+import * as cheerio from "cheerio";
 import fs from "node:fs/promises";
 import path from "node:path";
-
-import * as cheerio from "cheerio";
 import SiteMapper from "sitemapper";
 
-import type {
-  BlogPostCommon,
-  ExternalBlogData,
-} from "../src/lib/blog/post/schema.ts";
+import type { BlogPostCommon, ExternalBlogData } from "../src/lib/blog/post/schema.ts";
 
 async function loadFlinect(): Promise<BlogPostCommon[]> {
   const posts: BlogPostCommon[] = [];
@@ -22,12 +18,8 @@ async function loadFlinect(): Promise<BlogPostCommon[]> {
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    const title = $(`[property="og:title"]`)
-      .attr("content")
-      ?.replace(" | Flinect", "");
-    const publishedDate = $(`[property="article:published_time"]`).attr(
-      "content",
-    );
+    const title = $(`[property="og:title"]`).attr("content")?.replace(" | Flinect", "");
+    const publishedDate = $(`[property="article:published_time"]`).attr("content");
     if (!title || !publishedDate) {
       continue;
     }

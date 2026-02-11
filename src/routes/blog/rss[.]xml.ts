@@ -36,8 +36,7 @@ export const Route = createFileRoute("/blog/rss.xml")({
           status: 200,
           headers: {
             "Content-Type": "application/xml",
-            "Cache-Control":
-              "public, max-age=3600, stale-while-revalidate=3600",
+            "Cache-Control": "public, max-age=3600, stale-while-revalidate=3600",
           },
         });
       },

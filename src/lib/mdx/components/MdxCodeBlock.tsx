@@ -1,6 +1,7 @@
+import type React from "react";
+
 import { IconCheck, IconCopy } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
-import type React from "react";
 import { useId } from "react";
 
 import { ProgrammingLanguageIcon } from "~/components/ProgrammingLanguageIcon";
@@ -40,11 +41,9 @@ export function MdxCodeBlock({
   return (
     <div className={cn(className, "relative rounded-sm")} {...props}>
       {fileName ? (
-        <div className="relative flex rounded-t-sm border-border border-t-2 border-r-2 border-l-2 p-2 text-muted-foreground">
-          <div className="ml-2 flex grow items-center gap-2 self-center text-muted-foreground text-sm">
-            {language ? (
-              <ProgrammingLanguageIcon language={language} />
-            ) : undefined}
+        <div className="border-border text-muted-foreground relative flex rounded-t-sm border-t-2 border-r-2 border-l-2 p-2">
+          <div className="text-muted-foreground ml-2 flex grow items-center gap-2 self-center text-sm">
+            {language ? <ProgrammingLanguageIcon language={language} /> : undefined}
             {fileName}
           </div>
 
@@ -64,7 +63,7 @@ export function MdxCodeBlock({
         <pre
           id={codeId}
           className={cn(
-            "relative flex overflow-auto rounded-sm border-2 border-border font-mono font-normal text-sm leading-relaxed [&_code]:bg-transparent",
+            "border-border relative flex overflow-auto rounded-sm border-2 font-mono text-sm leading-relaxed font-normal [&_code]:bg-transparent",
             fileName ? "rounded-t-none" : "",
             "shiki",
           )}
@@ -72,7 +71,7 @@ export function MdxCodeBlock({
           {children}
         </pre>
         {!fileName ? (
-          <div className="absolute top-0 right-0 z-10 hidden p-2 text-muted-foreground group-hover:block">
+          <div className="text-muted-foreground absolute top-0 right-0 z-10 hidden p-2 group-hover:block">
             <Button
               variant="outline"
               size="icon-sm"

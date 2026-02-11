@@ -834,17 +834,12 @@ Here's an excerpt of our API saga [api/saga.ts](https://github.com/tinrab/rusty-
 ```ts
 function* connectWebSocket(): Generator<StrictEffect> {
   const webSocket = new WebSocket(config.webSocketUrl);
-  const webSocketChannel = (yield call(
-    createWebSocketChannel,
-    webSocket,
-  )) as EventChannel<Output>;
+  const webSocketChannel = (yield call(createWebSocketChannel, webSocket)) as EventChannel<Output>;
   yield fork(read, webSocketChannel);
   yield fork(write, webSocket);
 }
 
-function* read(
-  webSocketChannel: EventChannel<Output>,
-): Generator<StrictEffect> {
+function* read(webSocketChannel: EventChannel<Output>): Generator<StrictEffect> {
   while (true) {
     const output = (yield take(webSocketChannel)) as Output;
     yield put(apiActions.read(output));
@@ -877,13 +872,13 @@ export type ReadApiAction = {
 
 ```ts
 export enum OutputType {
-  Error = 'error',
-  Alive = 'alive',
-  Joined = 'joined',
-  UserJoined = 'user-joined',
-  UserLeft = 'user-left',
-  Posted = 'posted',
-  UserPosted = 'user-posted',
+  Error = "error",
+  Alive = "alive",
+  Joined = "joined",
+  UserJoined = "user-joined",
+  UserLeft = "user-left",
+  Posted = "posted",
+  UserPosted = "user-posted",
 }
 
 export type UserOutput = {
@@ -928,21 +923,23 @@ Here's the procedure for joining.
 yield put(apiActions.write(apiProto.join(action.payload.name)));
 
 while (true) {
-    const read = (yield take(ApiActionType.Read)) as ReadApiAction;
+  const read = (yield take(ApiActionType.Read)) as ReadApiAction;
 
-    if (read.payload.type === OutputType.Error) {
-        yield put(userActions.joined({ error: true, code: read.payload.payload.code }));
-        break;
-    } else if (read.payload.type === OutputType.Joined) {
-        const output = read.payload.payload;
-        yield put(userActions.joined({
-            error: false,
-            user: output.user,
-            others: output.others,
-            messages: output.messages,
-        }));
-        break;
-    }
+  if (read.payload.type === OutputType.Error) {
+    yield put(userActions.joined({ error: true, code: read.payload.payload.code }));
+    break;
+  } else if (read.payload.type === OutputType.Joined) {
+    const output = read.payload.payload;
+    yield put(
+      userActions.joined({
+        error: false,
+        user: output.user,
+        others: output.others,
+        messages: output.messages,
+      }),
+    );
+    break;
+  }
 }
 ```
 

@@ -1,5 +1,6 @@
-import { IconMenu } from "@tabler/icons-react";
 import type React from "react";
+
+import { IconMenu } from "@tabler/icons-react";
 
 import { useHeaderContext } from "~/components/layout/header-context";
 import { Button } from "~/components/ui/button";
@@ -14,11 +15,7 @@ import { cn } from "~/lib/utility";
 
 type HeaderMobileProps = React.ComponentProps<"div">;
 
-export function HeaderMobile({
-  className,
-  children,
-  ...props
-}: HeaderMobileProps) {
+export function HeaderMobile({ className, children, ...props }: HeaderMobileProps) {
   const { menuOpen, onMenuOpenChange } = useHeaderContext();
   return (
     <Sheet open={menuOpen} onOpenChange={onMenuOpenChange}>
@@ -44,10 +41,7 @@ export function HeaderMobileTitle({ ...props }: HeaderMobileTitleProps) {
 
 type HeaderMobileTriggerProps = React.HTMLAttributes<HTMLButtonElement>;
 
-export function HeaderMobileTrigger({
-  className,
-  ...props
-}: HeaderMobileTriggerProps) {
+export function HeaderMobileTrigger({ className, ...props }: HeaderMobileTriggerProps) {
   const { onMenuOpenChange } = useHeaderContext();
   return (
     <Button

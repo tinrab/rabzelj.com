@@ -21,15 +21,15 @@ Install [Docker](https://docs.docker.com/engine/installation/) and
 Inside project's root directory create `docker-compose.yaml` file.
 
 ```yaml
-version: '3.3'
+version: "3.3"
 services:
   api:
-    container_name: 'api'
-    build: './api'
+    container_name: "api"
+    build: "./api"
     ports:
-      - '8080:8080'
+      - "8080:8080"
     volumes:
-      - './api:/go/src/app'
+      - "./api:/go/src/app"
 ```
 
 Create `api/Dockerfile` file. It uses official [TensorFlow](https://hub.docker.com/r/tensorflow/tensorflow/) Docker image as its base image. You'll also need to install TensorFlow C library to use Go bindings.
@@ -169,8 +169,8 @@ func main() {
 
 <Note>
   Imports are skipped for brevity. You can use
-  [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports) tool to add
-  them. Your code editor most likely has a plugin for it.
+  [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports) tool to add them. Your code editor
+  most likely has a plugin for it.
 </Note>
 
 Write the `loadModel` function.

@@ -19,8 +19,7 @@ export const typographyVariants = cva("", {
       small: "font-medium text-sm leading-none",
       muted: "text-muted-foreground",
       a: "text-link underline underline-offset-4",
-      mutedLink:
-        "text-muted-foreground transition-colors hover:text-foreground",
+      mutedLink: "text-muted-foreground transition-colors hover:text-foreground",
     },
   },
   defaultVariants: { variant: "body" },
@@ -71,10 +70,7 @@ const variantElementMap = {
 type VariantElementMap = typeof variantElementMap;
 type TypographyVariant = keyof VariantElementMap;
 
-type TypographyOwnProps = Omit<
-  VariantProps<typeof typographyVariants>,
-  "variant"
-> & {
+type TypographyOwnProps = Omit<VariantProps<typeof typographyVariants>, "variant"> & {
   gutterTop?: boolean;
   gutterBottom?: boolean;
   gutter?: boolean;

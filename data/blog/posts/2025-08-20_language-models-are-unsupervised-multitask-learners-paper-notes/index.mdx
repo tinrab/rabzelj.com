@@ -14,11 +14,12 @@ A sufficiently large language model can learn to perform various NLP tasks in a 
 
 The GPT-2 model is a large, decoder-only Transformer architecture.
 It's based on the original GPT model with a few modifications:
+
 - **Layer Normalization**: Layernorm was moved to the input of each transformer sub-block.
-Similar to pre-activation in residual networks.
+  Similar to pre-activation in residual networks.
 - **Additional Normalization**: An extra layernorm was added after the final self-attention block.
 - **Modified Initialization**: The weights of the residual layers were scaled at initialization by a factor of $1/\sqrt{N}$ (where N is the number of residual layers).
-Residual connections help the values from growing too large.
+  Residual connections help the values from growing too large.
 - **Increased Scale**: The vocabulary was expanded to 50,257 tokens, and the context size was doubled from 512 to 1024.
 
 They trained 4 different sizes to see how performance scaled with size.

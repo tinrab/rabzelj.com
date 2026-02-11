@@ -13,10 +13,7 @@ export function PulseDecoration({ className, ...props }: PulseDecorationProps) {
 
   return (
     <div
-      className={cn(
-        "hidden items-center justify-center opacity-65 md:flex",
-        className,
-      )}
+      className={cn("hidden items-center justify-center opacity-65 md:flex", className)}
       {...props}
     >
       {Array.from({ length: n }, (_, i) => {
@@ -24,7 +21,7 @@ export function PulseDecoration({ className, ...props }: PulseDecorationProps) {
         return (
           <div
             key={String(i)}
-            className="absolute animate-pulse border bg-foreground/20"
+            className="bg-foreground/20 absolute animate-pulse border"
             style={
               {
                 "--index": i,

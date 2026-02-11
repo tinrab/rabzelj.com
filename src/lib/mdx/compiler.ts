@@ -1,16 +1,10 @@
-import {
-  headingIdPlugin,
-  MdxCompiler,
-  syntaxHighlightPlugin,
-} from "@temelj/mdx";
+import { headingIdPlugin, MdxCompiler, syntaxHighlightPlugin } from "@temelj/mdx";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 
 async function loadMdxCompiler(): Promise<MdxCompiler> {
-  const lightTheme = (await import("shiki/themes/github-light-default.mjs"))
-    .default;
-  const darkTheme = (await import("shiki/themes/github-dark-default.mjs"))
-    .default;
+  const lightTheme = (await import("shiki/themes/github-light-default.mjs")).default;
+  const darkTheme = (await import("shiki/themes/github-dark-default.mjs")).default;
 
   return (
     new MdxCompiler()

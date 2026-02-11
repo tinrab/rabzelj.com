@@ -25,10 +25,10 @@ The path length between any two positions in the input and output sequences is $
 It's difficult to learn relationships between distant elements in a sequence.
 
 The self-attention layers address these by:
-- connecting all positions with a constant number of sequentially executed operations ($O(1)$  instead of $O(n)$),
+
+- connecting all positions with a constant number of sequentially executed operations ($O(1)$ instead of $O(n)$),
 - allowing full parallelization during training,
 - providing constant-length paths between any two positions in the sequence.
-
 
 # Architecture
 
@@ -72,7 +72,6 @@ The consistent $d_{model}$ dimension throughout all layers enables clean residua
 
 Both encoder and decoder extensively use residual connections around each sub-layer, which helps with gradient flow and enables training of deeper networks.
 Layer norm is applied after each sub-layer to stabilize training and improve convergence.
-
 
 # Attention
 
@@ -131,7 +130,6 @@ Self-attention layers connect all positions with constant operations $O(1)$ vers
 are faster than recurrent layers when sequence length is $n<d$ (which is typical),
 and provide constant $O(1)$ path lengths between any two positions compared to $O(n)$ for recurrent and $O(log_k(n))$ for convolutional layers, which makes it easier to learn long-range dependencies.
 
-
 # Positional encoding
 
 The Transformer doesn't contain recurrence and no convolutions, so it has no way to understand the order of tokens in a sequence.
@@ -147,6 +145,7 @@ The paper uses sinusoidal encodings:
 $$
 PE_{(pos,2i)} = \sin(pos/10000^{2i/d_{model}})
 $$
+
 $$
 PE_{(pos,2i+1)} = \cos(pos/10000^{2i/d_{model}}),
 $$

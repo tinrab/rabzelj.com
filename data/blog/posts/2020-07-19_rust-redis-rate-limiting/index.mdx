@@ -29,14 +29,14 @@ Firstly, we need to establish a connection to a Redis server.
 For local development, we can use Docker Compose and declare a Redis container inside [docker-compose.yaml](https://github.com/tinrab/rusty-redis-rate-limiting/blob/46d95040708df92d46cef22d319d0182e12a2c0c/docker-compose.yaml).
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   redis:
     container_name: redis
     image: redis:6.0.5-alpine
     ports:
-      - '6379:6379'
+      - "6379:6379"
 ```
 
 Then run it.

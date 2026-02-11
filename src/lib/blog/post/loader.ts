@@ -1,9 +1,10 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-
 import { type HastElement, treeProcessorPlugin } from "@temelj/mdx";
 import { glob } from "glob";
+import fs from "node:fs/promises";
+import path from "node:path";
 import sharp from "sharp";
+
+import type { BlogTagData } from "~/lib/blog/tag/schema";
 
 import { serverConfig } from "~/config/server";
 import {
@@ -14,7 +15,6 @@ import {
   type RelatedBlogPost,
 } from "~/lib/blog/post/schema";
 import { loadBlogTags } from "~/lib/blog/tag/loader";
-import type { BlogTagData } from "~/lib/blog/tag/schema";
 import { blogTagIsNote } from "~/lib/blog/tag/utility";
 import { getMdxCompiler } from "~/lib/mdx/compiler";
 import { pathLocator } from "~/lib/path-locator";
@@ -46,9 +46,7 @@ export async function loadBlogPosts({
   }
 
   let posts: BlogPostData[] = [];
-  for (const postIndexPath of await glob(
-    `${POSTS_DIR}/**/${POST_INDEX_FILE}`,
-  )) {
+  for (const postIndexPath of await glob(`${POSTS_DIR}/**/${POST_INDEX_FILE}`)) {
     const postDir = path.dirname(postIndexPath);
 
     const post = await readBlogPost(postDir, { includeArtifact });
@@ -58,20 +56,15 @@ export async function loadBlogPosts({
   }
 
   if (tagSlug !== undefined) {
-    posts = posts.filter((post) =>
-      post.tags.some((tag) => tag.slug === tagSlug),
-    );
+    posts = posts.filter((post) => post.tags.some((tag) => tag.slug === tagSlug));
   }
 
   if (selectNotes !== undefined) {
-    posts = posts.filter(
-      (post) => post.tags.some(blogTagIsNote) === selectNotes,
-    );
+    posts = posts.filter((post) => post.tags.some(blogTagIsNote) === selectNotes);
   }
 
   return posts.sort((a, b) => {
-    const dateCmp =
-      new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime();
+    const dateCmp = new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime();
     if (dateCmp !== 0) {
       return dateCmp;
     }
@@ -81,18 +74,13 @@ export async function loadBlogPosts({
 
 export async function loadBlogPost(
   slug: string,
-  {
-    includeArtifact,
-    includeRelated,
-  }: { includeArtifact?: boolean; includeRelated?: boolean } = {},
+  { includeArtifact, includeRelated }: { includeArtifact?: boolean; includeRelated?: boolean } = {},
 ): Promise<BlogPostData | undefined> {
   if (process.env.NODE_ENV === "development") {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
-  for (const postIndexPath of await glob(
-    `${POSTS_DIR}/**/${POST_INDEX_FILE}`,
-  )) {
+  for (const postIndexPath of await glob(`${POSTS_DIR}/**/${POST_INDEX_FILE}`)) {
     const postDir = path.dirname(postIndexPath);
     if (!postDir.endsWith(slug)) {
       continue;
@@ -111,10 +99,7 @@ export async function loadExternalBlogData(): Promise<ExternalBlogData> {
 
 async function readBlogPost(
   dir: string,
-  {
-    includeArtifact,
-    includeRelated,
-  }: { includeArtifact?: boolean; includeRelated?: boolean } = {},
+  { includeArtifact, includeRelated }: { includeArtifact?: boolean; includeRelated?: boolean } = {},
 ): Promise<BlogPostData | undefined> {
   const slugIndex = dir.lastIndexOf("_");
   if (slugIndex === -1) {
@@ -183,11 +168,7 @@ async function readBlogPost(
   }
 
   if (cover) {
-    const { width, height, srcSet } = await processPostImage(
-      cover.file,
-      slug,
-      dir,
-    );
+    const { width, height, srcSet } = await processPostImage(cover.file, slug, dir);
     if (!cover.width || !cover.height) {
       cover.width = width;
       cover.height = height;
@@ -200,9 +181,7 @@ async function readBlogPost(
     for (const post of await loadBlogPosts()) {
       if (
         post.slug === slug ||
-        !post.tags.some((tag) =>
-          tags.some((postTag) => postTag.slug === tag.slug),
-        )
+        !post.tags.some((tag) => tags.some((postTag) => postTag.slug === tag.slug))
       ) {
         continue;
       }
@@ -262,10 +241,7 @@ async function processTree(node: HastElement, assetPath: string, slug: string) {
 
     // Set correct image path
     if (!node.properties.src.startsWith("http")) {
-      const relativeSrc = pathLocator.blog.post.asset(
-        slug,
-        path.basename(node.properties.src),
-      );
+      const relativeSrc = pathLocator.blog.post.asset(slug, path.basename(node.properties.src));
       if (!node.properties.src.startsWith(relativeSrc)) {
         node.properties.src = relativeSrc;
       }

@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-
 import sharp from "sharp";
 
 import { BLOG_POST_IMAGE_SIZES, loadBlogPosts } from "~/lib/blog/post/loader";

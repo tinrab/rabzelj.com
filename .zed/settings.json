@@ -1,0 +1,4 @@
+{
+  "file_scan_exclusions": ["**/routeTree.gen.ts"],
+  "read_only_files": ["**/routeTree.gen.ts"]
+}

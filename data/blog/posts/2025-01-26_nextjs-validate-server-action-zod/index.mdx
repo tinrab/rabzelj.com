@@ -26,15 +26,12 @@ Here's how you'd use it.
 ```ts { "fileName": "lib/action.ts" }
 "use server";
 
-export const signInAction = createApiAction(
-  signInFormSchema,
-  async (data): Promise<void> => {
-    if (data.name !== "tester" && data.password !== "password") {
-      throw new AccountError(AccountErrorCode.INVALID_CREDENTIALS);
-    }
-    // ...
-  },
-);
+export const signInAction = createApiAction(signInFormSchema, async (data): Promise<void> => {
+  if (data.name !== "tester" && data.password !== "password") {
+    throw new AccountError(AccountErrorCode.INVALID_CREDENTIALS);
+  }
+  // ...
+});
 ```
 
 ```ts { "fileName": "lib/schema.ts" }
@@ -97,9 +94,7 @@ export function createApiAction<TSchema extends z.ZodTypeAny, TResult = void>(
   actionFn: ApiActionFn<z.infer<TSchema>, TResult>,
 ): (data: FormData) => Promise<ActionResponse<TResult>> {
   return async (data: unknown): Promise<ActionResponse<TResult>> => {
-    const parsedData = schema.safeParse(
-      data instanceof FormData ? Object.fromEntries(data) : data,
-    );
+    const parsedData = schema.safeParse(data instanceof FormData ? Object.fromEntries(data) : data);
     if (parsedData.error) {
       return {
         issues: parsedData.error?.issues,
@@ -137,10 +132,7 @@ export function createApiAction<TSchema extends z.ZodTypeAny, TResult = void>(
   };
 }
 
-export async function callApiAction<
-  TSchema extends z.ZodTypeAny,
-  TResult = void,
->(
+export async function callApiAction<TSchema extends z.ZodTypeAny, TResult = void>(
   action: ApiAction<TSchema, TResult>,
   data: z.infer<TSchema>,
 ): Promise<TResult> {

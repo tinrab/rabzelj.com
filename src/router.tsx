@@ -13,9 +13,7 @@ export function getRouter() {
     trailingSlash: "never",
     scrollRestoration: true,
     defaultNotFoundComponent: () => <NotFound />,
-    defaultPendingComponent: () => (
-      <LinearLoader className="absolute inset-0 w-full" square />
-    ),
+    defaultPendingComponent: () => <LinearLoader className="absolute inset-0 w-full" square />,
     defaultPendingMinMs: 100,
     defaultPendingMs: 300,
   });

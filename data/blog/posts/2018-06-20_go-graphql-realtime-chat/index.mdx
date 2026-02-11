@@ -288,10 +288,10 @@ It uses [Akryum/vue-apollo](https://github.com/Akryum/vue-apollo) library to com
 
 ```js
 const httpLink = new HttpLink({
-  uri: 'http://localhost:8080/graphql',
+  uri: "http://localhost:8080/graphql",
 });
 const wsLink = new WebSocketLink({
-  uri: 'ws://localhost:8080/graphql',
+  uri: "ws://localhost:8080/graphql",
   options: {
     reconnect: true,
   },
@@ -299,7 +299,7 @@ const wsLink = new WebSocketLink({
 const link = split(
   ({ query }) => {
     const { kind, operation } = getMainDefinition(query);
-    return kind === 'OperationDefinition' && operation === 'subscription';
+    return kind === "OperationDefinition" && operation === "subscription";
   },
   wsLink,
   httpLink,
@@ -320,12 +320,7 @@ Messages are rendered inside [frontend/src/components/MessageList.vue](https://g
 ```html
 <template>
   <div>
-    <app-message
-      v-for="message of messages"
-      :key="message.id"
-      :message="message"
-    >
-    </app-message>
+    <app-message v-for="message of messages" :key="message.id" :message="message"> </app-message>
   </div>
 </template>
 ```
@@ -438,17 +433,17 @@ CMD ["app"]
 They specify its path inside [docker-compose.yaml](https://github.com/tinrab/graphql-realtime-chat/blob/master/docker-compose.yaml), along with a Redis container.
 
 ```yaml
-version: '3.6'
+version: "3.6"
 
 services:
   app:
     build: .
     environment:
-      REDIS_URL: 'redis:6379'
+      REDIS_URL: "redis:6379"
     ports:
-      - '8080:8080'
+      - "8080:8080"
   redis:
-    image: 'redis:4.0.9'
+    image: "redis:4.0.9"
 ```
 
 Build and run server:

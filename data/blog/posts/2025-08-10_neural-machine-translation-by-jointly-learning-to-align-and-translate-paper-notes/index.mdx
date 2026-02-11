@@ -9,7 +9,7 @@ publishedDate: 2025-08-10
 ---
 
 This paper introduces the attention mechanism for neural machine translation.
-It proposes the *RNNsearch* model as an extension to the basic encoder-decoder architecture.
+It proposes the _RNNsearch_ model as an extension to the basic encoder-decoder architecture.
 
 The goal is replacing the fixed-length context vector with a dynamic attention mechanism.
 Instead of compressing the entire source sentence into a single vector, the model uses "soft alignment" to selectively focus on different parts of the source sentence when generating each target word.
@@ -33,6 +33,7 @@ p(y_i|y_1, ..., y_{i-1}, x) = g(y_{i-1}, s_i, c_i),
 $$
 
 where:
+
 - $s_i$ is the decoder's hidden state at step $i$.
 - $c_i$ is a **dynamic context vector** computed for each target word.
 
