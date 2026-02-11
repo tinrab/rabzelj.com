@@ -9,15 +9,10 @@ type LinearLoaderProps = {
   };
 } & React.ComponentProps<"div">;
 
-export function LinearLoader({
-  square,
-  slotProps = {},
-  className,
-  ...props
-}: LinearLoaderProps) {
+export function LinearLoader({ square, slotProps = {}, className, ...props }: LinearLoaderProps) {
   return (
     <div
-      className={cn("h-1 text-primary", square ? "" : "rounded-sm", className)}
+      className={cn("text-primary h-1", square ? "" : "rounded-sm", className)}
       aria-label={props["aria-label"] ?? "loading"}
       {...props}
     >
@@ -25,7 +20,7 @@ export function LinearLoader({
         className={cn(
           slotProps.bar?.className,
           square ? "" : "rounded-sm",
-          "h-full animate-linear-loader bg-primary/10 transition-all",
+          "animate-linear-loader bg-primary/10 h-full transition-all",
           "bg-[linear-gradient(to_right,transparent_50%,currentColor_50%,currentColor_60%,transparent_60%,transparent_71.5%,currentColor_71.5%,currentColor_84%,transparent_84%)]",
         )}
         {...(slotProps.bar ?? {})}

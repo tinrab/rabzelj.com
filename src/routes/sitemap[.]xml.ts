@@ -13,13 +13,11 @@ export const Route = createFileRoute("/sitemap.xml")({
         const thisWeek = new Date(now);
         thisWeek.setDate(now.getDate() - now.getDay());
 
-        const staticRoutes: SitemapUrl[] = ["/", pathLocator.blog.index].map(
-          (path) => ({
-            url: `${serverConfig.app.url}${path}`,
-            changeFrequency: "weekly",
-            lastModified: thisWeek,
-          }),
-        );
+        const staticRoutes: SitemapUrl[] = ["/", pathLocator.blog.index].map((path) => ({
+          url: `${serverConfig.app.url}${path}`,
+          changeFrequency: "weekly",
+          lastModified: thisWeek,
+        }));
 
         const posts = await loadBlogPosts();
         const blogPostRoutes: SitemapUrl[] = posts.map((post) => ({
@@ -35,18 +33,14 @@ export const Route = createFileRoute("/sitemap.xml")({
           lastModified: thisWeek,
         }));
 
-        return new Response(
-          makeSitemap([...staticRoutes, ...blogPostRoutes, ...blogTagRoutes]),
-          {
-            status: 200,
-            headers: {
-              "Content-Type": "application/xml",
-              "X-Content-Type-Options": "nosniff",
-              "Cache-Control":
-                "public, max-age=3600, stale-while-revalidate=3600",
-            },
+        return new Response(makeSitemap([...staticRoutes, ...blogPostRoutes, ...blogTagRoutes]), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/xml",
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "public, max-age=3600, stale-while-revalidate=3600",
           },
-        );
+        });
       },
     },
   },
@@ -55,14 +49,7 @@ export const Route = createFileRoute("/sitemap.xml")({
 type SitemapUrl = {
   url: string;
   lastModified: Date;
-  changeFrequency:
-    | "always"
-    | "hourly"
-    | "daily"
-    | "weekly"
-    | "monthly"
-    | "yearly"
-    | "never";
+  changeFrequency: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   priority?: number;
 };
 

@@ -7,15 +7,11 @@ import {
   IconToml,
 } from "@tabler/icons-react";
 
-interface ProgrammingLanguageIconProps
-  extends React.HTMLAttributes<HTMLOrSVGElement> {
+interface ProgrammingLanguageIconProps extends React.HTMLAttributes<HTMLOrSVGElement> {
   language: string;
 }
 
-export function ProgrammingLanguageIcon({
-  language,
-  ...props
-}: ProgrammingLanguageIconProps) {
+export function ProgrammingLanguageIcon({ language, ...props }: ProgrammingLanguageIconProps) {
   if (language === "text") {
     return;
   }
@@ -37,12 +33,7 @@ export function ProgrammingLanguageIcon({
   if (language === "yaml" || language === "yml") {
     return <IconYaml {...props} />;
   }
-  if (
-    language === "h" ||
-    language === "c" ||
-    language === "hpp" ||
-    language === "cpp"
-  ) {
+  if (language === "h" || language === "c" || language === "hpp" || language === "cpp") {
     return <IconBrandCpp {...props} />;
   }
   throw new Error(`Unknown language: '${language}'`);

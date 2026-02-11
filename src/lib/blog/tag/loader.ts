@@ -11,11 +11,7 @@ import {
 import { blogTagIsNote } from "~/lib/blog/tag/utility";
 import { getMdxCompiler } from "~/lib/mdx/compiler";
 
-const TAGS_DIR = path.join(
-  process.cwd(),
-  serverConfig.app.dataDir,
-  "blog/tags",
-);
+const TAGS_DIR = path.join(process.cwd(), serverConfig.app.dataDir, "blog/tags");
 
 export async function loadBlogTags(): Promise<BlogTagData[]> {
   const compiler = await getMdxCompiler();
@@ -44,9 +40,7 @@ export async function loadBlogTags(): Promise<BlogTagData[]> {
   return tags.sort((a, b) => a.title.localeCompare(b.title));
 }
 
-export async function loadBlogTag(
-  slug: string,
-): Promise<BlogTagData | undefined> {
+export async function loadBlogTag(slug: string): Promise<BlogTagData | undefined> {
   const tags = await loadBlogTags();
   return tags.find((tag) => tag.slug === slug);
 }

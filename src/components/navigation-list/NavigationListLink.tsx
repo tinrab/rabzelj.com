@@ -8,8 +8,7 @@ const navigationListLinkVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "text-muted-foreground hover:text-foreground focus:text-foreground",
+        default: "text-muted-foreground hover:text-foreground focus:text-foreground",
         solid:
           "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground aria-selected:bg-accent aria-selected:text-accent-foreground",
       },
@@ -19,8 +18,7 @@ const navigationListLinkVariants = cva(
 );
 
 interface NavigationListLinkProps
-  extends useRender.ComponentProps<"button">,
-    VariantProps<typeof navigationListLinkVariants> {
+  extends useRender.ComponentProps<"button">, VariantProps<typeof navigationListLinkVariants> {
   selected?: boolean;
   disabled?: boolean;
 }

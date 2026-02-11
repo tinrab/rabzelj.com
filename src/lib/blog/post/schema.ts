@@ -1,4 +1,5 @@
 import type { MdxArtifact } from "@temelj/mdx";
+
 import { z } from "zod";
 
 import type { BlogTagData } from "~/lib/blog/tag/schema";

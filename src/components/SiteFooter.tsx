@@ -25,7 +25,7 @@ export function SiteFooter() {
           <Typography
             key={title}
             variant="a"
-            className="block text-muted-foreground underline"
+            className="text-muted-foreground block underline"
             render={
               <a href={to} target="_blank" rel="noreferrer">
                 {title}

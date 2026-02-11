@@ -54,9 +54,7 @@ export type ActionError = {
   message: string;
 };
 
-export type ActionResult<T> =
-  | { error: ActionError }
-  | ({ error: undefined } & T);
+export type ActionResult<T> = { error: ActionError } | ({ error: undefined } & T);
 ```
 
 Additionally, `Transaction` class could hold any other response data, such as status or HTTP headers.
@@ -68,8 +66,8 @@ One for making a request, and another that holds its result.
 
 ```ts
 export enum UserActionType {
-  SignIn = 'user/sign-in',
-  SignInResult = 'user/sign-in-result',
+  SignIn = "user/sign-in",
+  SignInResult = "user/sign-in-result",
 }
 
 export type SignInUserAction = {
@@ -122,10 +120,8 @@ Here are some helper selectors for the user's state.
 
 ```ts
 export const userSelectors = {
-  currentUser: (state: AppState): UserData | undefined =>
-    state.user.currentUser,
-  signInTransaction: (state: AppState): Transaction =>
-    state.user.signInTransaction,
+  currentUser: (state: AppState): UserData | undefined => state.user.currentUser,
+  signInTransaction: (state: AppState): Transaction => state.user.signInTransaction,
 };
 ```
 
@@ -180,14 +176,14 @@ Handling could involve calling the API within a try-catch block, and setting res
 function* handleSignIn(action: SignInUserAction): Generator {
   const { email, password } = action.payload;
 
-  const user: UserData = { id: '1', email: 'tin@flinect.com' };
+  const user: UserData = { id: "1", email: "tin@flinect.com" };
 
-  if (email != user.email || password != '123456') {
+  if (email != user.email || password != "123456") {
     yield put(
       userActions.signInResult({
         error: {
           code: ErrorCode.IncorrectCredentials,
-          message: 'Incorrect credentials.',
+          message: "Incorrect credentials.",
         },
       }),
     );

@@ -26,14 +26,14 @@ The CBoW model tries to predict a single word from a window of surrounding conte
 Architecture:
 
 - **Input Layer:** The model takes the context words surrounding a target word as input.
-For example, in the sentence "The cat sat on the mat," if the target word is "sat" and the context window is two words before and two words after, the input words would be "The," "cat," "on," and "the."
+  For example, in the sentence "The cat sat on the mat," if the target word is "sat" and the context window is two words before and two words after, the input words would be "The," "cat," "on," and "the."
 
 - **Projection Layer:** The input words are projected into a continuous vector space.
-These vectors are then averaged to form a single vector that represents the overall context.
-Because the vectors are averaged, the order of the context words does not impact the projection.
+  These vectors are then averaged to form a single vector that represents the overall context.
+  Because the vectors are averaged, the order of the context words does not impact the projection.
 
 - **Output Layer:**: The averaged context vector is then used to predict the original target word.
-The model is trained to maximize the probability of correctly predicting this target word.
+  The model is trained to maximize the probability of correctly predicting this target word.
 
 # Continuous Skip-gram
 
@@ -43,13 +43,13 @@ It's kind of the opposite to the CBoW model.
 Architecture:
 
 - **Input Layer:** The model takes a single target word as input.
-For example, in the sentence, "The quick brown fox jumps over the lazy dog," if the target word is "fox," the model will try to predict the words around it, like "quick," "brown," "jumps," and "over."
+  For example, in the sentence, "The quick brown fox jumps over the lazy dog," if the target word is "fox," the model will try to predict the words around it, like "quick," "brown," "jumps," and "over."
 
 - **Projection (or Hidden) Layer:** The input word is projected into a lower-dimensional vector space.
-This learned vector is the word embedding that captures the semantic meaning of the word.
+  This learned vector is the word embedding that captures the semantic meaning of the word.
 
 - **Output Layer:** The embedding is used to predict the context words within a certain window.
-For instance, it tries to predict that "quick" and "brown" are likely to appear before "fox," and "jumps" and "over" are likely to appear after it.
+  For instance, it tries to predict that "quick" and "brown" are likely to appear before "fox," and "jumps" and "over" are likely to appear after it.
 
 The primary goal is to learn the high-quality word embeddings from the hidden layer.
 This architecture is particularly good at capturing the meaning of rare words and has been influential in the field of natural language processing.

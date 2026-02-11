@@ -1,6 +1,7 @@
 import type React from "react";
 
 import type { BlogPostCommon } from "~/lib/blog/post/schema";
+
 import { cn } from "~/lib/utility";
 
 interface BlogPostFlatListProps<T extends BlogPostCommon> {
@@ -22,16 +23,14 @@ export function BlogPostFlatList<T extends BlogPostCommon>({
               key={post.url}
               className={cn(
                 "mb-2 text-balance",
-                post.priority === 1
-                  ? "text-2xl md:text-3xl"
-                  : "text-xl md:text-2xl",
+                post.priority === 1 ? "text-2xl md:text-3xl" : "text-xl md:text-2xl",
               )}
             >
               {renderPost(post)}
             </li>
           ))}
         </ul>
-        <div className="absolute top-0 -left-[2px] h-full w-[4px] shrink-0 overflow-hidden bg-border" />
+        <div className="bg-border absolute top-0 -left-[2px] h-full w-[4px] shrink-0 overflow-hidden" />
       </div>
     </div>
   );

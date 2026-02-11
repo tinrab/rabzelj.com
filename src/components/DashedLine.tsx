@@ -1,4 +1,5 @@
 import type React from "react";
+
 import { useId } from "react";
 
 interface DashedLineProps extends React.SVGAttributes<HTMLOrSVGElement> {
@@ -6,11 +7,7 @@ interface DashedLineProps extends React.SVGAttributes<HTMLOrSVGElement> {
   orientation?: "horizontal" | "vertical";
 }
 
-export function DashedLine({
-  size = 4,
-  orientation = "horizontal",
-  ...props
-}: DashedLineProps) {
+export function DashedLine({ size = 4, orientation = "horizontal", ...props }: DashedLineProps) {
   const patternId = useId();
 
   return (

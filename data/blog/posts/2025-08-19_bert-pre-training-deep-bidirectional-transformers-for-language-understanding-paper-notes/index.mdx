@@ -17,6 +17,7 @@ Pre-training is done on large unlabeled corpora using masked language model (MLM
 
 Instead of predicting the next word, MLM randomly masks some words in a sentence and asks the model to predict what those masked words should be, using context from both directions.
 Masking strategy is:
+
 - 80% of the time replace a token with `[MASK]` token
 - 10% of the time replace a token with a random token
 - 10% of the time keep unchanged
@@ -25,6 +26,7 @@ The `[MASK]` token never appears during fine-tuning, so using it 100% of the tim
 Random replacements forces the model to learn from the context rather than the token itself.
 
 MLM forces the model to learn:
+
 - Syntax: "The cat [MASK]" -> likely a verb
 - Semantics: "It's raining, so I need my [MASK]" -> "umbrella"
 - World knowledge: "The capital of France is [MASK]" -> "Paris"

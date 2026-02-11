@@ -58,13 +58,13 @@ This section shows how to set up a hypothetical development environment involvin
 Inside project's root directory create a `docker-compose.yaml` file with the following content.
 
 ```yaml
-version: '3.3'
+version: "3.3"
 services:
   mongo:
-    image: 'mongo:latest'
-    container_name: 'mongo'
+    image: "mongo:latest"
+    container_name: "mongo"
     ports:
-      - '27100:27017'
+      - "27100:27017"
 ```
 
 This defines a MongoDB service called `mongo`.
@@ -95,22 +95,22 @@ mongo   docker-entrypoint.sh mongod   Up      0.0.0.0:27100->27017/tcp
 Define another service inside `docker-compose.yaml`, which depends on `mongo`.
 
 ```yaml {highlight:3-11}
-version: '3.3'
+version: "3.3"
 services:
   api:
-    container_name: 'api'
-    build: './api'
+    container_name: "api"
+    build: "./api"
     ports:
-      - '8080:8080'
+      - "8080:8080"
     volumes:
-      - './api:/go/src/app'
+      - "./api:/go/src/app"
     depends_on:
-      - 'mongo'
+      - "mongo"
   mongo:
-    image: 'mongo:latest'
-    container_name: 'mongo'
+    image: "mongo:latest"
+    container_name: "mongo"
     ports:
-      - '27100:27017'
+      - "27100:27017"
 ```
 
 The `api` service will be built using a custom "Dockerfile". Create it inside `api` directory. Name it exactly `Dockerfile`, without an extension.
@@ -254,14 +254,14 @@ Declare a new service inside `docker-compose.yaml` file called `web`.
 
 ```yaml
 web:
-  container_name: 'web'
-  image: 'nginx:latest'
+  container_name: "web"
+  image: "nginx:latest"
   ports:
-    - '8081:80'
+    - "8081:80"
   volumes:
-    - './web:/usr/share/nginx/html'
+    - "./web:/usr/share/nginx/html"
   depends_on:
-    - 'api'
+    - "api"
 ```
 
 Create a `Dockerfile` inside `web` directory.
@@ -289,22 +289,18 @@ Create the `index.html` file.
     <div id="posts"></div>
     <script>
       $(document).ready(function () {
-        $.get('http://localhost:8080/posts', function (posts) {
-          $list = $('#posts');
+        $.get("http://localhost:8080/posts", function (posts) {
+          $list = $("#posts");
           for (var i = 0; i < posts.length; i++) {
-            $list.append('<p>' + posts[i].text + '</p>');
+            $list.append("<p>" + posts[i].text + "</p>");
           }
         });
-        $('#form').submit(function (event) {
+        $("#form").submit(function (event) {
           event.preventDefault();
-          var text = $('#post-input').val();
-          $.post(
-            'http://localhost:8080/posts',
-            JSON.stringify({ text: text }),
-            function () {
-              location.reload();
-            },
-          );
+          var text = $("#post-input").val();
+          $.post("http://localhost:8080/posts", JSON.stringify({ text: text }), function () {
+            location.reload();
+          });
         });
       });
     </script>

@@ -33,8 +33,8 @@ Update `environment.ts` file inside `environments` directory.
 ```typescript
 export const environment = {
   production: false,
-  clientId: '[CLIENT_ID]',
-  apiUrl: 'http://localhost:8080/api',
+  clientId: "[CLIENT_ID]",
+  apiUrl: "http://localhost:8080/api",
 };
 ```
 
@@ -43,8 +43,8 @@ And for production file `environment.prod.ts` change the `apiUrl` value.
 ```typescript
 export const environment = {
   production: true,
-  clientId: '[CLIENT_ID]',
-  apiUrl: '/api',
+  clientId: "[CLIENT_ID]",
+  apiUrl: "/api",
 };
 ```
 
@@ -83,39 +83,33 @@ ng g service auth
 Add some imports inside `auth.service.ts` and declare the `gapi` variable. This is necessary for making compilation succeed, because the actual `gapi` variable wont be set until browser fetches the Google API library.
 
 ```typescript
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../environments/environment';
-import { User } from './user.model';
+import { Injectable } from "@angular/core";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { environment } from "../environments/environment";
+import { User } from "./user.model";
 
 declare const gapi: any;
 
 @Injectable()
-export class AuthService { }
+export class AuthService {}
 ```
 
 Add an import for `HttpClientModule` and a provider for your authentication service inside `app.module.ts` file.
 
 ```typescript {highlight:3,6,13,16}
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { AuthService } from './auth.service';
+import { BrowserModule } from "@angular/platform-browser";
+import { NgModule } from "@angular/core";
+import { HttpClientModule } from "@angular/common/http";
+import { AppRoutingModule } from "./app-routing.module";
+import { AppComponent } from "./app.component";
+import { AuthService } from "./auth.service";
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    AppRoutingModule
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule, HttpClientModule, AppRoutingModule],
   providers: [AuthService],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
 ```
 
 Load Google API library in the constructor of `AuthService`.
@@ -226,24 +220,25 @@ ng g guard auth
 Check the sign-in state inside `canActivate` function in the `auth.guard.ts` file. If the user is not signed in, redirect him to the sign-in page.
 
 ```typescript
-import { Injectable } from '@angular/core';
-import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { AuthService } from './auth.service';
+import { Injectable } from "@angular/core";
+import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
+import { Observable } from "rxjs/Observable";
+import { AuthService } from "./auth.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private router: Router,
-    private authService: AuthService
-  ) { }
+    private authService: AuthService,
+  ) {}
   canActivate(
     next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
+    state: RouterStateSnapshot,
+  ): Observable<boolean> | Promise<boolean> | boolean {
     if (this.authService.isSignedIn) {
       return true;
     }
-    this.router.navigateByUrl('signin');
+    this.router.navigateByUrl("signin");
     return false;
   }
 }
@@ -252,30 +247,33 @@ export class AuthGuard implements CanActivate {
 Now connect all routes inside the routing module file `app-routing.module.ts`.
 
 ```typescript
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { SignInComponent } from './sign-in/sign-in.component';
-import { ListComponent } from './list/list.component';
-import { AuthGuard } from './auth.guard';
+import { NgModule } from "@angular/core";
+import { Routes, RouterModule } from "@angular/router";
+import { SignInComponent } from "./sign-in/sign-in.component";
+import { ListComponent } from "./list/list.component";
+import { AuthGuard } from "./auth.guard";
 const routes: Routes = [
   {
-    path: '',
-    children: [{
-      path: 'signin',
-      component: SignInComponent
-    }, {
-      path: '',
-      component: ListComponent,
-      canActivate: [AuthGuard]
-    }]
-  }
+    path: "",
+    children: [
+      {
+        path: "signin",
+        component: SignInComponent,
+      },
+      {
+        path: "",
+        component: ListComponent,
+        canActivate: [AuthGuard],
+      },
+    ],
+  },
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
-  providers: [AuthGuard]
+  providers: [AuthGuard],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}
 ```
 
 ## Sign-in flow
@@ -290,23 +288,24 @@ Make a basic sign-in page in the `sign-in.component.html` template file.
 Write the `signIn` function inside `sign-in.component.ts`.
 
 ```typescript
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../auth.service';
+import { Component } from "@angular/core";
+import { Router } from "@angular/router";
+import { AuthService } from "../auth.service";
 @Component({
-  selector: 'app-sign-in',
-  templateUrl: './sign-in.component.html',
-  styleUrls: ['./sign-in.component.scss']
+  selector: "app-sign-in",
+  templateUrl: "./sign-in.component.html",
+  styleUrls: ["./sign-in.component.scss"],
 })
 export class SignInComponent {
   constructor(
     private router: Router,
-    private authService: AuthService
-  ) { }
+    private authService: AuthService,
+  ) {}
   signIn(): void {
-    this.authService.signIn()
-      .then(_ => this.router.navigateByUrl(''))
-      .catch(error => console.log(error));
+    this.authService
+      .signIn()
+      .then((_) => this.router.navigateByUrl(""))
+      .catch((error) => console.log(error));
   }
 }
 ```
@@ -323,27 +322,27 @@ Show user's name and a sign-out button in the `list.component.html` template fil
 Update the `list.component.ts` file.
 
 ```typescript
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../auth.service';
-import { User } from '../user.model';
+import { Component } from "@angular/core";
+import { Router } from "@angular/router";
+import { AuthService } from "../auth.service";
+import { User } from "../user.model";
 
 @Component({
-  selector: 'app-list',
-  templateUrl: './list.component.html',
-  styleUrls: ['./list.component.scss']
+  selector: "app-list",
+  templateUrl: "./list.component.html",
+  styleUrls: ["./list.component.scss"],
 })
 export class ListComponent {
   user: User;
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     this.user = this.authService.currentUser;
   }
   signOut(): void {
     this.authService.signOut();
-    this.router.navigateByUrl('signin');
+    this.router.navigateByUrl("signin");
   }
 }
 ```
@@ -381,38 +380,30 @@ ng g service todo
 Locate `todo.service.ts` file and add some imports.
 
 ```typescript
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/toPromise';
-import { environment } from '../environments/environment';
-import { Todo } from './todo.model';
-import { User } from './user.model';
-import { AuthService } from './auth.service';
+import { Injectable } from "@angular/core";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import "rxjs/add/operator/map";
+import "rxjs/add/operator/toPromise";
+import { environment } from "../environments/environment";
+import { Todo } from "./todo.model";
+import { User } from "./user.model";
+import { AuthService } from "./auth.service";
 
 @Injectable()
-export class TodoService { }
+export class TodoService {}
 ```
 
 Add `TodoService` to the providers array inside `app.module.ts`.
 
 ```typescript {highlight:1,13}
-import { TodoService } from './todo.service';
+import { TodoService } from "./todo.service";
 @NgModule({
-  declarations: [
-    AppComponent,
-    SignInComponent,
-    ListComponent
-  ],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    AppRoutingModule
-  ],
+  declarations: [AppComponent, SignInComponent, ListComponent],
+  imports: [BrowserModule, HttpClientModule, AppRoutingModule],
   providers: [AuthService, TodoService],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
 ```
 
 Write a constructor for `TodoService`.
@@ -483,18 +474,18 @@ ng g component todo
 Add an input property inside `todo.component.ts` to hold the todo model.
 
 ```typescript {highlight:1,10-11}
-import { Component, Input } from '@angular/core';
-import { Todo } from '../todo.model';
+import { Component, Input } from "@angular/core";
+import { Todo } from "../todo.model";
 
 @Component({
-  selector: 'app-todo',
-  templateUrl: './todo.component.html',
-  styleUrls: ['./todo.component.scss']
+  selector: "app-todo",
+  templateUrl: "./todo.component.html",
+  styleUrls: ["./todo.component.scss"],
 })
 export class TodoComponent {
   @Input()
   item: Todo;
-  constructor() { }
+  constructor() {}
 }
 ```
 
@@ -507,17 +498,17 @@ Display todo's title in the template.
 To display todos in a list, call the service inside a `ngAfterViewInit` lifecycle hook and set resulting data to a `todos` property.
 
 ```typescript {highlight:1,5-6,13,15,19,23-26}
-import { Component, AfterViewInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../auth.service';
-import { User } from '../user.model';
-import { TodoService } from '../todo.service';
-import { Todo } from '../todo.model';
+import { Component, AfterViewInit } from "@angular/core";
+import { Router } from "@angular/router";
+import { AuthService } from "../auth.service";
+import { User } from "../user.model";
+import { TodoService } from "../todo.service";
+import { Todo } from "../todo.model";
 
 @Component({
-  selector: 'app-list',
-  templateUrl: './list.component.html',
-  styleUrls: ['./list.component.scss']
+  selector: "app-list",
+  templateUrl: "./list.component.html",
+  styleUrls: ["./list.component.scss"],
 })
 export class ListComponent implements AfterViewInit {
   user: User;
@@ -525,17 +516,16 @@ export class ListComponent implements AfterViewInit {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private todoService: TodoService
+    private todoService: TodoService,
   ) {
     this.user = this.authService.currentUser;
   }
   ngAfterViewInit(): void {
-    this.todoService.listTodos()
-    .then(todos => this.todos = todos);
+    this.todoService.listTodos().then((todos) => (this.todos = todos));
   }
   signOut(): void {
     this.authService.signOut();
-    this.router.navigateByUrl('signin');
+    this.router.navigateByUrl("signin");
   }
 }
 ```
@@ -620,9 +610,7 @@ Update the todo component's template file.
 
 ```html
 <div>
-  <span *ngIf="!editMode; else titleInput" (click)="onTitleClick()"
-    >{{item.title}}</span
-  >
+  <span *ngIf="!editMode; else titleInput" (click)="onTitleClick()">{{item.title}}</span>
   <ng-template #titleInput>
     <input
       type="text"
@@ -637,17 +625,12 @@ Update the todo component's template file.
 Add some properties and write a couple of functions in `todo.component.ts`.
 
 ```typescript {highlight:4-5,16-19,21,23-35}
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter
-} from '@angular/core';
-import { Todo } from '../todo.model';
+import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Todo } from "../todo.model";
 @Component({
-  selector: 'app-todo',
-  templateUrl: './todo.component.html',
-  styleUrls: ['./todo.component.scss']
+  selector: "app-todo",
+  templateUrl: "./todo.component.html",
+  styleUrls: ["./todo.component.scss"],
 })
 export class TodoComponent {
   @Input()
@@ -769,14 +752,14 @@ Import necessary modules inside `app.module.ts`.
 
 ```typescript
 // ...
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import {
   MdButtonModule,
   MdInputModule,
   MdListModule,
   MdIconModule,
-  MdToolbarModule
-} from '@angular/material';
+  MdToolbarModule,
+} from "@angular/material";
 
 @NgModule({
   imports: [
@@ -786,31 +769,25 @@ import {
     MdInputModule,
     MdListModule,
     MdIconModule,
-    MdToolbarModule
+    MdToolbarModule,
     // ...
-  ]
+  ],
 })
-export class AppModule { }
+export class AppModule {}
 ```
 
 Import Roboto font and material icons inside `index.html`.
 
 ```html
-<link
-  href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
-  rel="stylesheet"
-/>
-<link
-  href="https://fonts.googleapis.com/icon?family=Material+Icons"
-  rel="stylesheet"
-/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 ```
 
 Locate `styles.scss` file and add the following imports.
 
 ```scss
-@import '~normalize.css';
-@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+@import "~normalize.css";
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
 ```
 
 Update `app.component.html`.
@@ -826,14 +803,7 @@ Make a welcoming sign-in page in the `sign-in.component.html` file.
 
 ```html
 <h1>Welcome to To-Do List!</h1>
-<button
-  md-raised-button
-  class="sign-in-button"
-  color="primary"
-  (click)="signIn()"
->
-  Sign in
-</button>
+<button md-raised-button class="sign-in-button" color="primary" (click)="signIn()">Sign in</button>
 ```
 
 And in `sign-in.component.scss`.
@@ -903,9 +873,7 @@ Update the `todo.component.html`.
 
 ```html
 <md-list-item>
-  <span md-line *ngIf="!editMode; else titleInput" (click)="onTitleClick()"
-    >{{item.title}}</span
-  >
+  <span md-line *ngIf="!editMode; else titleInput" (click)="onTitleClick()">{{item.title}}</span>
   <ng-template #titleInput>
     <md-form-field class="title-input">
       <input
@@ -952,7 +920,7 @@ handlers:
   - url: /.*
     script: _go_app
 env_variables:
-  CLIENT_ID: '[CLIENT_ID]'
+  CLIENT_ID: "[CLIENT_ID]"
 ```
 
 Modify the `build` script and add a `deploy` script inside `package.json`.

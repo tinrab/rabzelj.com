@@ -32,7 +32,7 @@ function RouteComponent() {
           <div key={post.slug} className="flex flex-col">
             <Typography
               variant="a"
-              className="mb-1 text-balance text-xl tracking-tight"
+              className="mb-1 text-xl tracking-tight text-balance"
               render={
                 <Link to="/blog/$slug" params={{ slug: post.slug }}>
                   {post.title}

@@ -10,11 +10,7 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
       <div className="text-error text-lg">Something went wrong.</div>
       <p className="flex flex-wrap items-center gap-2">
         <Button onClick={() => window.history.back()}>Go back</Button>
-        <Button
-          variant="outline"
-          nativeButton={false}
-          render={<Link to="/">Start Over</Link>}
-        />
+        <Button variant="outline" nativeButton={false} render={<Link to="/">Start Over</Link>} />
       </p>
     </div>
   );

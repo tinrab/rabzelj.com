@@ -17,9 +17,10 @@ It enabled a PaLM 540B model to achieve state-of-the-art accuracy on the GSM8K b
 This "prompting only" approach is valuable because it doesn't require extensive training datasets or fine-tuning a separate model for each new task.
 
 CoT prompt structure:
+
 - Input: The problem or question presented to the language model.
 - Chain of Thought: A sequence of natural language steps that show how to arrive at the solution.
-These steps explain the reasoning process, providing an "interpretable window" into its thought process.
+  These steps explain the reasoning process, providing an "interpretable window" into its thought process.
 - Output: The final answer to the problem.
 
 The ablation study demonstrated that the specific sequential, natural language reasoning steps provided by CoT prompting are the reason for its effectiveness.

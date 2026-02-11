@@ -67,19 +67,9 @@ export const Route = createFileRoute("/api/images/blog/post/cover/$slug")({
               }}
             >
               <defs>
-                <pattern
-                  id="grid"
-                  width="80"
-                  height="80"
-                  patternUnits="userSpaceOnUse"
-                >
+                <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
                   <rect width="80" height="80" fill="url(#smallGrid)" />
-                  <path
-                    d="M 80 0 L 0 0 0 80"
-                    fill="none"
-                    stroke="#262626"
-                    strokeWidth="4"
-                  />
+                  <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#262626" strokeWidth="4" />
                 </pattern>
               </defs>
 
@@ -153,8 +143,7 @@ export const Route = createFileRoute("/api/images/blog/post/cover/$slug")({
           status: 200,
           headers: {
             "Content-Type": "image/png",
-            "Cache-Control":
-              "public, max-age=604800, state-while-revalidate=86400",
+            "Cache-Control": "public, max-age=604800, state-while-revalidate=86400",
           },
         });
       },

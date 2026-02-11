@@ -46,28 +46,10 @@ export const Route = createFileRoute("/api/images/featured")({
                 height={60}
                 patternUnits="userSpaceOnUse"
               >
-                <rect
-                  fill="rgba(26,26,26,0.2)"
-                  x="0"
-                  y="0"
-                  width="30"
-                  height="30"
-                />
-                <rect
-                  fill="rgba(26,26,26,0.5)"
-                  x="30"
-                  y="30"
-                  width="30"
-                  height="30"
-                />
+                <rect fill="rgba(26,26,26,0.2)" x="0" y="0" width="30" height="30" />
+                <rect fill="rgba(26,26,26,0.5)" x="30" y="30" width="30" height="30" />
               </pattern>
-              <rect
-                x="0"
-                y="0"
-                width={width}
-                height={height}
-                fill="url(#pattern-checkers)"
-              />
+              <rect x="0" y="0" width={width} height={height} fill="url(#pattern-checkers)" />
             </svg>
 
             {Array.from({ length: slashCount }, (_, i) => {
@@ -146,8 +128,7 @@ export const Route = createFileRoute("/api/images/featured")({
           status: 200,
           headers: {
             "Content-Type": "image/png",
-            "Cache-Control":
-              "public, max-age=604800, state-while-revalidate=86400",
+            "Cache-Control": "public, max-age=604800, state-while-revalidate=86400",
           },
         });
       },

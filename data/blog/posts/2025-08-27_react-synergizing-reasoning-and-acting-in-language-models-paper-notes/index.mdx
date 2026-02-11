@@ -19,13 +19,15 @@ This can lead to error propagation or hallucinations.
 
 ReAct addresses these issues by prompting the LLM to generate a sequence of thoughts, actions, and observations.
 That creates a loop for solving problems:
+
 - Thought: The model first reasons about the task.
-It analyzes the current situation, decomposes the goal into smaller steps, and comes up with a plan.
+  It analyzes the current situation, decomposes the goal into smaller steps, and comes up with a plan.
 - Act: Based on that, the model generates an action to be executed in the environment.
 - Observation: The model receives an observation from the environment as a result of its action.
-This provides feedback.
+  This provides feedback.
 
 This "Thought => Act => Observation" cycle repeats, and the model adjusts its plan.
 This synergy is described in the paper as:
+
 - Reason to Act: The reasoning traces help the model update high-level plans.
 - Act to Reason: The actions allow the model to interface with external sources to improve its reasoning.

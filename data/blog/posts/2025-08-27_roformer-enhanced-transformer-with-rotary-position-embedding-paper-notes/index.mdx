@@ -41,6 +41,7 @@ $$
 where $pos$ is the position of a token, $x_pos$ is the embedding vector, $\hat{x}_{pos}$ is $x_pos$ rotated by $$\theta_pos$.
 
 Steps to encode in 2D space:
+
 1. Start with embeddings for relative tokens $A$ and $B$: $\hat{x}_A$ and $\hat{x}_A$.
 2. For each token, calculate rotation angles $\theta_{A}$ and $\theta_{B}$ based on positions.
 3. Apply the rotation by multiplying embeddings with positional encodings (cosines and sines).

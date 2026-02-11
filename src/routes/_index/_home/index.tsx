@@ -50,7 +50,7 @@ function RouteComponent() {
   const [email, setEmail] = useState<string>();
 
   return (
-    <div className="wrap-break-word mx-auto flex max-w-3xl flex-col items-center px-4 pt-6 pb-8 md:pt-12">
+    <div className="mx-auto flex max-w-3xl flex-col items-center px-4 pt-6 pb-8 wrap-break-word md:pt-12">
       <img
         className="relative mb-3 flex aspect-square shrink-0 rounded-full"
         src={`${clientConfig.app.url}${pathLocator.assets.avatar}`}
@@ -61,23 +61,18 @@ function RouteComponent() {
       <Typography variant="h1" className="mb-3 text-4xl md:text-5xl">
         Tin Rabzelj
       </Typography>
-      <h2 className="mb-6 text-muted-foreground">Software Engineer</h2>
+      <h2 className="text-muted-foreground mb-6">Software Engineer</h2>
 
       <div className="mb-5 text-center">
         <Typography variant="body">
-          Personal blog:{" "}
-          <Typography variant="a" render={<Link to="/blog">/blog</Link>} />.
+          Personal blog: <Typography variant="a" render={<Link to="/blog">/blog</Link>} />.
         </Typography>
         <Typography variant="body">
           Find my OSS projects on{" "}
           <Typography
             variant="a"
             render={
-              <a
-                href="https://github.com/tinrab"
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href="https://github.com/tinrab" target="_blank" rel="noreferrer">
                 GitHub
               </a>
             }
@@ -87,9 +82,8 @@ function RouteComponent() {
       </div>
 
       <blockquote className="mb-8 max-w-md border-l-2 pl-6 text-lg italic">
-        Working with Rust, TypeScript, React.js. Focusing on distributed
-        systems, microservices, AI, CUDA, graphics programming, osdev, and
-        no-code.
+        Working with Rust, TypeScript, React.js. Focusing on distributed systems, microservices, AI,
+        CUDA, graphics programming, osdev, and no-code.
       </blockquote>
 
       <div className="mb-5 flex space-x-6">
@@ -97,7 +91,7 @@ function RouteComponent() {
           <a
             key={title}
             {...props}
-            className="text-base text-foreground/60 transition-colors hover:text-foreground/80"
+            className="text-foreground/60 hover:text-foreground/80 text-base transition-colors"
             target="_blank"
             rel="noreferrer"
           >

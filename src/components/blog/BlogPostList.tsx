@@ -1,7 +1,8 @@
 import type React from "react";
 
-import { Typography } from "~/components/Typography";
 import type { BlogPostCommon, BlogPostYearGroup } from "~/lib/blog/post/schema";
+
+import { Typography } from "~/components/Typography";
 import { cn } from "~/lib/utility";
 
 interface BlogPostListProps<T extends BlogPostCommon> {
@@ -21,7 +22,7 @@ export function BlogPostList<T extends BlogPostCommon>({
         {posts.map((yearGroup, index) => (
           <div key={String(index)} className="flex justify-start">
             <div className="sticky z-10">
-              <div className="absolute -left-2 flex size-4 items-center justify-center rounded-full bg-border/100" />
+              <div className="bg-border/100 absolute -left-2 flex size-4 items-center justify-center rounded-full" />
             </div>
 
             <div className="-mt-1 mb-4 ml-4">
@@ -39,14 +40,11 @@ export function BlogPostList<T extends BlogPostCommon>({
               </div>
 
               {yearGroup.months.map((monthGroup) => (
-                <div
-                  key={monthGroup.month}
-                  className="relative flex w-full flex-col pl-0 md:pl-4"
-                >
+                <div key={monthGroup.month} className="relative flex w-full flex-col pl-0 md:pl-4">
                   <Typography
                     id={`h-${yearGroup.year}-${monthGroup.month}${anchorSuffix}`}
                     variant="a"
-                    className="mb-2 text-muted-foreground hover:no-underline"
+                    className="text-muted-foreground mb-2 hover:no-underline"
                     render={
                       <a
                         href={`#h-${yearGroup.year}-${monthGroup.month.toLowerCase()}${anchorSuffix}`}
@@ -62,9 +60,7 @@ export function BlogPostList<T extends BlogPostCommon>({
                         key={post.url}
                         className={cn(
                           "mb-2 text-balance",
-                          post.priority === 1
-                            ? "text-2xl md:text-3xl"
-                            : "text-xl md:text-2xl",
+                          post.priority === 1 ? "text-2xl md:text-3xl" : "text-xl md:text-2xl",
                         )}
                       >
                         {renderPost(post)}
@@ -76,7 +72,7 @@ export function BlogPostList<T extends BlogPostCommon>({
             </div>
           </div>
         ))}
-        <div className="absolute top-0 -left-[2px] h-full w-[4px] shrink-0 overflow-hidden bg-border" />
+        <div className="bg-border absolute top-0 -left-[2px] h-full w-[4px] shrink-0 overflow-hidden" />
       </div>
     </div>
   );

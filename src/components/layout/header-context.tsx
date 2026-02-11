@@ -26,9 +26,7 @@ export function HeaderContextProvider({
     [menuOpen, onMenuOpenChange],
   );
 
-  return (
-    <HeaderContext.Provider value={value}>{children}</HeaderContext.Provider>
-  );
+  return <HeaderContext.Provider value={value}>{children}</HeaderContext.Provider>;
 }
 
 export function useHeaderContext(): HeaderContextValue {

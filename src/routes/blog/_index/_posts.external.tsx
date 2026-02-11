@@ -41,10 +41,7 @@ function RouteComponent() {
         anchorSuffix="-flinect"
         posts={flinectPosts}
         renderPost={(post) => (
-          <Typography
-            variant="a"
-            render={<Link to={post.url}>{post.title}</Link>}
-          />
+          <Typography variant="a" render={<Link to={post.url}>{post.title}</Link>} />
         )}
       />
     </section>

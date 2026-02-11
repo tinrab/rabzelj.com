@@ -1,9 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import {
-  getCookie,
-  setCookie,
-  setResponseHeader,
-} from "@tanstack/react-start/server";
+import { getCookie, setCookie, setResponseHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 import { THEME_COOKIE_NAME } from "~/lib/theme/constants";

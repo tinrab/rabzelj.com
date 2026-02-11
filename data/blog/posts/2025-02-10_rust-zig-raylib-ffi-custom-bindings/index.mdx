@@ -106,7 +106,7 @@ The annoying parts are the fact that external functions are unsafe and the need 
 The [raw C types](https://doc.rust-lang.org/core/ffi/index.html), while not pretty, exist to adhere to the C standard.
 External functions are unsafe because the Rust compiler cannot guarantee that the function is safe.
 
-If you look at some crates on [crates.io](https://crates.io/), you'll see a "*-sys" naming pattern for unsafe, FFI, bindings-only crates, and their sibling crates that wrap them with safe Rust-like APIs.
+If you look at some crates on [crates.io](https://crates.io/), you'll see a "\*-sys" naming pattern for unsafe, FFI, bindings-only crates, and their sibling crates that wrap them with safe Rust-like APIs.
 For example, `openssl-sys` and `openssl`.
 
 # Wrapping FFI code with safe interfaces
@@ -315,24 +315,24 @@ impl Input {
 When writing safe wrappers around an unsafe parts, these are some of the rules I try to follow:
 
 - **Limit unsafe code**.
-Keep the unsafe parts confined to the smallest possible scope.
-This isn't that hard because pretty much all of the code is safe in practice.
+  Keep the unsafe parts confined to the smallest possible scope.
+  This isn't that hard because pretty much all of the code is safe in practice.
 
 - **Validate FFI inputs and outputs at the boundaries**.
-This means checking that pointer values are not null, strings are valid UTF-8, numeric values are in range, etc.
-Also think about how to translate between C code and modern practices, like result-as-values.
+  This means checking that pointer values are not null, strings are valid UTF-8, numeric values are in range, etc.
+  Also think about how to translate between C code and modern practices, like result-as-values.
 
 - **Use RAII to your advantage**.
-With window example above, what happens if we close it before initializing it? I don't even know.
-Thanks to RAII, the only way I can call `CloseWindow` is by dropping the `Window` struct.
+  With window example above, what happens if we close it before initializing it? I don't even know.
+  Thanks to RAII, the only way I can call `CloseWindow` is by dropping the `Window` struct.
 
 - **Tests, lints and docs**.
-Basically, write tests.
-You can get AI to generate tests for you, just verify that they make sense.
-Clippy has some great lints.
-For example, requiring you to document unsafe blocks with "SAFETY: ..."
-One great thing about of `unsafe` being a keyword is that you can search for it in your codebase.
-Also, use [miri](https://github.com/rust-lang/miri).
+  Basically, write tests.
+  You can get AI to generate tests for you, just verify that they make sense.
+  Clippy has some great lints.
+  For example, requiring you to document unsafe blocks with "SAFETY: ..."
+  One great thing about of `unsafe` being a keyword is that you can search for it in your codebase.
+  Also, use [miri](https://github.com/rust-lang/miri).
 
 # The main game loop
 

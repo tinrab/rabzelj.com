@@ -449,10 +449,10 @@ This creates a canvas and a button to clear it. All of the following JavaScript 
 Declare some variables.
 
 ```js
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
 var isDrawing = false;
-var strokeColor = '';
+var strokeColor = "";
 var strokes = [];
 ```
 
@@ -498,7 +498,7 @@ The `update` function redraws everything on the canvas.
 ```js
 function update() {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.lineJoin = 'round';
+  ctx.lineJoin = "round";
   ctx.lineWidth = 4;
 
   ctx.strokeStyle = strokeColor;
@@ -527,7 +527,7 @@ function drawStrokes(strokes) {
 Write an `onclick` handler for the clear button.
 
 ```js
-document.getElementById('clearButton').onclick = function () {
+document.getElementById("clearButton").onclick = function () {
   strokes = [];
   update();
 };
@@ -538,7 +538,7 @@ document.getElementById('clearButton').onclick = function () {
 To communicate with the server, first declare some additional variables.
 
 ```js
-var socket = new WebSocket('ws://localhost:3000/ws');
+var socket = new WebSocket("ws://localhost:3000/ws");
 var otherColors = {};
 var otherStrokes = {};
 ```
@@ -555,9 +555,7 @@ function addPoint(x, y, newStroke) {
   } else {
     strokes[strokes.length - 1].push(p);
   }
-  socket.send(
-    JSON.stringify({ kind: MESSAGE_STROKE, points: [p], finish: newStroke }),
-  );
+  socket.send(JSON.stringify({ kind: MESSAGE_STROKE, points: [p], finish: newStroke }));
   update();
 }
 ```
@@ -565,7 +563,7 @@ function addPoint(x, y, newStroke) {
 Send a "clear" message in the clear handler.
 
 ```js {highlight:3}
-document.getElementById('clearButton').onclick = function () {
+document.getElementById("clearButton").onclick = function () {
   strokes = [];
   socket.send(JSON.stringify({ kind: MESSAGE_CLEAR }));
   update();
@@ -576,7 +574,7 @@ Now write `onmessage` handler to handle received messages.
 
 ```js
 socket.onmessage = function (event) {
-  var messages = event.data.split('\n');
+  var messages = event.data.split("\n");
   for (var i = 0; i < messages.length; i++) {
     var message = JSON.parse(messages[i]);
     onMessage(message);
@@ -632,9 +630,7 @@ if (message.finish) {
   otherStrokes[message.userId].push(message.points);
 } else {
   var strokes = otherStrokes[message.userId];
-  strokes[strokes.length - 1] = strokes[strokes.length - 1].concat(
-    message.points,
-  );
+  strokes[strokes.length - 1] = strokes[strokes.length - 1].concat(message.points);
 }
 update();
 ```
@@ -651,7 +647,7 @@ Update the `update` function to display others' drawings.
 ```js
 function update() {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.lineJoin = 'round';
+  ctx.lineJoin = "round";
   ctx.lineWidth = 4;
   // Draw mine
   ctx.strokeStyle = strokeColor;

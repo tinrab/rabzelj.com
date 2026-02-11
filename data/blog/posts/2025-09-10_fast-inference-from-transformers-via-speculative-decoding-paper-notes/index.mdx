@@ -17,14 +17,15 @@ Speculative decoding is an algorithm designed to accelerate inference from large
 The core idea is to use a faster approximation model ($M_q$) to predict a sequence of several future tokens, and then have the large target model ($M_p$) verify these predictions in a single parallel step.
 
 The process:
+
 1. Speculation: The fast approximation model generates a "draft" of several tokens autoregressively.
 2. Verification: The large target model takes the original input and the entire draft sequence and evaluates them all at once in a single parallel forward pass.
-This pass yields the probability distributions the target model would have predicted for each token in the sequence.
+   This pass yields the probability distributions the target model would have predicted for each token in the sequence.
 3. Acceptance and rejection: The algorithm iterates through the draft tokens, comparing the approximation model's predictions to the target model's.
-It accepts a prefix of the draft tokens as long as they are consistent (using the rules of speculative sampling).
-The first token that is rejected terminates the acceptance process.
+   It accepts a prefix of the draft tokens as long as they are consistent (using the rules of speculative sampling).
+   The first token that is rejected terminates the acceptance process.
 4. Correction: If a token is rejected, a single new token is sampled from the target model's corrected probability distribution.
-If all draft tokens are accepted, an additional new token is sampled from the target model's distribution for the next position.
+   If all draft tokens are accepted, an additional new token is sampled from the target model's distribution for the next position.
 
 At least one new token is guaranteed to be generated in every iteration, but potentially many more.
 

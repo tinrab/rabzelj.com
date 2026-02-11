@@ -15,7 +15,7 @@ You have to maintain a separate tool (pgbouncer) to get around exhausting the OS
 Ideally, clients use connection pools to re-use connections to the database.
 You have client driver pools, external pools like pgbouncer, and built-into-database ones (some NewSQL databases do this).
 
-*How to build a modern database?*
+_How to build a modern database?_
 
 IO with the database should be achieved with an event loop through a long-lived connection (libpq is one example).
 With modern async runtimes, databases could handle many connections simultaneously.

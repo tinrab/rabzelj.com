@@ -9,18 +9,9 @@ interface LayoutFooterProps extends React.ComponentProps<"div"> {
   };
 }
 
-export function LayoutFooter({
-  slotProps = {},
-  className,
-  children,
-  ...props
-}: LayoutFooterProps) {
+export function LayoutFooter({ slotProps = {}, className, children, ...props }: LayoutFooterProps) {
   return (
-    <footer
-      className={cn("w-full", className)}
-      aria-labelledby="footer-heading"
-      {...props}
-    >
+    <footer className={cn("w-full", className)} aria-labelledby="footer-heading" {...props}>
       <h2 id="footer-heading" className="sr-only">
         Footer
       </h2>

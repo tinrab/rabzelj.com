@@ -1,12 +1,10 @@
-import { IconSlash } from "@tabler/icons-react";
 import type React from "react";
+
+import { IconSlash } from "@tabler/icons-react";
 import { useState } from "react";
 
 import { DashedLine } from "~/components/DashedLine";
-import {
-  HeaderContextProvider,
-  useHeaderContext,
-} from "~/components/layout/header-context";
+import { HeaderContextProvider, useHeaderContext } from "~/components/layout/header-context";
 import { cn } from "~/lib/utility";
 
 export type HeaderProps = React.HtmlHTMLAttributes<HTMLDivElement>;
@@ -16,7 +14,7 @@ export function Header({ children, className, ...props }: HeaderProps) {
 
   return (
     <HeaderContextProvider menuOpen={menuOpen} onMenuOpenChange={setMenuOpen}>
-      <header className={cn("w-full bg-background/95", className)} {...props}>
+      <header className={cn("bg-background/95 w-full", className)} {...props}>
         <div className="flex flex-col items-center px-4">{children}</div>
 
         <DashedLine />
@@ -29,11 +27,7 @@ type HeaderRowProps = {
   desktopOnly?: boolean;
 } & React.ComponentProps<"div">;
 
-export function HeaderRow({
-  desktopOnly,
-  className,
-  ...props
-}: HeaderRowProps) {
+export function HeaderRow({ desktopOnly, className, ...props }: HeaderRowProps) {
   return (
     <div
       className={cn(
@@ -51,14 +45,8 @@ interface HeaderTitleProps extends React.ComponentProps<"div"> {}
 export function HeaderTitle({ className, ...props }: HeaderTitleProps) {
   const { onMenuOpenChange } = useHeaderContext();
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: needed
-    // biome-ignore lint/a11y/useKeyWithClickEvents: needed
-    <div
-      className={cn("relative", className)}
-      onClick={() => onMenuOpenChange(false)}
-      {...props}
-    >
-      <div className="flex h-[24px] w-auto gap-2 font-bold text-foreground">
+    <div className={cn("relative", className)} onClick={() => onMenuOpenChange(false)} {...props}>
+      <div className="text-foreground flex h-[24px] w-auto gap-2 font-bold">
         <span>Tin Rabzelj</span>
         {/* <Badge className="bg-red-700 font-bold text-white">
           looking for work
@@ -73,15 +61,11 @@ type HeaderDividerProps = {
   desktopOnly?: boolean;
 } & React.SVGAttributes<SVGElement>;
 
-export function HeaderDivider({
-  desktopOnly,
-  className,
-  ...props
-}: HeaderDividerProps) {
+export function HeaderDivider({ desktopOnly, className, ...props }: HeaderDividerProps) {
   return (
     <IconSlash
       className={cn(
-        "size-5 shrink-0 text-border",
+        "text-border size-5 shrink-0",
         desktopOnly ? "hidden md:inline-flex" : "",
         className,
       )}

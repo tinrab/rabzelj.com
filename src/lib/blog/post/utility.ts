@@ -1,8 +1,6 @@
 import type { BlogPostCommon, BlogPostYearGroup } from "~/lib/blog/post/schema";
 
-export function groupBlogPosts<T extends BlogPostCommon>(
-  posts: T[],
-): BlogPostYearGroup<T>[] {
+export function groupBlogPosts<T extends BlogPostCommon>(posts: T[]): BlogPostYearGroup<T>[] {
   const groupedPosts: BlogPostYearGroup<T>[] = [];
 
   for (const post of posts) {

@@ -94,22 +94,14 @@ export const Route = createFileRoute("/sitemap.xml")({
         }));
 
         // Return the XML response
-        return new Response(
-          makeSitemap([
-            ...staticRoutes,
-            ...blogPostRoutes,
-            ...blogTagRoutes,
-          ]),
-          {
-            status: 200,
-            headers: {
-              "Content-Type": "application/xml",
-              "X-Content-Type-Options": "nosniff",
-              "Cache-Control":
-                "public, max-age=3600, stale-while-revalidate=3600",
-            },
+        return new Response(makeSitemap([...staticRoutes, ...blogPostRoutes, ...blogTagRoutes]), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/xml",
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "public, max-age=3600, stale-while-revalidate=3600",
           },
-        );
+        });
       },
     },
   },

@@ -1,0 +1,232 @@
+---
+title: A Result Type for TypeScript
+description: Did somebody ask for a monad?
+tags:
+  - typescript
+publishedDate: 2026-02-11
+---
+
+I've written a package that brings Rust-inspired result types to TypeScript: [@temelj/result](https://www.npmjs.com/package/@temelj/result).
+There are existing packages that do this, but I wanted to build my own to keep it simple and minimal.
+
+Here's a function that parses a number:
+
+```ts
+function parseNumber(input: string): number {
+  const parsed = parseInt(input, 10);
+  if (Number.isNaN(parsed)) {
+    throw new Error("Invalid number");
+  }
+  return parsed;
+}
+
+const value = parseNumber("not-a-number"); // Throws!
+```
+
+The signature `parseNumber(input: string): number` promises a `number`, but it can also throw.
+We have to look at the implementation or read the docs to know it's unsafe.
+This becomes painful in larger codebases where functions call functions, and errors bubble up through layers of stack traces.
+
+Sometimes I need a way to enrich errors with extra info.
+It's ugly to that with `try/catch`.
+
+The package provides a `Result<T, E>` type that represents either success (`Ok<T>`) or failure (`Err<E>`).
+
+Here's the same function rewritten:
+
+```ts
+import { ok, err, type Result } from "@temelj/result";
+
+function parseNumberSafe(input: string): Result<number, string> {
+  const parsed = parseInt(input, 10);
+  if (Number.isNaN(parsed)) {
+    return err("Invalid number");
+  }
+  return ok(parsed);
+}
+
+// Usage
+const result = parseNumberSafe("not-a-number"); // Result<number, string>
+```
+
+# Features
+
+The package provides two simple constructors:
+
+```ts
+import { ok, err } from "@temelj/result";
+
+const success = ok(42); // ResultOk<number>
+const failure = err("something went wrong"); // ResultErr<string>
+```
+
+Check which variant you have using `isOk` and `isErr`:
+
+```ts
+import { isOk, isErr, unwrap, unwrapErr } from "@temelj/result";
+
+const result = parseNumberSafe("123");
+
+if (isOk(result)) {
+  console.log(`Success: ${result.value}`); // 123
+} else {
+  console.log(`Error: ${result.error}`); // "Invalid number"
+}
+
+// Or unwrap directly (throws if wrong variant)
+const value = unwrap(result); // number or throws
+const error = unwrapErr(result); // string or throws
+```
+
+`unwrap` and `unwrapErr` are escape hatches for when you're certain about the variant.
+
+Use them sparingly.
+Prefer `unwrapOr` for safer defaults.
+
+```ts
+import { unwrapOr } from "@temelj/result";
+
+const value = unwrapOr(parseNumberSafe("invalid"), 0); // 0
+const value2 = unwrapOr(parseNumberSafe("42"), 0); // 42
+
+// Lazy default evaluation
+const value3 = unwrapOr(parseNumberSafe("invalid"), () => expensiveFallback());
+```
+
+Map over success values without unwrapping:
+
+```ts
+import { map } from "@temelj/result";
+
+const result = parseNumberSafe("42");
+const doubled = map(result, (n) => n * 2); // Result<number, string>
+// If result was Err, doubled is the same Err
+// If result was Ok(42), doubled is Ok(84)
+```
+
+Transform errors with `mapErr`:
+
+```ts
+import { mapErr } from "@temelj/result";
+
+type HttpError = { code: number; message: string };
+
+const result = parseNumberSafe("invalid");
+const httpError = mapErr(result, (msg) => ({
+  code: 400,
+  message: msg,
+})); // Result<number, HttpError>
+```
+
+You can wrap operations that might throw from either sync or async functions.
+
+```ts
+import { fromThrowable, isOk, unwrap } from "@temelj/result";
+
+// Wrap a function that might throw
+const result = fromThrowable(() => JSON.parse('{"valid": true}'));
+// Result<any, unknown>
+
+if (isOk(result)) {
+  console.log(unwrap(result)); // { valid: true }
+}
+
+// With custom error mapping
+const parsed = fromThrowable(
+  () => JSON.parse(userInput),
+  (e) => `JSON parse failed: ${e instanceof Error ? e.message : String(e)}`,
+);
+// Result<any, string>
+```
+
+This is helpful when dealing with external libraries or browser APIs that throw.
+
+`fromPromise` catches both sync throws in the factory function and promise rejections:
+
+```ts
+import { fromPromise, isOk, unwrapErr } from "@temelj/result";
+
+async function fetchUser(id: string) {
+  const result = await fromPromise(
+    () => fetch(`/api/users/${id}`).then((r) => r.json()),
+    (e) => (e instanceof Error ? e.message : "Network error"),
+  );
+  // Result<User, string>
+
+  if (isOk(result)) {
+    return result.value;
+  }
+
+  console.error(`Failed to fetch: ${unwrapErr(result)}`);
+
+  return null;
+}
+```
+
+Note how the error type is explicit.
+
+Compare this to standard async/await:
+
+```ts
+async function fetchUserStandard(id: string): Promise<User> {
+  const response = await fetch(`/api/users/${id}`);
+  // Could throw network error, 404, JSON parse error...
+  return response.json();
+}
+```
+
+The TypeScript compiler helps prevent common mistakes.
+
+```ts
+import { ok, err, map, mapErr, type Result } from "@temelj/result";
+
+type DbError = { type: "not_found" | "connection_failed"; details: string };
+
+async function findUser(id: string): Promise<Result<User, DbError>> {
+  // Database logic...
+  return ok(user);
+}
+
+async function getUserDisplayName(id: string): Promise<Result<string, DbError>> {
+  const userResult = await findUser(id);
+
+  // Type-safe transformation
+  return map(userResult, (user) => `${user.firstName} ${user.lastName}`);
+}
+
+async function renderGreeting(id: string) {
+  const nameResult = await getUserDisplayName(id);
+
+  if (isOk(nameResult)) {
+    // `nameResult.value` is a string.
+    return `Hello, ${nameResult.value}!`;
+  } else {
+    // TypeScript knows this is `DbError`, not `string` or `Error`
+    const error = nameResult.error;
+    return error.type === "not_found" ? "User not found" : "Service unavailable";
+  }
+}
+```
+
+The `mapErr` function is useful when transforming errors between layers of an application:
+
+```ts
+const nodeResult = graphContext.tryGetNode(nodeInstance.node);
+if (isErr(nodeResult)) {
+  return mapErr(nodeResult, (error) => error.extendMetadata({ nodeInstanceId }));
+}
+```
+
+## Installation
+
+Add it to your project from npm or JSR:
+
+```sh
+# npm
+npm install @temelj/result
+
+# JSR (Deno)
+deno add jsr:@temelj/result
+```
+
+The package is part of [Temelj](https://github.com/tinrab/temelj) (GitHub), a standard library for TypeScript.

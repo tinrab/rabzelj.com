@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 import { THEME_LOCAL_STORAGE_KEY } from "~/lib/theme/constants";
 import { changeThemeServerFn } from "~/lib/theme/fn";
@@ -36,9 +30,7 @@ export function ThemeProvider({
   initialTheme,
   ...otherProps
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => initialTheme ?? getStoredTheme(storageKey),
-  );
+  const [theme, setTheme] = useState<Theme>(() => initialTheme ?? getStoredTheme(storageKey));
 
   // Applies theme to the document.
   const applyTheme = useCallback(
@@ -70,7 +62,7 @@ export function ThemeProvider({
         return;
       }
 
-      changeThemeServerFn({ data: { theme: newTheme } });
+      void changeThemeServerFn({ data: { theme: newTheme } });
 
       applyTheme(newTheme);
     },
@@ -123,9 +115,7 @@ function getStoredTheme(key: string): Theme {
   return theme || Theme.SYSTEM;
 }
 
-function getSystemTheme(
-  mediaQuery?: MediaQueryList | MediaQueryListEvent,
-): Theme {
+function getSystemTheme(mediaQuery?: MediaQueryList | MediaQueryListEvent): Theme {
   let matchedMedia = mediaQuery;
   if (typeof window !== "undefined") {
     matchedMedia = window.matchMedia(THEME_MEDIA_QUERY);

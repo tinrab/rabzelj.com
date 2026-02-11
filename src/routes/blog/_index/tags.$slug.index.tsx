@@ -39,10 +39,7 @@ function RouteComponent() {
         <Typography variant="h2" gutterBottom render={<h1>{tag.title}</h1>} />
         <Typography variant="body">{tag.description}</Typography>
 
-        <Typography
-          variant="a"
-          render={<Link to="/blog/tags">See all tags.</Link>}
-        />
+        <Typography variant="a" render={<Link to="/blog/tags">See all tags.</Link>} />
       </div>
 
       <BlogPostList
