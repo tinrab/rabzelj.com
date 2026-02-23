@@ -5,11 +5,13 @@ import { createMdxContent } from "@temelj/mdx-react";
 import { z } from "zod";
 
 import { BlogNoteAlert } from "~/components/blog/BlogNoteAlert";
+import { BlogSeriesSection } from "~/components/blog/BlogSeriesSection";
 import { BlogTagChip } from "~/components/blog/BlogTagChip";
 import { Typography } from "~/components/Typography";
 import { Separator } from "~/components/ui/separator";
 import { clientConfig } from "~/config/client";
 import { loadBlogPost } from "~/lib/blog/post/loader";
+import { loadBlogSeriesWithPosts } from "~/lib/blog/series/loader";
 import { blogTagIsNote } from "~/lib/blog/tag/utility";
 import { mdxPageLowerHeadingComponents } from "~/lib/mdx/components/registry";
 import { pageMiddleware } from "~/lib/middleware";
@@ -32,7 +34,9 @@ const loadRouteData = createServerFn({ method: "GET" })
       throw notFound();
     }
 
-    return { post };
+    const series = post.series ? await loadBlogSeriesWithPosts(post.series) : undefined;
+
+    return { post, series };
   });
 
 export const Route = createFileRoute("/blog/_post/_post/$slug")({
@@ -64,7 +68,7 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
 });
 
 function RouteComponent() {
-  const { post } = Route.useLoaderData();
+  const { post, series } = Route.useLoaderData();
 
   const content = post.artifact?.compiled
     ? createMdxContent(
@@ -81,6 +85,10 @@ function RouteComponent() {
       <Typography className="text-balance" variant="h1">
         {post.title}
       </Typography>
+
+      {series ? (
+        <BlogSeriesSection className="mt-6" series={series} currentSlug={post.slug} />
+      ) : undefined}
 
       {isNote ? <BlogNoteAlert className="mt-4" /> : undefined}
 

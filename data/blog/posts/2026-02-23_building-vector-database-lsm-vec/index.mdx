@@ -1,0 +1,338 @@
+---
+title: "Building a Vector Database in Rust: LSM-VEC"
+description: Combining LSM-tree storage with HNSW-like routing to provide update-friendly disk-based vector search.
+tags:
+  - rust
+  - database
+publishedDate: 2026-02-23
+series: lsm-vec-vector-database
+---
+
+I've been building a vector database in Rust based on the [LSM-VEC](https://arxiv.org/abs/2505.17152) and [ACORN](https://arxiv.org/abs/2403.04871) papers.
+
+This blog post is about the LSM-VEC architecture.
+
+There's a lot of interesting things to talk about, and I don't know how best to structure these posts.
+I'll pick random parts from the codebase and talk about them.
+If I miss anything, I'll include it in future posts.
+
+# In-Memory HNSW
+
+[HNSW](https://arxiv.org/abs/1603.09320) (Hierarchical Navigable Small World) is an algorithm for approximate nearest neighbor search (ANN).
+It builds a multi-layer (inspired by skip lists) proximity graph where higher layers have long-range edges for coarse navigation, and the bottom layer captures fine-grained local neighborhoods.
+Search starts from the top, greedily navigates between vertices and down the layers, and finishes with a beam search at layer 0.
+Here's [a good blog post](https://www.pinecone.io/learn/series/faiss/hnsw/) about it.
+
+One issue is memory.
+We can't fit big data in RAM.
+We could keep an index in memory and store data somewhere else, but even that has limits.
+
+HNSW also struggles with dynamic workloads.
+Every insertion updates multiple graph layers.
+Over time, the graph structure degrades.
+Nodes become poorly connected or accumulate too many edges.
+
+# DiskANN
+
+[DiskANN](https://papers.nips.cc/paper_files/paper/2019/hash/09853c7fb1d3f8ee67a61b6bf4a7f8e6-Abstract.html) addresses disk-based vector search.
+It builds a pruned graph offline, reorders vectors for disk locality, and keeps only quantized vectors in memory for routing.
+During search, it prefetches candidates from disk efficiently.
+
+But it only works with static datasets.
+The graph index is built once.
+
+From the LSM-VEC paper:
+
+> Insertions are appended at the end of the dataset without being properly integrated into the graph, which increases traversal cost and reduces recall. Deletions are not fully supported and may fragment the graph over time.
+
+[FreshDiskANN](https://arxiv.org/abs/2105.09613) extends DiskANN to support incremental updates.
+New vectors connect to disk-resident neighbors, and deletions use a local relinking strategy. But it maintains a fixed disk layout.
+It's better than a full rebuild, but the graph quality still degrades.
+
+# SPFresh
+
+[SPFresh](https://arxiv.org/abs/2410.14452) partitions vectors into clusters instead of building proximity graphs.
+New vectors get assigned to their nearest cluster.
+
+Updates are fast, but recall suffers.
+
+From the LSM-VEC paper:
+
+> SPFresh suffers from structural rigidity. Similar vectors may fall into different clusters, harming recall unless many clusters are probed.
+
+By the way, _recall_ refers to the percentage of vectors that the index returns which are true nearest neighbors.
+When I was writing benchmarks, I had trouble choosing parameters that would give _>95%_ recall so I had to build an auto-tunning mechanism.
+Will talk about this another time.
+
+# Out-of-place updates with LSM-Trees
+
+LSM-VEC combines graph-based indexing (for recall) with LSM-Tree storage (for update efficiency).
+Instead of modifying the graph in place, updates are written as new entries.
+Old versions get cleaned up during compaction.
+
+When a vector is updated or a neighbor is changed, LSM-VEC inserts the new edge information directly into the LSM-Tree.
+This avoids the high I/O cost of searching for and modifying existing records on disk.
+
+Upper layers are kept in memory.
+Almost all nodes are in the layer _0_ (_L0_), so keeping upper layers in memory is possible.
+This enables fast "coarse" routing.
+
+From the paper:
+
+> "LSM-VEC decomposes the HNSW index into memory-resident upper layers and a disk-resident bottom layer. [...] the upper layers are typically small. Empirically, less than 1% of all nodes reside above the bottom layer."
+
+Layer _L0_ is on disk, in LSM-Tree SST files.
+
+The graph edges (the adjacency lists) are stored as key-value pairs within the LSM-Tree.
+The key represents the source vector ID, and the value is its neighbor.
+
+Vectors are stored in contiguous on-disk arrays.
+They are sorted by ID, which allows us to retrieve any vector in constant time by calculating its offset in the file.
+
+Changes to connections can be written to the LSM-Tree sequentially without moving the actual vector data.
+
+# Overview of the implementation
+
+Here's how I've implemented the LSM engine.
+
+The core structure looks like this:
+
+```rust
+pub struct LsmVectorEngine {
+    config: LsmConfig,
+    manifest: ManifestStore,
+    wal: RwLock<Arc<Store>>,
+    memtable: RwLock<MemTableManager>,
+    sst_index: DashMap<u32, Vec<SstMetadata>>,
+    hnsw_graph: Arc<HnswGraph>,
+    search_engine: Arc<SearchEngine>,
+    l0_reservoir: RwLock<VecDeque<VectorId>>,
+    // ...
+}
+
+pub trait Engine: Send + Sync {
+    fn insert(&self, vector: &[f32]) -> Result<VectorId, CoreError>;
+    fn insert_with_options(
+        &self,
+        vector: &[f32],
+        options: InsertOptions,
+    ) -> Result<VectorId, CoreError>;
+    fn insert_batch(
+        &self,
+        vectors: Vec<(Vec<f32>, Option<Vec<u8>>)>,
+    ) -> Result<Vec<VectorId>, CoreError>;
+    fn search(&self, query: &[f32], k: usize) -> Result<Vec<SearchResult>, CoreError>;
+    fn search_with_filter(
+        &self,
+        query: &[f32],
+        k: usize,
+        filter: Option<&SearchFilter>,
+        options: Option<SearchOptions>,
+    ) -> Result<Vec<SearchResult>, CoreError>;
+    // ...
+}
+```
+
+Note that I only bother with `f32` currently.
+
+The `hnsw_graph` holds the upper layers in memory.
+The `memtable` buffers recent writes.
+
+The `l0_reservoir` is a bounded circular buffer of recently inserted vector IDs.
+It's used during insertion when searching for L0 neighbors.
+If graph traversal doesn't find enough candidates (fewer than _M_), the algorithm falls back to sampling from the reservoir.
+This handles two edge cases: early inserts when the graph is sparse, and workloads with temporal locality where recent inserts cluster together spatially.
+
+# Insertion flow
+
+Inserting a vector involves generating a random ID (I use Ulid), navigate upper layers (in memory) to find entry points, search layer _L0_ for nearest neighbors, write vector to WAL (if enabled), insert into MemTable, then add reverse edges to maintain bidirectional connectivity.
+
+This is a snippet:
+
+```rust
+pub fn insert(&self, vector: &[f32]) -> Result<VectorId, CoreError> {
+    let id = VectorId::generate();
+    let signature = self.search_engine.compute_signature(vector);
+
+    let l0_neighbors = self.insert_into_hnsw(id, vector, seq);
+
+    if self.config.wal.enabled {
+        let record = WalRecord { op: WalOperation::Insert, vector_id: id, /* ... */ };
+        self.wal.read().append(record.serialize()?)?;
+    }
+
+    let entry = MemTableEntry::new_f32_with_signature(vector, seq, signature);
+    self.memtable.read().insert(id, entry);
+
+    if self.memtable.read().should_freeze() {
+        self.trigger_flush(false)?;
+    }
+
+    Ok(id)
+}
+```
+
+Each `MemTableEntry` has a `edges: Vec<VectorId>`, which is a list of vectors that point to **this** vector.
+When vector _A_ adds _B_ as a neighbor, _B_ needs to know about _A_ so that during search, traversing to _B_ can lead back to _A_.
+This is a must for good recall.
+The amount of these edges is limited by `max_edges`, where I prune excess by keeping closest vectors by their distance.
+
+I tried optimizing batch insert flow a bit.
+So each insert flow procedure may have its own batch-version equivalent.
+
+For concurrency, I have "plan" and "apply" phases.
+Plan phase is lock-free and read-only.
+Planning against a snapshot ensures consistency as other inserts happen.
+
+```rust
+// Plan phase (parallel)
+let prepared_data: Vec<(VectorId, Vec<VectorId>, MemTableEntry, HnswInsertPlan)> =
+    prepared_data
+        .into_par_iter()
+        .map(|(id, vector, _seq, mut entry, _)| {
+            // Compute which neighbors to connect to at each HNSW layer
+            todo!()
+        })
+        .collect();
+
+// Apply phase (parallel, thread-local accumulation)
+let (reverse_updates, l0_candidate_ids): (HashMap<VectorId, Vec<VectorId>>, Vec<VectorId>) =
+    prepared_data
+        .into_par_iter()
+        .fold(
+            || (HashMap::new(), Vec::new()),
+            |(mut updates, mut candidates), (id, l0_neighbors, entry, plan)| {
+                // Actually modify HNSW graph edges
+                self.apply_hnsw_insert_plan(&plan, entry_vector.as_ref(), &get_vector_for_apply, &|_| {});
+                // Collect reverse updates (neighbor -> new nodes connecting to it)
+                for neighbor in &plan.l0_neighbors {
+                    updates.entry(*neighbor).or_default().push(id);
+                }
+                // Insert into memtable
+                memtable.insert(id, entry);
+                (updates, candidates)
+            },
+        )
+        .reduce(
+            || (HashMap::new(), Vec::new()),
+            |(mut updates, mut candidates), (other_updates, other_candidates)| {
+                // Merge thread-local maps
+                for (neighbor, mut ids) in other_updates {
+                    updates.entry(neighbor).or_default().append(&mut ids);
+                }
+                (updates, candidates)
+            },
+        );
+
+// Apply accumulated reverse updates
+for (neighbor, new_ids) in reverse_updates {
+    // Add bidirectional edges
+}
+```
+
+I use [rayon](https://crates.io/crates/rayon), [parking_lot](https://crates.io/crates/parking_lot) and std threads.
+There's no async, at least not in the core database crates.
+
+The memtable eventually flushes to an SST file.
+
+A note to remember about `fsync` from the man page:
+
+> Calling fsync() does not necessarily ensure that the entry in the directory containing the file has also reached disk.
+> For that an explicit fsync() on a file descriptor for the directory is also needed.
+
+When enough _L0_ SSTs accumulate, compaction merges them into _L1_.
+This is where edges can be re-linked, and the graph layout can be optimized.
+I do compaction in a background thread.
+
+```rust
+fn compact_if_needed(&self) {
+    if !self.compaction_running.compare_exchange(false, true) {
+        return;  // Already running
+    }
+    let _guard = Guard(|| self.compaction_running.store(false));
+    self.compact_l0_if_needed();
+    self.compact_higher_levels_if_needed();
+}
+
+fn compact_l0_if_needed(&self) {
+    loop {
+        let l0_files = self.sst_index.get(&0);
+        if l0_files.len() <= L0_MAX_FILES {
+            break;
+        }
+
+        let picked = pick_l0_compaction_files(l0_files);
+        let new_sst = self.compact_files_to_level(picked, /* target_level */ 1);
+
+        // Update index
+        self.sst_index.get_mut(&1).push(new_sst);
+        self.remove_compacted_files_from_index(0, &picked);
+    }
+}
+```
+
+All of this is quite complicated and I am not at all positive that it's implemented in an optimal way.
+
+# Search flow
+
+Search follows the classic HNSW pattern but with LSM-VEC's sampling optimization.
+
+This is a snippet:
+
+```rust
+pub fn search(&self, request: SearchRequest) -> Vec<SearchResult> {
+    // Navigate upper layers in memory
+    let entry_for_l0 = upper_graph.greedy_search_upper_layers(
+        request.query, entry_point, max_level, 1, // ...
+    );
+
+    // Search layer 0 with probabilistic sampling
+    let candidates = if let Some(filter) = request.filter {
+        self.search_layer_with_sampling_acorn(/*...*/)
+    } else {
+        self.search_layer_with_sampling(/*...*/)
+    };
+
+    candidates.into_iter().take(request.k).map(/*...*/).collect()
+}
+
+
+fn search_layer_with_sampling(
+    &self,
+    query: &[f32],
+    entry_points: &[VectorId],
+    ef: usize,
+    vectors: &dyn VectorProvider,
+    query_sig: &SimHashSignature,
+) -> Vec<(f32, VectorId)> {
+    if self.sampling_ratio >= 1.0 {
+        return self.search_layer_without_sampling(query, entry_points, ef, vectors);
+    }
+
+    let threshold = self.simhasher.threshold_from_ratio(self.sampling_ratio);
+    self.search_layer_core(
+        query,
+        entry_points,
+        ef,
+        vectors,
+        // should_eval
+        |neighbor| {
+            vectors
+                .get_signature(neighbor)
+                .is_none_or(|sig| self.simhasher.should_evaluate(query_sig, &sig, threshold))
+        },
+        // should_accept
+        |_| true,
+    )
+}
+```
+
+LSM-VEC uses SimHash (I use [simsimd](https://crates.io/crates/simsimd) crate) signatures to probabilistically skip unlikely candidates, which avoid evaluating every neighbor during graph traversal.
+This cuts disk I/O.
+
+# Conclusion
+
+I don't want to talk too much about benchmarks because it probably isn't SOTA fast.
+I do some interesting things with concurrency, LSM storage, bloom filters for presence checks, etc., but I'd need this database to be feature-ready before micro-optimizing individual parts.
+
+I'll talk about other parts in the future blog post, and publish source code when I feel like it.
