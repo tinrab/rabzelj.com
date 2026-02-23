@@ -49,6 +49,12 @@ export default defineConfig({
     nitro({
       rollupConfig: {
         external: ["@resvg/resvg-js"],
+        onwarn(warning, warn) {
+          if (warning.code === "MODULE_LEVEL_DIRECTIVE" || warning.code === "SOURCEMAP_ERROR") {
+            return;
+          }
+          warn(warning);
+        },
       },
       routeRules: {
         "/assets/**": {
@@ -60,14 +66,4 @@ export default defineConfig({
       },
     }),
   ],
-  build: {
-    rollupOptions: {
-      onwarn(warning, warn) {
-        if (warning.code === "MODULE_LEVEL_DIRECTIVE" || warning.code === "SOURCEMAP_ERROR") {
-          return;
-        }
-        warn(warning);
-      },
-    },
-  },
 });

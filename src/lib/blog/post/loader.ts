@@ -210,6 +210,7 @@ async function readBlogPost(
     assetPath: dir,
     artifact: includeArtifact ? artifact : undefined,
     related,
+    series: artifact.frontmatter.series,
   };
 }
 

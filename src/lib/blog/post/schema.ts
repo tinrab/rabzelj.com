@@ -12,6 +12,7 @@ export const blogPostFrontmatterSchema = z.object({
   description: z.string().trim().regex(/[.?]$/),
   tags: z.array(z.string().trim()),
   priority: z.number().default(0),
+  series: z.string().trim().optional(),
   cover: z
     .union([
       z.string().trim(),
@@ -42,6 +43,7 @@ export interface BlogPostData extends BlogPostCommon {
   assetPath: string;
   artifact?: MdxArtifact<BlogPostFrontmatter>;
   related?: RelatedBlogPost[];
+  series?: string;
 }
 
 export interface RelatedBlogPost {
