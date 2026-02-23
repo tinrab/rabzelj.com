@@ -31,9 +31,6 @@ export default defineConfig({
   server: {
     port: 3000,
   },
-  optimizeDeps: {
-    exclude: ["@resvg/resvg-js"],
-  },
   ssr: {
     noExternal: ["@tabler/icons-react"],
   },
@@ -48,7 +45,6 @@ export default defineConfig({
     viteReact(),
     nitro({
       rollupConfig: {
-        external: ["@resvg/resvg-js"],
         onwarn(warning, warn) {
           if (warning.code === "MODULE_LEVEL_DIRECTIVE" || warning.code === "SOURCEMAP_ERROR") {
             return;
