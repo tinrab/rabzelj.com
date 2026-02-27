@@ -107,6 +107,12 @@ async function readBlogPost(
   }
   const slug = dir.slice(Math.max(0, slugIndex + 1));
 
+  const dirDatePrefix = dir.slice(dir.lastIndexOf("/") + 1, slugIndex + 1);
+  if (!/^\d{4}-\d{2}-\d{2}_$/.test(dirDatePrefix)) {
+    throw new Error(`Invalid blog post directory date prefix '${dirDatePrefix}' in '${dir}'`);
+  }
+  const dirDate = dirDatePrefix.slice(0, -1);
+
   const source = await fs.readFile(path.join(dir, POST_INDEX_FILE), "utf8");
 
   const compiler = await getMdxCompiler();
@@ -128,6 +134,12 @@ async function readBlogPost(
     blogPostFrontmatterSchema,
   );
   const frontmatter = artifact.frontmatter;
+
+  if (dirDate !== frontmatter.publishedDate) {
+    throw new Error(
+      `Directory date prefix '${dirDate}' does not match publishedDate '${frontmatter.publishedDate}' in '${slug}'`,
+    );
+  }
 
   if (process.env.NODE_ENV === "production" && frontmatter.demo) {
     return;

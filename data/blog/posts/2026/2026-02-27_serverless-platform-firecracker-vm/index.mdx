@@ -1,0 +1,614 @@
+---
+title: Trying to Build a Serverless Platform using Firecracker
+description: Can I build my own AWS Lambda, though?
+tags:
+  - rust
+  - docker
+  - deno
+  - firecracker
+publishedDate: 2026-02-27
+---
+
+I wanted to play with [Firecracker](https://firecracker-microvm.github.io) a bit, so I decided to build a tiny "serverless" self-hosted tool with it.
+The idea is to embed [Deno](https://deno.com) into microVMs that will serve user-deployed HTTP services.
+I needed a way to manage these microVMs and to route traffic to and from them.
+
+This is all WIP.
+Here's an overview.
+
+I have a "proxy" built in Rust with `axum`.
+It accepts an incoming request, figures out which worker VM should handle it, and forwards the request to it.
+It also collects metrics.
+
+There's a "manager" that manages VMs.
+It creates, starts, stops or destroys them.
+It maintains pools of workers for each user-deployed app so they can scale horizontally.
+
+The "worker" is what runs inside each VM.
+It's a Rust service that uses Deno to execute user-provided TypeScript code.
+
+Proxy communicates with the manager via gRPC.
+It retrieves VMs and reports metrics to the manager.
+The manager can decide to scale worker pools up or down.
+
+Proxy's HTTP server accepts a request, sets headers `X-User-ID` and `X-App-ID` used for tracking, then sends the HTTP request to the worker via virtio-vsock.
+Virtio-vsock is a device that provides a socket interface (AF_VSOCK) for communication between a VM guest and the host (or between co-located VMs), using context IDs (CIDs) and ports instead of IP addresses.
+When you run a VM with Firecracker, you get a socket file for communicating with this VM.
+
+# Building VM images
+
+To run a microVM with Firecracker we need a kernel image and a ext4 file system image used as rootfs.
+
+A rootfs (root filesystem) is the filesystem that appears as the root `/` to processes running inside a VM.
+I'm using Docker (Podman actually) to prepare this rootfs.
+
+```bash
+# Extract Debian trixie rootfs with libraries
+podman pull debian:trixie-slim
+
+# Create a temporary container to install packages
+podman run --name debian-rootfs debian:trixie-slim bash -c "
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        libgcc-s1 \
+        libc6 \
+        libssl3 \
+        ca-certificates
+"
+
+# Export the filesystem from the container
+podman export debian-rootfs | tar -xf -
+podman rm debian-rootfs
+```
+
+There are other ways of doing this, Docker just makes it easier and declarative.
+
+For the kernel images, there are several options.
+I have a Nix flake setup and I am downloading an image from [https://s3.amazonaws.com/spec.ccfc.min/img/quickstart_guide/x86_64/kernels/vmlinux.bin](https://s3.amazonaws.com/spec.ccfc.min/img/quickstart_guide/x86_64/kernels/vmlinux.bin).
+The `vmlinux.bin` is a file that Firecracker needs.
+
+Here's a snippet of my Nix flake:
+
+```nix
+packages = {
+    kernel = pkgs.fetchurl {
+      url = "https://s3.amazonaws.com/spec.ccfc.min/img/quickstart_guide/x86_64/kernels/vmlinux.bin";
+      sha256 = "1mhw3din09vxsp2bzjqbsy04id0qq0pq2n9j0jxc9a4lyif7sppa";
+    };
+    config = pkgs.writeText "config.json" ''
+    {
+        "boot-source": {
+        "kernel_image_path": "${
+            pkgs.fetchurl {
+                url = "https://s3.amazonaws.com/spec.ccfc.min/img/quickstart_guide/x86_64/kernels/vmlinux.bin";
+                sha256 = "1mhw3din09vxsp2bzjqbsy04id0qq0pq2n9j0jxc9a4lyif7sppa";
+            }
+        }",
+        "boot_args": "console=ttyS0 reboot=k panic=1 pci=off root=/dev/vda init=/sbin/init"
+        },
+        "drives": [
+            {
+                "drive_id": "rootfs",
+                "path_on_host": "debian-rootfs.ext4",
+                "is_root_device": true,
+                "is_read_only": false
+            }
+        ],
+        "machine-config": {
+            "vcpu_count": 1,
+            "mem_size_mib": 128
+        },
+        "vsock": {
+            "guest_cid": 3,
+            "uds_path": "control-vsock.socket"
+        }
+    }
+    '';
+};
+```
+
+The boot args route console output to serial (`console=ttyS0`) and tell the kernel to reboot on panic.
+`debian-rootfs.ext4` is the path to the rootfs file.
+`uds_path` will give us the socket for communication.
+Machine config can be user-defined too.
+
+Note, this config is created at runtime by the manager.
+I just needed this to get a kernel image in a declarative way.
+
+That's it for the base image.
+
+The worker is a Rust binary that needs to run inside the VM.
+
+I build it inside a Docker container too, using the same Debian base:
+
+```dockerfile
+# Simple Dockerfile for building worker_service with Debian compatibility
+FROM debian:trixie-slim
+
+# Install build and runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    libgcc-s1 \
+    libc6 \
+    libssl3 \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:$PATH"
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy the entire crates directory
+COPY crates/ ./crates/
+
+# Build the worker service
+RUN cd crates && cargo build
+
+# Create app directory and copy binary
+RUN mkdir -p /app && cp crates/target/debug/worker_service /app/worker_service
+RUN chmod +x /app/worker_service
+
+# Set default command to show the binary is ready
+CMD ["/app/worker_service", "--version"]
+```
+
+Building inside Docker ensures the binary is compiled against the same libc version in the VM.
+
+My full setup is very Nix-dependent, but here's a snippet:
+
+```bash
+cwd=$(pwd)
+
+# Clean
+rm -rf "{{ ROOTFS_DIR }}" "{{ OUTPUT_IMAGE }}"
+mkdir -p "{{ ROOTFS_DIR }}"
+cd "{{ ROOTFS_DIR }}"
+
+# Extract Debian trixie rootfs with libraries
+podman pull debian:trixie-slim
+
+# Create a temporary container to install packages
+podman run --name debian-rootfs debian:trixie-slim bash -c "
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        libgcc-s1 \
+        libc6 \
+        libssl3 \
+        ca-certificates
+"
+
+# Export the filesystem from the container
+podman export debian-rootfs | tar -xf -
+podman rm debian-rootfs
+
+# Custom init script for VMs
+rm -f sbin/init
+cp "$cwd/infrastructure/worker/init.sh" sbin/init
+chmod +x sbin/init
+
+# Build and copy worker service using Docker
+mkdir -p app
+cd "$cwd"
+podman build -t worker-builder -f worker.dockerfile .
+podman run --name worker-extract worker-builder true
+podman cp worker-extract:/app/worker_service "$cwd/{{ ROOTFS_DIR }}/app/worker_service"
+podman rm worker-extract
+
+mke2fs -t ext4 -d "{{ ROOTFS_DIR }}" "{{ OUTPUT_IMAGE }}" 300M
+rm -rf "{{ ROOTFS_DIR }}"
+```
+
+The `-d` flag with `mke2fs` populates the filesystem from the rootfs directory. I create a 300MB image, which is plenty of room for the rootfs and the service.
+
+When we run a VM with Firecracker using the JSON config, we get back a vsock unix socket file.
+The vsock is how the VM talks to the host.
+
+Note that I am not bothering with [Jailer](https://github.com/firecracker-microvm/firecracker/blob/v1.14.2/docs/jailer.md) yet.
+
+# Managing VMs
+
+The "manager" service handles VM orchestration.
+When we create a VM, it generates a unique ID, allocates a context ID (CID) for vsock, picks a port, and starts Firecracker VM.
+It keeps track of which VMs belong to which user app.
+
+You can spin up multiple VMs for one app and the manager will distribute requests across them using round-robin.
+
+Here's how it selects a worker using round-robin:
+
+```rust
+pub async fn get_worker_for_app(&self, user_id: Id, app_id: Id) -> Option<VmConfig> {
+    let pool_key = (user_id, app_id);
+
+    let Some(pool) = self.worker_pools.get(&pool_key) else {
+      return None;
+    };
+    if pool.workers.is_empty() {
+        return None;
+    }
+
+    // Simple round-robin selection
+    for i in 0..pool.workers.len() {
+        let worker_index = (pool.current_index + i) % pool.workers.len();
+        let vm_id = &pool.workers[worker_index];
+
+        if let Some(vm_instance) = self.vms.get(vm_id) {
+            if vm_instance.status == VmStatus::Running {
+                let config = vm_instance.config.clone();
+
+                // Update current_index for next request
+                if let Some(mut pool) = self.worker_pools.get_mut(&pool_key) {
+                    pool.current_index = (worker_index + 1) % pool.workers.len();
+                }
+
+                return Some(config);
+            }
+        }
+    }
+
+    None
+}
+```
+
+The scaling logic:
+
+```rust
+pub async fn scale_app(&self, user_id: Id, app_id: Id, desired_count: usize) -> Result<Vec<Id>> {
+    let pool_key = (user_id, app_id);
+    let current_count = self
+        .worker_pools
+        .get(&pool_key)
+        .map(|p| p.workers.len())
+        .unwrap_or(0);
+
+    let mut created_vms = Vec::new();
+
+    if current_count < desired_count {
+        // Scale up
+        for _ in current_count..desired_count {
+            let vm_id = self
+                .create_vm_with_capabilities(/* ... */)
+                .await?;
+            created_vms.push(vm_id);
+        }
+    } else if current_count > desired_count {
+        // Scale down
+        if let Some(pool) = self.worker_pools.get(&pool_key) {
+            for i in desired_count..current_count {
+                if let Some(vm_id) = pool.workers.get(i) {
+                    let _ = self.destroy_vm(*vm_id).await;
+                }
+            }
+        }
+    }
+
+    Ok(created_vms)
+}
+```
+
+Here's how the VM creation works in the Manager:
+
+```rust
+pub async fn create_vm_with_capabilities(
+    &self,
+    user_id: Id,
+    app_id: Id,
+    firecracker_binary_path: PathBuf,
+    kernel_path: PathBuf,
+    rootfs_path: PathBuf,
+    mem_size_mib: u32,
+    vcpu_count: u32,
+) -> Result<Id> {
+    let vm_id = Id::generate();
+    let cid = {
+        let mut next_cid = self.next_cid.lock().await;
+        let cid = *next_cid;
+        *next_cid += 1;
+        cid
+    };
+
+    let vsock_uds_path = temp_dir().join(format!("vsock-{}.socket", vm_id));
+
+    let config = VmConfig {
+        id: vm_id,
+        cid,
+        vsock_uds_path,
+        firecracker_binary_path,
+        kernel_path,
+        rootfs_path,
+        mem_size_mib,
+        vcpu_count,
+        user_id,
+        app_id,
+        created_at: OffsetDateTime::now_utc(),
+    };
+    let vm_instance = VmInstance {
+        config,
+        firecracker_process: None,
+        status: VmStatus::Stopped,
+    };
+
+    self.vms.insert(vm_id, vm_instance);
+
+    // Add to worker pool
+    let mut pool = self
+        .worker_pools
+        .entry((user_id, app_id))
+        .or_insert_with(|| WorkerPool {
+            user_id,
+            app_id,
+            workers: Vec::new(),
+            current_index: 0,
+        });
+    pool.workers.push(vm_id);
+
+    if let Err(err) = self.start_vm(vm_id).await {
+        error!("Failed to start VM", vm_id, err);
+    }
+
+    Ok(vm_id)
+}
+```
+
+To start the VM:
+
+```rust
+let mut child = Command::new(&config.firecracker_binary_path)
+    .arg("--api-sock")
+    .arg(&config.vsock_uds_path)
+    .arg("--config-file")
+    .arg(&config_path)
+    .spawn()?;
+
+sleep(Duration::from_secs(2)).await;
+
+match child.try_wait()? {
+    Some(status) => {
+        error!("Firecracker process exited with status: {}", status);
+        vm_instance.status = VmStatus::Failed;
+        return Err(Error::VmOperationFailed(
+            "Firecracker process failed to start".to_string(),
+        ));
+    }
+    None => {
+        vm_instance.firecracker_process = Some(child);
+        vm_instance.status = VmStatus::Running;
+        info!("VM {} started successfully", vm_id);
+    }
+}
+```
+
+This launches the Firecracker binary as a child process.
+The binary starts the VMM (Virtual Machine Monitor) and, if we passed `--api-sock`, it binds a Unix-domain socket and starts an embedded HTTP server on it.
+You can talk to this socket via the REST API to configure things or trigger actions.
+Passing `--config-file` makes the VM boot automatically.
+
+The Manager also exposes a gRPC API for the Proxy to interact with:
+
+```protobuf
+service VmService {
+  rpc CreateVm(CreateVmRequest) returns (CreateVmResponse) {}
+  rpc StartVm(StartVmRequest) returns (StartVmResponse) {}
+  rpc StopVm(StopVmRequest) returns (StopVmResponse) {}
+  rpc DestroyVm(DestroyVmRequest) returns (DestroyVmResponse) {}
+  rpc GetVm(GetVmRequest) returns (GetVmResponse) {}
+  rpc ListVms(ListVmsRequest) returns (ListVmsResponse) {}
+  rpc GetWorkerForRequest(GetWorkerForRequestRequest) returns (GetWorkerForRequestResponse) {}
+  rpc ScaleApp(ScaleAppRequest) returns (ScaleAppResponse) {}
+  rpc ListWorkerPools(ListWorkerPoolsRequest) returns (ListWorkerPoolsResponse) {}
+}
+```
+
+The main one is `GetWorkerForRequest`.
+This is how I get VM for a request.
+
+```protobuf
+message GetWorkerForRequestRequest {
+  Id user_id = 1;
+  Id app_id = 2;
+}
+
+message GetWorkerForRequestResponse {
+  VmConfig vm = 1;
+}
+```
+
+# Running services with Deno
+
+The Worker (inside VMs) uses Deno's [deno_core](https://crates.io/crates/deno_core) crate to execute TypeScript code.
+
+Here's how I embed it in Rust.
+This most likely isn't ideal, but it works for now.
+
+```rust
+use deno_core::{JsRuntime, RuntimeOptions};
+
+let mut runtime = JsRuntime::new(RuntimeOptions {
+    ..Default::default()
+});
+
+// Set up context for this execution
+let context_code = format!(
+    r#"
+globalThis.__current_context__ = {{
+    user_id: "{}",
+    app_id: "{}",
+    request_id: {}
+}};
+"#,
+    context.user_id,
+    context.app_id,
+    context
+        .request_id
+        .as_ref()
+        .map(|r| format!("\"{}\"", r))
+        .unwrap_or("null".to_string())
+);
+
+runtime
+    .execute_script("<context>", context_code)
+    .map_err(|e| Error::ExecutionFailed(format!("Failed to set context: {}", e)))?;
+```
+
+Then to run user code:
+
+```rust
+// Execute user code and store the result globally
+let user_code = format!(
+    r#"
+(function() {{
+    try {{
+        const result = (function() {{
+            {}
+        }})();
+        // Store result globally for extraction
+        globalThis.__user_code_result__ = result;
+        return "SUCCESS";
+    }} catch (error) {{
+        globalThis.__user_code_result__ = "Error: " + (error.message || String(error));
+        return "ERROR";
+    }}
+}})()
+"#,
+    code
+);
+
+let _ = runtime
+    .execute_script("<user>", user_code)
+    .map_err(|e| Error::ExecutionFailed(format!("Failed to execute user code: {}", e)))?;
+
+// Run event loop if needed (for async code)
+let rt = tokio::runtime::Runtime::new()?;
+rt.block_on(runtime.run_event_loop(Default::default()))
+    .map_err(|e| Error::ExecutionFailed(format!("Event loop failed: {}", e)))?;
+```
+
+And extract the result:
+
+```rust
+// Extract the stored result by returning it as a string from JavaScript
+let extract_code = r#"
+    try {
+        const result = globalThis.__user_code_result__;
+        if (result !== undefined) {
+            if (typeof result === 'string') {
+                result;
+            } else {
+                JSON.stringify(result);
+            }
+        } else {
+            "No result returned";
+        }
+    } catch (e) {
+        "Error extracting result: " + String(e);
+    }
+"#;
+
+let _extract_result = runtime
+    .execute_script("<extract>", extract_code)
+    .map_err(|e| Error::ExecutionFailed(format!("Failed to extract result: {}", e)))?;
+
+// For now, return a formatted response with context
+// TODO: Learn how to properly extract v8 values from deno_core
+Ok(format!(
+    "{}:{} - JavaScript executed",
+    context.user_id, context.app_id
+))
+```
+
+When a request comes in, I inject the context into the global scope so user code can access it:
+
+```ts
+export default {
+  async fetch(request) {
+    const user = globalThis.__current_context__.user_id;
+    const app = globalThis.__current_context__.app_id;
+    return new Response(`Hello, ${user} from ${app}!`);
+  },
+};
+```
+
+This follows Deno's expected default export for using [deno serve](https://docs.deno.com/runtime/reference/cli/serve/#example).
+
+All this magic is needed in order to hook into Deno's serving with my own handlers.
+
+The context includes the user ID, app ID, and a unique request ID for tracing.
+Each request gets its own `JsRuntime` instance.
+I think I could reuse them if I managed snapshots.
+
+# Virtio-vsock
+
+Virtio-vsock is a virtual device that provides socket-based communication between the VM and the host.
+Each VM gets a unique Context ID (CID) assigned by the Manager.
+The host exposes a Unix Domain Socket that proxies connections to the VM:
+
+```json
+{
+  "vsock": {
+    "guest_cid": 3,
+    "uds_path": "/tmp/vsock-vm123.socket"
+  }
+}
+```
+
+Inside the VM, the Worker uses [tokio-vsock](https://crates.io/crates/tokio-vsock) crate and listens for requests:
+
+```rust
+let vsock_port: u32 = env::var("VSOCK_PORT")
+    .unwrap_or_else(|_| "8080".to_string())
+    .parse()
+    .unwrap_or(8080);
+
+let worker_state = Arc::new(Mutex::new(WorkerState::new()));
+let app_state = AppState { worker_state };
+
+let app = Router::new()
+    .route("/execute", post(execute_handler))
+    .route("/deploy", post(deploy_handler))
+    .route("/undeploy", post(undeploy_handler))
+    .route("/request", post(request_handler))
+    .with_state(app_state);
+
+let vsock_addr = VsockAddr::new(tokio_vsock::VMADDR_CID_LOCAL, vsock_port);
+info!("Worker service listening on vsock {}", vsock_addr);
+
+let listener = VsockListener::bind(vsock_addr)?;
+axum::serve(listener, app).await?;
+```
+
+The Proxy connects to the worker by asking the Manager for the VM's `uds_path`, then connecting via the vsock interface:
+
+```rust
+async fn connect_to_worker_via_uds(uds_path: &str) -> io::Result<UnixStream> {
+    // Retry connection up to 3 times with exponential backoff
+    for attempt in 0..3 {
+        match UnixStream::connect(uds_path).await {
+            Ok(stream) => return Ok(stream),
+            Err(e) => {
+                if attempt == 2 {
+                    return Err(e);
+                }
+                let delay_ms = 100 * (2u64.pow(attempt));
+                sleep(Duration::from_millis(delay_ms)).await;
+            }
+        }
+    }
+    unreachable!()
+}
+```
+
+The socket files are all located on the same machine, along with the proxy.
+
+Ideally, the "manager" would we running on each node in a cluster.
+I like the failure isolation between the proxy (stateless routing) and the manager (stateful, VMs better not crash because of it).
+To make this work in a cluster, I'd have to move things around a bit.
+
+# Conclusion
+
+That's what I've got.
+Firecracker is a big deal, and I have a lot more to learn.
