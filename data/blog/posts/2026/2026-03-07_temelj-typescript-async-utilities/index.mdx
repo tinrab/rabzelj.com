@@ -1,0 +1,322 @@
+---
+title: Async Primitives for TypeScript
+description: "A collection of async primitives for TypeScript. Queue, Mutex, AsyncStream, delay, throttle, and more."
+tags:
+  - typescript
+publishedDate: 2026-03-07
+---
+
+I've built a collection of async utilities for TypeScript: [@temelj/async](https://github.com/tinrab/temelj/tree/develop/packages/async).
+
+Here's an overview of what's included.
+
+# Time and Delays
+
+`delay` resolves after a specified duration:
+
+```ts
+import { delay } from "@temelj/async";
+
+await delay(100); // Resolves after 100ms
+
+// Cancel with AbortSignal
+const controller = new AbortController();
+delay(1000, { signal: controller.signal });
+controller.abort(); // Rejects with AbortError
+```
+
+`timeout` races a promise against a timer:
+
+```ts
+import { timeout, TimeoutError } from "@temelj/async";
+
+try {
+  const result = await timeout(fetchData(), 5000);
+} catch (e) {
+  if (e instanceof TimeoutError) {
+    console.log("Request timed out");
+  }
+}
+
+// Or use a fallback value instead of throwing
+const result = await timeout(slowOperation(), 1000, {
+  fallback: "default",
+});
+```
+
+`wait` polls until a predicate returns true:
+
+```ts
+import { wait } from "@temelj/async";
+
+await wait(() => document.readyState === "complete", { interval: 100, timeout: 5000 });
+```
+
+# Deferred Promises
+
+Sometimes you need a promise with externally controlled resolution.
+
+`defer` creates one:
+
+```ts
+import { defer } from "@temelj/async";
+
+const { promise, resolve, reject } = defer<number>();
+
+// Resolve later
+resolve(42);
+
+// Or reject
+reject(new Error("failed"));
+
+const result = await promise;
+```
+
+This is useful when building custom async primitives or integrating with event-based APIs.
+
+# Concurrency Control
+
+`limit` wraps a function to enforce concurrency limit:
+
+```ts
+import { limit } from "@temelj/async";
+
+const processItem = limit(async (item: Item) => {
+  return await process(item);
+}, 2); // Max 2 concurrent
+
+const results = await Promise.all(items.map(processItem));
+```
+
+`Mutex` ensures only one task accesses a resource at a time:
+
+```ts
+import { Mutex } from "@temelj/async";
+
+const mutex = new Mutex();
+
+async function updateSharedResource() {
+  const release = await mutex.acquire();
+  try {
+    // Exclusive access
+    await modifyResource();
+  } finally {
+    release();
+  }
+}
+
+// Or use runExclusive for convenience
+const result = await mutex.runExclusive(async () => {
+  return computeValue();
+});
+```
+
+`Barrier` waits until a specified number of tasks have reached it:
+
+```ts
+import { Barrier } from "@temelj/async";
+
+const barrier = new Barrier(3); // Wait for 3 tasks
+
+// In 3 different async contexts
+await barrier.wait();
+// All three continue here simultaneously
+```
+
+`Queue` is a promise/task queue with priority and concurrency:
+
+```ts
+import { Queue } from "@temelj/async";
+
+const q = new Queue({ concurrency: 2 });
+
+q.add(
+  async () => {
+    await processItem(1);
+  },
+  // High priority
+  { priority: 10 },
+);
+
+q.add(
+  async () => {
+    await processItem(2);
+  },
+  // Low priority
+  { priority: 0 },
+);
+
+await q.onIdle; // Wait for all tasks to complete
+```
+
+# Iteration
+
+`map` transforms items concurrently with configurable concurrency:
+
+```ts
+import { map, Skip } from "@temelj/async";
+
+// Transform with concurrency limit
+const results = await map(
+  items,
+  async (item) => {
+    return transform(item);
+  },
+  { concurrency: 3 },
+);
+
+// Skip items using the Skip symbol
+const filtered = await map([1, 2, 3, 4, 5], (x) => {
+  if (x % 2 === 0) return Skip;
+  return x * 2;
+}); // [2, 6, 10]
+
+// Handle errors without stopping
+await map(
+  items,
+  async (item) => {
+    if (item.fails) {
+      throw new Error("oops");
+    }
+    return item.value;
+  },
+  { stopOnError: false },
+); // Rejects with AggregateError
+```
+
+`reduce` processes items serially:
+
+```ts
+import { reduce } from "@temelj/async";
+
+const sum = await reduce(
+  [1, 2, 3, 4],
+  async (acc, item) => {
+    return acc + item;
+  },
+  0,
+); // 10
+```
+
+# Rate limiting
+
+`debounce` delays execution until calls stop:
+
+```ts
+import { debounce } from "@temelj/async";
+
+const debouncedSearch = debounce(async (query: string) => {
+  return await fetchResults(query);
+}, 300);
+
+// Only the last call within 300ms executes
+search("h");
+search("he");
+search("hel");
+search("hell");
+search("hello"); // This one runs after 300ms
+
+// Leading edge option
+const leading = debounce(fn, 300, { leading: true, trailing: false });
+```
+
+`throttle` limits execution to once per interval:
+
+```ts
+import { throttle } from "@temelj/async";
+
+const throttledSave = throttle(async (data: Data) => {
+  await save(data);
+}, 1000);
+
+// First call executes immediately
+save(data1);
+// Subsequent calls within 1s return the same promise
+save(data2);
+save(data3); // Returns immediately with same promise as data2
+```
+
+# Retry
+
+`retry` handles transient failures with configurable backoff:
+
+```ts
+import { retry } from "@temelj/async";
+
+const result = await retry(
+  async (attempt) => {
+    return await unstableOperation();
+  },
+  {
+    times: 3, // Retry up to 3 times
+    delay: 100, // 100ms between attempts
+    shouldRetry: (e) => e instanceof TransientError,
+  },
+);
+
+// Exponential backoff with function
+await retry(fn, {
+  times: 3,
+  delay: (attempt) => Math.pow(2, attempt) * 100, // 100, 200, 400ms
+});
+```
+
+# Stream
+
+`AsyncStream` provides a fluent API for async pipelines:
+
+```ts
+import { AsyncStream } from "@temelj/async";
+
+const results = await AsyncStream.from(items)
+  .map(async (x) => x * 2)
+  .filter(async (x) => x > 5)
+  .toArray();
+
+// Works with async iterables
+async function* generate() {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+
+const result = await AsyncStream.from(generate())
+  .map((x) => x * 10)
+  .toArray(); // [10, 20, 30]
+
+// With concurrency
+await AsyncStream.from(items)
+  .map(async (x) => process(x), { concurrency: 3 })
+  .drain(); // Execute without collecting results
+```
+
+# Common Options
+
+Most functions accept a standard set of options:
+
+```ts
+import { map } from "@temelj/async";
+
+await map(items, fn, {
+  signal: abortController.signal, // Cancel operation
+  concurrency: 3, // For map, limit concurrency
+  stopOnError: false, // Continue on errors, collect them
+});
+```
+
+# Conclusion
+
+Add it to your project:
+
+```sh
+# pnpm
+pnpm add @temelj/async
+
+# npm
+npm install @temelj/async
+
+# JSR (Deno)
+deno add jsr:@temelj/async
+```
+
+The package is part of [Temelj](https://github.com/tinrab/temelj), a core library for TypeScript.
