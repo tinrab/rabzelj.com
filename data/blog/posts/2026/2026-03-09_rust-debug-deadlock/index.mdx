@@ -1,0 +1,214 @@
+---
+title: How to Debug a Deadlock
+description: How to debug a deadlock in Rust?
+tags:
+  - rust
+  - systems-programming
+publishedDate: 2026-03-09
+---
+
+Recently, while working on a Rust-based vector database (codename "vectorio"), I ran into a deadlock.
+In this post, I'll talk about my debugging process and also share some proactive techniques to prevent deadlocks.
+
+# The symptoms
+
+The app was running a heavy benchmark by inserting vectors into an HNSW index, and after about 50k inserts, the throughput would drop to zero.
+The process just froze.
+
+Maybe it got stuck in a infinite loop, or was it waiting for something?
+
+# A look at `perf`
+
+To find out what the CPU was doing, I captured 10 seconds of CPU activity using `perf`:
+
+```bash
+$ perf record -p $(pidof vectorio) -g -- sleep 10
+```
+
+Looking at the `perf report`:
+
+```text
+Samples: 96  of event 'cycles:P', Event count (approx.): 12015262
+  Children      Self  Command         Shared Object                                   Symbol
++   70.75%     1.80%  vectorio  [kernel.kallsyms]                               [k] entry_SYSCALL_64_after_hwframe
++   64.96%     0.00%  vectorio  [kernel.kallsyms]                               [k] do_syscall_64
++   54.22%     0.00%  vectorio  libc.so.6                                       [.] __syscall_cancel_arch_end
++   50.03%     0.00%  vectorio  libc.so.6                                       [.] __syscall_cancel
+...
++   25.06%     0.00%  vectorio  vectorio                                  [.] std::io::default_read_to_end
+```
+
+The process was barely using any CPU.
+Only 96 samples collected over 10 seconds.
+`htop` either showed 1 core at 100% or nothing, can't remember.
+Most threads were parked in syscalls, sleeping, waiting on condition variables, or doing basic background I/O.
+
+`perf` is useful for finding hot loops, but for a deadlock where threads have yielded the CPU, we need to inspect the wait-state of the threads.
+
+# Extracting thread stack traces
+
+I needed to see exactly what every thread was waiting on.
+
+```bash
+gdb -p "$pid" \
+    --nx \
+    --batch \
+    -ex "set debuginfod enabled off" \
+    -ex "set pagination off" \
+    -ex "set confirm off" \
+    -ex "thread apply all bt full" \
+    -ex "detach" \
+    -ex "quit"
+```
+
+This command attaches GDB to a running process and prints full stack traces for every thread, then cleanly detaches and exits.
+
+Most of the Tokio and Rayon worker threads were parked (`rayon_core::registry::WorkerThread::wait_until_cold`, `parking_lot::condvar::Condvar::wait_until_internal` etc.).
+
+```
+Thread 11 (Thread 0x7f95c38986c0 (LWP 40769) "tokio-runtime-w"):
+#0  0x00007f95c398e38d in syscall () from /lib64/libc.so.6
+No symbol table info available.
+#1  0x000055a3a59267b9 in parking_lot::condvar::Condvar::wait_until_internal ()
+No symbol table info available.
+#2  0x000055a3a59f3a80 in tokio::runtime::scheduler::multi_thread::worker::Context::park_internal ()
+No symbol table info available.
+# ...
+```
+
+Thread 1 gave a hint:
+
+```
+Thread 1 (Thread 0x7f95c389a300 (LWP 40763) "vectorio"):
+#0  0x00007f95c398e38d in syscall () from /lib64/libc.so.6
+#1  0x000055a3a591835a in parking_lot_core::parking_lot::park::{{closure}} ()
+#2  0x000055a3a591804e in dashmap::lock::RawRwLock::lock_shared_slow ()
+#3  0x000055a3a5a3a9d0 in vectorio_core::engine::lsm::db::LsmVectorEngine::point_cache_insert ()
+#4  0x000055a3a5a39466 in vectorio_core::engine::lsm::db::LsmVectorEngine::get_vector_ref_with_memtable ()
+#5  0x000055a3a5a6e66f in vectorio_core::engine::lsm::db::LsmVectorEngine::insert_into_hnsw_with_reverse_provider ()
+# ...
+```
+
+It was stuck inside `dashmap::lock::RawRwLock::lock_shared_slow` during a `point_cache_insert` operation.
+The thread was trying to acquire a read lock, but it was blocked.
+
+### Re-entrancy in DashMap
+
+I was performing a cache eviction when the cache grew too large.
+The cache was backed by a [dashmap](https://crates.io/crates/dashmap), which uses fine-grained shard locks to allow concurrent access instead of locking the full map like `RwLock<HashMap<...>>`.
+
+It looked something like this:
+
+```rust
+self.sst_point_cache.retain(|_, v| {
+    // Calling .len() while inside .retain()
+    if self.sst_point_cache.len() < target {
+        return true;
+    }
+    // ...
+});
+```
+
+When `retain` is called, `DashMap` acquires write locks on its shards to iterate and potentially remove items safely.
+While holding those locks, the closure calls `self.sst_point_cache.len()`.
+The `len()` function attempts to acquire read locks across all shards to count the total number of items.
+It blocks, because it's trying to acquire a read lock on a shard it has already locked for writing.
+
+This is a single-thread re-entrancy deadlock.
+Unlike multiple threads competing with each other, this is a single thread attempting to take a non-reentrant lock it already holds.
+
+# The fix
+
+To fix this, we need to avoid interacting with the `DashMap` while `retain` is executing the closure.
+
+```rust
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+let kept = AtomicUsize::new(0);
+self.sst_point_cache.retain(|_, v| {
+    if kept.load(Ordering::Relaxed) < target {
+        kept.fetch_add(1, Ordering::Relaxed);
+        return true;
+    }
+    // ...
+});
+```
+
+It uses a local counter to decide when to stop, rather than calling `len()` inside the closure.
+
+# Prevention
+
+It helps to track down concurrency issues ahead of time.
+
+## Enabling deadlock detection with `parking_lot`
+
+If you use the `parking_lot` crate for synchronization, you can enable its experimental [deadlock detection](https://docs.rs/parking_lot/latest/parking_lot/deadlock/index.html).
+
+Add the `deadlock_detection` feature to your `Cargo.toml`:
+
+```toml
+[dependencies]
+parking_lot = { version = "0.12", features = ["deadlock_detection"] }
+```
+
+Then, spawn a background thread at the start of your program that periodically checks for deadlocks and prints out the backtraces of the offending threads:
+
+```rust
+#[cfg(feature = "deadlock_detection")]
+{
+use std::thread;
+use std::time::Duration;
+use parking_lot::deadlock;
+
+// Create a background thread which checks for deadlocks every 10s
+thread::spawn(move || {
+    loop {
+        thread::sleep(Duration::from_secs(10));
+        let deadlocks = deadlock::check_deadlock();
+        if deadlocks.is_empty() {
+            continue;
+        }
+
+        println!("{} deadlocks detected", deadlocks.len());
+        for (i, threads) in deadlocks.iter().enumerate() {
+            println!("Deadlock #{}", i);
+            for t in threads {
+                println!("Thread Id {:#?}", t.thread_id());
+                println!("{:#?}", t.backtrace());
+            }
+        }
+    }
+});
+}
+```
+
+## Use ThreadSanitizer
+
+Rust supports [ThreadSanitizer](https://doc.rust-lang.org/beta/unstable-book/compiler-flags/sanitizer.html) on the nightly toolchain.
+TSan instruments your memory accesses and lock acquisitions, and it can detect data races and lock ordering inversions at runtime even if the deadlock didn't actually trigger during that specific run.
+
+```bash
+export RUSTFLAGS=-Zsanitizer=thread RUSTDOCFLAGS=-Zsanitizer=thread
+cargo +nightly run -Zbuild-std --target x86_64-unknown-linux-gnu
+```
+
+## Exhaustive testing with `loom`
+
+The OS scheduler might never hit the exact interleaving required to trigger the bug.
+
+The [`loom` crate](https://github.com/tokio-rs/loom) helps with this.
+
+It acts as a replacement for standard sync primitives in tests.
+`loom` exhaustively permutes every possible thread scheduling interleaving to find hidden deadlocks and data races.
+
+# Conclusion
+
+Here's some tips.
+
+As shown in the `DashMap` example, it's good to avoid executing callbacks, closures, or calling out to unknown code while holding a lock.
+Try to gather the data you need, drop the lock, and then execute the callback.
+
+If you must acquire multiple locks, always acquire them in the exact same global order across your entire codebase.
+This breaks the "circular wait" condition required for a deadlock.
+
+Instead of using `.lock()` which blocks forever, consider using `.try_lock()` or a timeout.
