@@ -11,10 +11,7 @@ app.config.time*
 # Dist
 node_modules
 dist/
-.vinxi
 .output
-.vercel
-.netlify
 .wrangler
 .nitro
 .tanstack

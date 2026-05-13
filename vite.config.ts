@@ -1,3 +1,4 @@
+import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
@@ -6,7 +7,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { defineConfig } from "vite";
 import arraybufferPlugin from "vite-plugin-arraybuffer";
-import tsConfigPaths from "vite-tsconfig-paths";
 
 const routeRules: Record<string, unknown> = {};
 for (const fileName of await fs.readdir("public")) {
@@ -34,8 +34,11 @@ export default defineConfig({
   ssr: {
     noExternal: ["@tabler/icons-react"],
   },
+  resolve: {
+    tsconfigPaths: true,
+  },
   plugins: [
-    tsConfigPaths(),
+    process.env.NODE_ENV === "production" ? cloudflare({ viteEnvironment: { name: "ssr" } }) : null,
     tanstackStart({
       srcDirectory: "src",
       sitemap: { enabled: false },
@@ -45,6 +48,7 @@ export default defineConfig({
     viteReact(),
     nitro({
       rollupConfig: {
+        // @ts-ignore
         onwarn(warning, warn) {
           if (warning.code === "MODULE_LEVEL_DIRECTIVE" || warning.code === "SOURCEMAP_ERROR") {
             return;
@@ -60,6 +64,7 @@ export default defineConfig({
         },
         ...routeRules,
       },
+      wasm: {},
     }),
   ],
 });

@@ -2,12 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
-
-env:
-  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+    branches: [feature/cf]
 
 jobs:
   deploy:
@@ -20,10 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          node-version: 22
+          node-version: 26
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         id: pnpm-install
         with:
           run_install: false
@@ -44,7 +39,7 @@ jobs:
 
       - name: Install Tools
         run: |
-          npm install --global vercel@latest
+          npm install --global wrangler@latest
 
       - name: Install
         run: pnpm install
@@ -52,14 +47,15 @@ jobs:
       - name: Generate
         run: node --import tsx/esm ./scripts/main.ts generate
         env:
-          TIN_APP_URL: http://localhost:3000
+          TIN_APP_URL: https://rabzelj.com
           TIN_APP_DATA_DIR: ./data
 
       - name: Build
-        run: pnpm run build:vercel
-
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ env.VERCEL_TOKEN }}
+        run: pnpm run build
+        env:
+          NODE_ENV: production
 
       - name: Deploy
-        run: vercel deploy --prebuilt --yes --prod --token=${{ secrets.VERCEL_TOKEN }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

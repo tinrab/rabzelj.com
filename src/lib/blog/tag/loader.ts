@@ -1,43 +1,10 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-
-import { serverConfig } from "~/config/server";
+import { blogData } from "~/-generated/blog";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
-import {
-  type BlogTagData,
-  type BlogTagPostCountData,
-  blogTagFrontmatterSchema,
-} from "~/lib/blog/tag/schema";
+import { type BlogTagData, type BlogTagPostCountData } from "~/lib/blog/tag/schema";
 import { blogTagIsNote } from "~/lib/blog/tag/utility";
-import { getMdxCompiler } from "~/lib/mdx/compiler";
-
-const TAGS_DIR = path.join(process.cwd(), serverConfig.app.dataDir, "blog/tags");
 
 export async function loadBlogTags(): Promise<BlogTagData[]> {
-  const compiler = await getMdxCompiler();
-
-  const tags: BlogTagData[] = [];
-
-  for (const tagFile of await fs.readdir(TAGS_DIR)) {
-    const source = await fs.readFile(path.join(TAGS_DIR, tagFile), "utf8");
-    const { frontmatter } = await compiler.compile(
-      source,
-      {
-        frontmatterOnly: true,
-      },
-      blogTagFrontmatterSchema,
-    );
-
-    const slug = tagFile.slice(0, Math.max(0, tagFile.length - 4));
-
-    tags.push({
-      title: frontmatter.title,
-      slug,
-      description: frontmatter.description,
-    });
-  }
-
-  return tags.sort((a, b) => a.title.localeCompare(b.title));
+  return blogData.tags;
 }
 
 export async function loadBlogTag(slug: string): Promise<BlogTagData | undefined> {

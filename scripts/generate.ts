@@ -2,22 +2,56 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 
-import { BLOG_POST_IMAGE_SIZES, loadBlogPosts } from "~/lib/blog/post/loader";
+import { BlogPostData } from "~/lib/blog/post/schema";
+
+import { BLOG_POST_IMAGE_SIZES, BlogData, loadBlogData } from "./lib/blog";
 
 const ROOT_DIR = path.join(import.meta.dirname, "..");
 const BLOG_POST_PUBLIC_DIR = path.join(ROOT_DIR, "public/_assets/blog/post");
+const GENERATED_BLOG_DATA_FILE = path.join(ROOT_DIR, "src/-generated/blog.ts");
 
 const ASSET_REGEX = /\.(png|jpg|gif|webp|avif)$/;
 const IMAGE_REGEX = /\.(png|jpg|webp|avif)$/;
 
 export async function generate(): Promise<void> {
-  await generateBlogPostAssets();
+  const blogData = await loadBlogData();
+  await generateBlogData(blogData);
+  await generateBlogPostAssets(blogData.posts);
 }
 
-async function generateBlogPostAssets(): Promise<void> {
+async function generateBlogData(blogData: BlogData): Promise<void> {
+  console.log("Generating blog data module...");
+
+  const runtimeBlogData = {
+    ...blogData,
+    posts: blogData.posts.map((post) => ({
+      ...post,
+      assetPath: "",
+    })),
+  };
+
+  const source = `import type { BlogPostData, ExternalBlogData } from "~/lib/blog/post/schema";
+    import type { BlogSeriesData } from "~/lib/blog/series/schema";
+    import type { BlogTagData } from "~/lib/blog/tag/schema";
+
+    export interface BlogData {
+      posts: BlogPostData[];
+      tags: BlogTagData[];
+      series: BlogSeriesData[];
+      external: ExternalBlogData;
+    }
+
+    export const blogData = ${JSON.stringify(runtimeBlogData, null, 2)} as BlogData;
+  `;
+
+  await fs.mkdir(path.dirname(GENERATED_BLOG_DATA_FILE), { recursive: true });
+  await fs.writeFile(GENERATED_BLOG_DATA_FILE, source);
+}
+
+async function generateBlogPostAssets(posts: BlogPostData[]): Promise<void> {
   console.log("Generating blog post assets...");
 
-  for (const post of await loadBlogPosts({ includeArtifact: true })) {
+  for (const post of posts) {
     let hasAssets = false;
     for (const assetFile of await fs.readdir(post.assetPath)) {
       if (assetFile.match(ASSET_REGEX)) {
