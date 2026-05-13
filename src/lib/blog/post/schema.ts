@@ -6,6 +6,7 @@ import type { BlogTagData } from "~/lib/blog/tag/schema";
 
 export const blogPostFrontmatterSchema = z.object({
   demo: z.boolean().default(false),
+  toc: z.boolean().default(false),
   title: z.string().trim(),
   publishedDate: z.string().trim(),
   modifiedDate: z.string().trim().optional(),
@@ -38,6 +39,7 @@ export interface BlogPostCommon {
 export interface BlogPostData extends BlogPostCommon {
   slug: string;
   description: string;
+  toc?: BlogPostTableOfContentsItem[];
   tags: BlogTagData[];
   cover?: BlogPostCoverData;
   assetPath: string;
@@ -50,6 +52,12 @@ export interface RelatedBlogPost {
   title: string;
   url: string;
   slug: string;
+}
+
+export interface BlogPostTableOfContentsItem {
+  id: string;
+  title: string;
+  level: 2 | 3 | 4;
 }
 
 export interface BlogPostCoverData {

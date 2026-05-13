@@ -1,50 +1,13 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-
-import { serverConfig } from "~/config/server";
+import { blogData } from "~/-generated/blog";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
 import {
   type BlogSeriesData,
   type BlogSeriesPostData,
   type BlogSeriesPost,
-  blogSeriesFrontmatterSchema,
 } from "~/lib/blog/series/schema";
-import { getMdxCompiler } from "~/lib/mdx/compiler";
-
-const SERIES_DIR = path.join(process.cwd(), serverConfig.app.dataDir, "blog/series");
 
 export async function loadBlogSeries(): Promise<BlogSeriesData[]> {
-  try {
-    await fs.access(SERIES_DIR);
-  } catch {
-    return [];
-  }
-
-  const compiler = await getMdxCompiler();
-
-  const series: BlogSeriesData[] = [];
-
-  for (const seriesFile of await fs.readdir(SERIES_DIR)) {
-    const source = await fs.readFile(path.join(SERIES_DIR, seriesFile), "utf8");
-    const { frontmatter } = await compiler.compile(
-      source,
-      {
-        frontmatterOnly: true,
-      },
-      blogSeriesFrontmatterSchema,
-    );
-
-    const slug = seriesFile.slice(0, Math.max(0, seriesFile.length - 4));
-
-    series.push({
-      title: frontmatter.title,
-      slug,
-      description: frontmatter.description,
-      completed: frontmatter.completed,
-    });
-  }
-
-  return series.sort((a, b) => a.title.localeCompare(b.title));
+  return blogData.series;
 }
 
 export async function loadBlogSeriesBySlug(slug: string): Promise<BlogSeriesData | undefined> {

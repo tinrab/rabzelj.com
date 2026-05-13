@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rabzelj-com",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "vars": {
+    "TIN_APP_URL": "https://rabzelj.com",
+    "TIN_APP_DATA_DIR": "./data",
+  },
+  "routes": [{ "pattern": "rabzelj.com", "custom_domain": true }],
+}

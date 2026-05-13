@@ -5,6 +5,7 @@ import { createMdxContent } from "@temelj/mdx-react";
 import { z } from "zod";
 
 import { BlogNoteAlert } from "~/components/blog/BlogNoteAlert";
+import { BlogPostTableOfContents } from "~/components/blog/BlogPostTableOfContents";
 import { BlogSeriesSection } from "~/components/blog/BlogSeriesSection";
 import { BlogTagChip } from "~/components/blog/BlogTagChip";
 import { Typography } from "~/components/Typography";
@@ -79,6 +80,7 @@ function RouteComponent() {
       )
     : undefined;
   const isNote = post.tags.some(blogTagIsNote);
+  const toc = post.toc;
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-8 break-words md:py-12">
@@ -129,6 +131,8 @@ function RouteComponent() {
           {post.description}
         </Typography>
       ) : undefined}
+
+      {toc?.length ? <BlogPostTableOfContents items={toc} /> : undefined}
 
       <section className="pt-6">{content}</section>
 

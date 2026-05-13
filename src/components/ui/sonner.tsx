@@ -1,8 +1,10 @@
+"use client";
+
 import {
-  IconAlertOctagon,
-  IconAlertTriangle,
   IconCircleCheck,
   IconInfoCircle,
+  IconAlertTriangle,
+  IconAlertOctagon,
   IconLoader,
 } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
