@@ -28,6 +28,9 @@ for (const fileName of await fs.readdir("public")) {
 }
 
 export default defineConfig({
+  define: {
+    "process.env.SATORI_STANDALONE": JSON.stringify("1"),
+  },
   server: {
     port: 3000,
   },

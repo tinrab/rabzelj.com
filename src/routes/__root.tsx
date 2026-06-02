@@ -69,6 +69,7 @@ export const Route = createRootRoute({
         { property: "og:type", content: "website" },
         {
           property: "og:image",
+          name: "image",
           content: `${app.url}${pathLocator.assets.featured}`,
         },
       ],

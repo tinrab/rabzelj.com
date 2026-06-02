@@ -14,5 +14,7 @@ export const pathLocator = {
     avatar: "/icon.png",
     blogPostCover: (slug: string): string => `/api/images/blog/post/cover/${slug}`,
     featured: "/api/images/featured",
+    generatedBlogPostCover: (slug: string): string => `/_assets/images/blog/post/cover/${slug}.png`,
+    generatedFeatured: "/_assets/images/featured.png",
   },
 };

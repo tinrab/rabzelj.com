@@ -11,6 +11,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.5.0
         version: 1.5.0(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@cf-wasm/photon':
+        specifier: ^0.3.6
+        version: 0.3.6
       '@fontsource/roboto':
         specifier: ^5.2.10
         version: 5.2.10
@@ -80,9 +83,6 @@ importers:
       shadcn:
         specifier: ^4.10.0
         version: 4.10.0(@types/node@25.9.1)
-      sharp:
-        specifier: ^0.34.5
-        version: 0.34.5
       shiki:
         specifier: ^4.1.0
         version: 4.1.0
@@ -337,6 +337,12 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  '@cf-wasm/internals@0.1.2':
+    resolution: {integrity: sha512-9d/I3JFv1IpQFYOrIw5RQShQPyuZRw9DyeBylF39Uj/MH7my8+EzKDPpUCHiqZ5O7tZS/A6zwP08egpeI5NBhA==}
+
+  '@cf-wasm/photon@0.3.6':
+    resolution: {integrity: sha512-LfLfJ10+Z+DrohjQTSBkgmqxp6d4gvlGuwFkb5c4RHJGAMyVJxrAQWGrLunWE6TvZssIkT5fhKAjQZYhFSYzqg==}
 
   '@cloudflare/kv-asset-handler@0.5.0':
     resolution: {integrity: sha512-jxQYkj8dSIzc0cD6cMMNdOc1UVjqSqu8BZdor5s8cGjW2I8BjODt/kWPVdY+u9zj3ms75Q5qaZgnxUad83+eAg==}
@@ -4961,6 +4967,12 @@ snapshots:
       use-sync-external-store: 1.6.0(react@19.2.6)
     optionalDependencies:
       '@types/react': 19.2.15
+
+  '@cf-wasm/internals@0.1.2': {}
+
+  '@cf-wasm/photon@0.3.6':
+    dependencies:
+      '@cf-wasm/internals': 0.1.2
 
   '@cloudflare/kv-asset-handler@0.5.0': {}
 

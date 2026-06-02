@@ -1,128 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { serverConfig } from "~/config/server";
 import { pathLocator } from "~/lib/path-locator";
-import { renderImage } from "~/lib/render-image";
+import { FeaturedSocialImage, SOCIAL_IMAGE_SIZE } from "~/lib/social-image";
 
 export const Route = createFileRoute("/api/images/featured")({
   server: {
     handlers: {
-      GET: async () => {
-        const slashCount = 6;
-        const width = 1200;
-        const height = 630;
+      GET: async ({ request }) => {
+        if (process.env.NODE_ENV === "production") {
+          return new Response(null, {
+            status: 302,
+            headers: {
+              "Cache-Control": "public, max-age=604800, stale-while-revalidate=86400",
+              Location: new URL(pathLocator.assets.generatedFeatured, request.url).toString(),
+            },
+          });
+        }
 
-        const image = await renderImage(
-          <div
-            style={{
-              fontFamily: "Roboto",
-              padding: "4rem",
-              width: "100%",
-              height: "100%",
-              position: "relative",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "rgb(10,10,10)",
-              color: "white",
-            }}
-          >
-            {/** biome-ignore lint/a11y/noSvgWithoutTitle: not needed */}
-            <svg
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-              }}
-              width={width}
-              height={height}
-            >
-              <pattern
-                id="pattern-checkers"
-                x="0"
-                y="0"
-                width={60}
-                height={60}
-                patternUnits="userSpaceOnUse"
-              >
-                <rect fill="rgba(26,26,26,0.2)" x="0" y="0" width="30" height="30" />
-                <rect fill="rgba(26,26,26,0.5)" x="30" y="30" width="30" height="30" />
-              </pattern>
-              <rect x="0" y="0" width={width} height={height} fill="url(#pattern-checkers)" />
-            </svg>
-
-            {Array.from({ length: slashCount }, (_, i) => {
-              const size = 2000;
-              return (
-                <div
-                  key={String(i)}
-                  style={{
-                    position: "absolute",
-                    width: `${size}px`,
-                    height: `${size * 0.2}px`,
-                    backgroundColor: `rgba(26,26,26,${(0.1 * slashCount) / (i + 1)})`,
-                    top: "50%",
-                    left: "50%",
-                    transform: `translate(-50%, -50%) scale(1) rotate(${i * 13 - 7}deg)`,
-                    border: "8px solid rgba(82,82,82,0.04)",
-                  }}
-                />
-              );
-            })}
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                marginTop: "-2.5rem",
-              }}
-            >
-              <img
-                style={{
-                  marginRight: "2rem",
-                  borderRadius: "9999px",
-                  border: "2px solid #737373",
-                }}
-                src={`${serverConfig.app.url}${pathLocator.assets.avatar}`}
-                alt={serverConfig.app.title}
-                width={210}
-                height={210}
-              />
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "3.75rem",
-                    lineHeight: "1.75rem",
-                    marginBottom: "2.5rem",
-                  }}
-                >
-                  {serverConfig.app.title}
-                </div>
-                <div
-                  style={{
-                    fontSize: "3.75rem",
-                    lineHeight: "1.75rem",
-                    color: "#737373",
-                  }}
-                >
-                  Software Engineer
-                </div>
-              </div>
-            </div>
-          </div>,
-          {
-            width,
-            height,
-          },
-        );
+        const { renderImage } = await import("~/lib/render-image");
+        const image = await renderImage(FeaturedSocialImage({}), SOCIAL_IMAGE_SIZE);
 
         return new Response(image as BufferSource, {
           status: 200,

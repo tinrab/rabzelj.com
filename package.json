@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsgo --noEmit && NITRO_PRESET=cloudflare-module vite build",
+    "build": "pnpm script generate && tsgo --noEmit && NITRO_PRESET=cloudflare-module vite build",
     "clean": "shx rm -rf ./dist ./.output ./.tanstack ./.nitro ./.wrangler",
     "dev": "vite dev --port 3000",
     "format": "oxfmt",
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
+    "@cf-wasm/photon": "^0.3.6",
     "@fontsource/roboto": "^5.2.10",
     "@fontsource/roboto-mono": "^5.2.9",
     "@resvg/resvg-wasm": "^2.6.2",
@@ -39,7 +40,6 @@
     "rss": "^1.2.2",
     "satori": "^0.26.0",
     "shadcn": "^4.10.0",
-    "sharp": "^0.34.5",
     "shiki": "^4.1.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",

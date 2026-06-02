@@ -1,10 +1,17 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import sharp from "sharp";
 
 import { BlogPostData } from "~/lib/blog/post/schema";
+import { pathLocator } from "~/lib/path-locator";
+import {
+  BlogPostCoverSocialImage,
+  FeaturedSocialImage,
+  SOCIAL_IMAGE_SIZE,
+} from "~/lib/social-image";
 
 import { BLOG_POST_IMAGE_SIZES, BlogData, loadBlogData } from "./lib/blog";
+import { imageMetadata, resizeImageToFile } from "./lib/image";
+import { renderImage } from "./lib/render-image";
 
 const ROOT_DIR = path.join(import.meta.dirname, "..");
 const BLOG_POST_PUBLIC_DIR = path.join(ROOT_DIR, "public/_assets/blog/post");
@@ -17,6 +24,7 @@ export async function generate(): Promise<void> {
   const blogData = await loadBlogData();
   await generateBlogData(blogData);
   await generateBlogPostAssets(blogData.posts);
+  await generateSocialImages(blogData.posts);
 }
 
 async function generateBlogData(blogData: BlogData): Promise<void> {
@@ -74,12 +82,11 @@ async function generateBlogPostAssets(posts: BlogPostData[]): Promise<void> {
         await fs.copyFile(path.join(post.assetPath, assetFile), filePath);
 
         if (parsedFilePath.ext.match(IMAGE_REGEX)) {
-          const s = sharp(filePath);
-          const md = await s.metadata();
+          const md = await imageMetadata(filePath);
           console.log(`Generating image sizes for '${filePath}'...`);
 
           for (const { width, suffix } of BLOG_POST_IMAGE_SIZES) {
-            if (md.width && md.width <= width) {
+            if (md.width <= width) {
               continue;
             }
 
@@ -87,7 +94,7 @@ async function generateBlogPostAssets(posts: BlogPostData[]): Promise<void> {
               targetDir,
               `${parsedFilePath.name}--${suffix}${parsedFilePath.ext}`,
             );
-            await s.resize(width).toFile(resizePath);
+            await resizeImageToFile(filePath, resizePath, width);
 
             console.log(`Generated image size '${resizePath}' (${width}px)`);
           }
@@ -95,4 +102,43 @@ async function generateBlogPostAssets(posts: BlogPostData[]): Promise<void> {
       }
     }
   }
+}
+
+async function generateSocialImages(posts: BlogPostData[]): Promise<void> {
+  console.log("Generating social images...");
+
+  const avatarSrc = await loadAvatarDataUrl();
+  const featuredPath = path.join(ROOT_DIR, "public", pathLocator.assets.generatedFeatured);
+  await fs.mkdir(path.dirname(featuredPath), { recursive: true });
+  await fs.writeFile(
+    featuredPath,
+    await renderImage(FeaturedSocialImage({ avatarSrc }), SOCIAL_IMAGE_SIZE),
+  );
+  console.log(`Generated social image '${featuredPath}'`);
+
+  for (const post of posts) {
+    const coverPath = path.join(
+      ROOT_DIR,
+      "public",
+      pathLocator.assets.generatedBlogPostCover(post.slug),
+    );
+    await fs.mkdir(path.dirname(coverPath), { recursive: true });
+    await fs.writeFile(
+      coverPath,
+      await renderImage(
+        BlogPostCoverSocialImage({
+          avatarSrc,
+          slug: post.slug,
+          title: post.title,
+        }),
+        SOCIAL_IMAGE_SIZE,
+      ),
+    );
+    console.log(`Generated social image '${coverPath}'`);
+  }
+}
+
+async function loadAvatarDataUrl(): Promise<string> {
+  const bytes = await fs.readFile(path.join(ROOT_DIR, "public/icon.png"));
+  return `data:image/png;base64,${bytes.toString("base64")}`;
 }

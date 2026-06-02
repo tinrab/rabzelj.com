@@ -2,7 +2,6 @@ import { type HastElement, treeProcessorPlugin } from "@temelj/mdx";
 import { glob } from "glob";
 import fs from "node:fs/promises";
 import path from "node:path";
-import sharp from "sharp";
 
 import type {
   BlogPostData,
@@ -17,6 +16,8 @@ import { blogSeriesFrontmatterSchema } from "~/lib/blog/series/schema";
 import { blogTagFrontmatterSchema } from "~/lib/blog/tag/schema";
 import { getMdxCompiler } from "~/lib/mdx/compiler";
 import { pathLocator } from "~/lib/path-locator";
+
+import { imageMetadata } from "./image";
 
 const DATA_DIR = path.resolve(process.env.TIN_APP_DATA_DIR ?? "./data");
 const APP_URL = (process.env.TIN_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -214,15 +215,12 @@ async function readBlogPost(dir: string, tags: BlogTagData[]): Promise<BlogPostD
 
   let cover: BlogPostCoverData | undefined;
   if (typeof frontmatter.cover === "string") {
-    const s = sharp(path.join(dir, frontmatter.cover));
-    const md = await s.metadata();
-    if (md.width && md.height) {
-      cover = {
-        file: frontmatter.cover,
-        width: md.width,
-        height: md.height,
-      };
-    }
+    const md = await imageMetadata(path.join(dir, frontmatter.cover));
+    cover = {
+      file: frontmatter.cover,
+      width: md.width,
+      height: md.height,
+    };
   } else if (frontmatter.cover) {
     cover = {
       file: frontmatter.cover.file,
@@ -337,12 +335,7 @@ async function processPostImage(
   srcSet?: string;
 }> {
   const isRemote = src.startsWith("http");
-  const s = sharp(isRemote ? src : path.join(assetPath, src));
-  const md = await s.metadata();
-
-  if (!md.width || !md.height) {
-    throw new Error(`Invalid image '${src}'`);
-  }
+  const md = await imageMetadata(isRemote ? src : path.join(assetPath, src));
 
   let srcSet = "";
   if (!isRemote && !src.endsWith(".gif")) {
