@@ -3,7 +3,7 @@ import type React from "react";
 import { IconSlash } from "@tabler/icons-react";
 import { useState } from "react";
 
-import { DashedLine } from "~/components/DashedLine";
+import { GridFadeLine } from "~/components/GridFadeLine";
 import { HeaderContextProvider, useHeaderContext } from "~/components/layout/header-context";
 import { cn } from "~/lib/utility";
 
@@ -14,10 +14,12 @@ export function Header({ children, className, ...props }: HeaderProps) {
 
   return (
     <HeaderContextProvider menuOpen={menuOpen} onMenuOpenChange={setMenuOpen}>
-      <header className={cn("bg-background/95 w-full", className)} {...props}>
-        <div className="flex flex-col items-center px-4">{children}</div>
-
-        <DashedLine />
+      <header
+        className={cn("bg-background/95 relative w-full overflow-hidden", className)}
+        {...props}
+      >
+        <GridFadeLine fadeDirection="down" className="opacity-60" />
+        <div className="relative z-10 flex flex-col items-center px-4">{children}</div>
       </header>
     </HeaderContextProvider>
   );

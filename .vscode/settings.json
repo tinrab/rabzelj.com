@@ -1,5 +1,4 @@
 {
-  "editor.defaultFormatter": "oxc.oxc-vscode",
   "files.watcherExclude": {
     "**/routeTree.gen.ts": true
   },

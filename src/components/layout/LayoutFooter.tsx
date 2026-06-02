@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { DashedLine } from "~/components/DashedLine";
+import { GridFadeLine } from "~/components/GridFadeLine";
 import { cn } from "~/lib/utility";
 
 interface LayoutFooterProps extends React.ComponentProps<"div"> {
@@ -11,33 +11,28 @@ interface LayoutFooterProps extends React.ComponentProps<"div"> {
 
 export function LayoutFooter({ slotProps = {}, className, children, ...props }: LayoutFooterProps) {
   return (
-    <footer className={cn("w-full", className)} aria-labelledby="footer-heading" {...props}>
+    <footer
+      className={cn("relative w-full overflow-hidden", className)}
+      aria-labelledby="footer-heading"
+      {...props}
+    >
       <h2 id="footer-heading" className="sr-only">
         Footer
       </h2>
 
-      <DashedLine orientation="horizontal" />
+      <GridFadeLine fadeDirection="up" className="opacity-60" />
 
       <div
         {...(slotProps.content ?? {})}
         className={cn(
           // "mx-auto flex max-w-3xl px-4",
-          "mx-auto flex max-w-3xl",
+          // "relative z-10 mx-auto flex max-w-3xl",
+          "relative z-10 mx-auto flex max-w-(--breakpoint-xl)",
           slotProps.content?.className,
         )}
       >
         <div className="relative w-full">
-          {/* <DashedLine
-						className="-left-[2px] absolute top-0 hidden h-full md:block"
-						orientation="vertical"
-					/> */}
-
-          <div className="px-4 py-4 pb-8">{children}</div>
-
-          {/* <DashedLine
-						className="-right-[2px] absolute top-0 hidden h-full md:block"
-						orientation="vertical"
-					/> */}
+          <div className="px-4 py-8">{children}</div>
         </div>
       </div>
     </footer>

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "yet-another-react-lightbox/styles.css";
 
 @import "@fontsource/roboto/300";
 @import "@fontsource/roboto/400";
@@ -24,27 +25,19 @@
   --font-sans: "Roboto";
   --font-mono: "Roboto Mono";
 
-  --animate-pulse: pulse 12s ease calc(var(--index, 0) * 0.1s) infinite;
   --animate-linear-loader: linear-loader 2s linear infinite;
 
-  @keyframes pulse {
-    0%,
-    100% {
-      transform: translate(-50%, -50%) scale(1);
-    }
-    50% {
-      transform: translate(-50%, -50%) scale(0.9);
-    }
-  }
   @keyframes linear-loader {
     0% {
       background-size: 200% 100%;
       background-position: left -31.25% top 0%;
     }
+
     50% {
       background-size: 800% 100%;
       background-position: left -49% top 0%;
     }
+
     100% {
       background-size: 400% 100%;
       background-position: left -102% top 0%;

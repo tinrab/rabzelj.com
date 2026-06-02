@@ -15,6 +15,7 @@ import {
 } from "~/components/ui/table";
 import { MdxCodeBlock } from "~/lib/mdx/components/MdxCodeBlock";
 import { MdxContentHeading } from "~/lib/mdx/components/MdxContentHeading";
+import { MdxImage } from "~/lib/mdx/components/MdxImage";
 import { MdxInlineCode } from "~/lib/mdx/components/MdxInlineCode";
 import { cn } from "~/lib/utility";
 
@@ -75,12 +76,7 @@ export function getMdxContentComponents({
       if (!alt) {
         throw new Error("Image must have an alt attribute");
       }
-      return (
-        <span className="mx-auto flex flex-col gap-2 text-center">
-          <img alt={alt} className={cn(className, "mx-auto")} {...props} />
-          <span className="text-muted-foreground text-sm leading-5 font-normal">{alt}</span>
-        </span>
-      );
+      return <MdxImage alt={alt} className={className} {...props} />;
     },
 
     Note: ({ children, ...props }) => {

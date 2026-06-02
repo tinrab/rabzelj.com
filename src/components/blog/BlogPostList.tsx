@@ -22,7 +22,7 @@ export function BlogPostList<T extends BlogPostCommon>({
         {posts.map((yearGroup, index) => (
           <div key={String(index)} className="flex justify-start">
             <div className="sticky z-10">
-              <div className="bg-border/100 absolute -left-2 flex size-4 items-center justify-center rounded-full" />
+              <div className="bg-muted absolute -left-2 flex size-4 items-center justify-center rounded-full" />
             </div>
 
             <div className="-mt-1 mb-4 ml-4">
@@ -72,7 +72,7 @@ export function BlogPostList<T extends BlogPostCommon>({
             </div>
           </div>
         ))}
-        <div className="bg-border absolute top-0 -left-[2px] h-full w-[4px] shrink-0 overflow-hidden" />
+        <div className="bg-muted absolute top-0 -left-[2px] h-full w-[4px] shrink-0 overflow-hidden" />
       </div>
     </div>
   );
