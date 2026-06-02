@@ -43,7 +43,9 @@ export function MdxCodeBlock({
       {fileName ? (
         <div className="border-border text-muted-foreground relative flex rounded-t-sm border-t-2 border-r-2 border-l-2 p-2">
           <div className="text-muted-foreground ml-2 flex grow items-center gap-2 self-center text-sm">
-            {language ? <ProgrammingLanguageIcon language={language} /> : undefined}
+            {language ? (
+              <ProgrammingLanguageIcon className="size-5" language={language} />
+            ) : undefined}
             {fileName}
           </div>
 

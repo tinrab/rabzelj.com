@@ -9,7 +9,6 @@ import { HeaderMobile, HeaderMobileTitle } from "~/components/layout/header-mobi
 import { NavigationList } from "~/components/navigation-list/NavigationList";
 import { NavigationListGroup } from "~/components/navigation-list/NavigationListGroup";
 import { NavigationListLink } from "~/components/navigation-list/NavigationListLink";
-import { PulseDecoration } from "~/components/PulseDecoration";
 import { Button } from "~/components/ui/button";
 import {
   NavigationMenu,
@@ -32,10 +31,6 @@ export function SiteHeader() {
 
   return (
     <Header>
-      <div className="pointer-events-none absolute -top-[0px] h-full w-full overflow-hidden">
-        <PulseDecoration className="absolute -top-[50px] left-1/2" />
-      </div>
-
       <HeaderRow className="max-w-(--breakpoint-xl)">
         <Link to="/">
           <HeaderTitle />

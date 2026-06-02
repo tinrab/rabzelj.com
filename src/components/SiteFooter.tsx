@@ -20,12 +20,12 @@ const socialLinks = [
 export function SiteFooter() {
   return (
     <LayoutFooter>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col items-start gap-2">
         {socialLinks.map(({ title, to }) => (
           <Typography
             key={title}
             variant="a"
-            className="text-muted-foreground block underline"
+            className="text-muted-foreground inline-block underline"
             render={
               <a href={to} target="_blank" rel="noreferrer">
                 {title}

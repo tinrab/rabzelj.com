@@ -92,7 +92,7 @@ Thread 1 (Thread 0x7f95c389a300 (LWP 40763) "vectorio"):
 It was stuck inside `dashmap::lock::RawRwLock::lock_shared_slow` during a `point_cache_insert` operation.
 The thread was trying to acquire a read lock, but it was blocked.
 
-### Re-entrancy in DashMap
+# Re-entrancy in DashMap
 
 I was performing a cache eviction when the cache grew too large.
 The cache was backed by a [dashmap](https://crates.io/crates/dashmap), which uses fine-grained shard locks to allow concurrent access instead of locking the full map like `RwLock<HashMap<...>>`.

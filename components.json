@@ -6,7 +6,7 @@
   "tailwind": {
     "config": "",
     "css": "src/styles/ui.css",
-    "baseColor": "zinc",
+    "baseColor": "taupe",
     "cssVariables": true,
     "prefix": ""
   },
