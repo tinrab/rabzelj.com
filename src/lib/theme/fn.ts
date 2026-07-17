@@ -6,7 +6,7 @@ import { THEME_COOKIE_NAME } from "~/lib/theme/constants";
 import { Theme, themeSchema } from "~/lib/theme/types";
 
 export const changeThemeServerFn = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ theme: themeSchema }))
+  .validator(z.object({ theme: themeSchema }))
   .handler(async ({ data }) => {
     setCookie(THEME_COOKIE_NAME, data.theme, {
       httpOnly: false,

@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { GridFadeLine } from "~/components/GridFadeLine";
+import { StructuralGrid } from "~/components/StructuralGrid";
 import { cn } from "~/lib/utility";
 
 interface LayoutFooterProps extends React.ComponentProps<"div"> {
@@ -12,7 +12,7 @@ interface LayoutFooterProps extends React.ComponentProps<"div"> {
 export function LayoutFooter({ slotProps = {}, className, children, ...props }: LayoutFooterProps) {
   return (
     <footer
-      className={cn("relative w-full overflow-hidden", className)}
+      className={cn("relative w-full overflow-hidden border-t", className)}
       aria-labelledby="footer-heading"
       {...props}
     >
@@ -20,7 +20,7 @@ export function LayoutFooter({ slotProps = {}, className, children, ...props }: 
         Footer
       </h2>
 
-      <GridFadeLine fadeDirection="up" className="opacity-60" />
+      <StructuralGrid />
 
       <div
         {...(slotProps.content ?? {})}

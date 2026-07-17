@@ -31,12 +31,12 @@ export function SiteHeader() {
 
   return (
     <Header>
-      <HeaderRow className="max-w-(--breakpoint-xl)">
+      <HeaderRow className="max-w-(--breakpoint-xl) px-4">
         <Link to="/">
           <HeaderTitle />
         </Link>
 
-        <div className="ml-auto flex items-center gap-3 pl-3">
+        <div className="ml-auto flex items-center gap-3">
           <NavigationMenu className="hidden md:inline-flex">
             <NavigationMenuList>
               {links.map((link) => (
