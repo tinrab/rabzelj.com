@@ -1,42 +1,44 @@
-import type { HtmlRootNode } from "@temelj/mdx";
-
-import { documentFrontmatter, htmlText, rewriteHtml, selectHtml, SourceFile } from "@temelj/mdx";
-
 import type {
-  BlogPostCoverData,
+  BlogPostContent,
+  BlogPostSource,
   BlogPostData,
-  BlogPostTableOfContentsItem,
   ExternalBlogData,
 } from "~/lib/blog/post/schema";
-import type { BlogSeriesData } from "~/lib/blog/series/schema";
-import type { BlogTagData } from "~/lib/blog/tag/schema";
+import type { BlogSeriesData, BlogSeriesFrontmatter } from "~/lib/blog/series/schema";
+import type { BlogTagData, BlogTagFrontmatter } from "~/lib/blog/tag/schema";
 
-import { blogPostAssetUrls } from "~/lib/blog/assets";
-import { blogPostFrontmatterSchema } from "~/lib/blog/post/schema";
-import { blogSeriesFrontmatterSchema } from "~/lib/blog/series/schema";
-import { blogTagFrontmatterSchema } from "~/lib/blog/tag/schema";
-import { getMdxProcessor } from "~/lib/mdx/processor";
 import { pathLocator } from "~/lib/path-locator";
 
 import externalBlogData from "../../../data/blog/external.json";
 
-const postSources = import.meta.glob<string>("../../../data/blog/posts/**/index.mdx", {
+const postSources = import.meta.glob<BlogPostSource>("../../../data/blog/posts/**/index.mdx", {
   eager: true,
   import: "default",
-  query: "?raw",
+  query: "?blog-frontmatter",
 });
 
-const tagSources = import.meta.glob<string>("../../../data/blog/tags/*.mdx", {
+const tagSources = import.meta.glob<BlogTagFrontmatter>("../../../data/blog/tags/*.mdx", {
   eager: true,
   import: "default",
-  query: "?raw",
+  query: "?blog-frontmatter",
 });
 
-const seriesSources = import.meta.glob<string>("../../../data/blog/series/*.mdx", {
+const seriesSources = import.meta.glob<BlogSeriesFrontmatter>("../../../data/blog/series/*.mdx", {
   eager: true,
   import: "default",
-  query: "?raw",
+  query: "?blog-frontmatter",
 });
+
+const postContents = import.meta.glob<BlogPostContent>("../../../data/blog/posts/**/index.mdx", {
+  import: "default",
+  query: "?blog-content",
+});
+
+export async function loadBlogPostContent(slug: string): Promise<BlogPostContent> {
+  const sourcePath = Object.keys(postContents).find((path) => path.endsWith(`_${slug}/index.mdx`));
+  if (!sourcePath) throw new Error(`Blog post source not found: ${slug}`);
+  return postContents[sourcePath]();
+}
 
 const MAX_RELATED_POSTS = 3;
 
@@ -47,16 +49,17 @@ interface BlogData {
   external: ExternalBlogData;
 }
 
-let blogDataPromise: Promise<BlogData> | undefined;
+let blogData: BlogData | undefined;
 
 export function loadBlogData(): Promise<BlogData> {
-  blogDataPromise ??= createBlogData();
-  return blogDataPromise;
+  blogData ??= createBlogData();
+  return Promise.resolve(blogData);
 }
 
-async function createBlogData(): Promise<BlogData> {
-  const [tags, series] = await Promise.all([loadSourceBlogTags(), loadSourceBlogSeries()]);
-  const posts = await loadSourceBlogPosts(tags);
+function createBlogData(): BlogData {
+  const tags = loadSourceBlogTags();
+  const series = loadSourceBlogSeries();
+  const posts = loadSourceBlogPosts(tags);
 
   for (const post of posts) {
     post.related = posts
@@ -89,11 +92,9 @@ async function createBlogData(): Promise<BlogData> {
   };
 }
 
-async function loadSourceBlogPosts(tags: BlogTagData[]): Promise<BlogPostData[]> {
-  const posts = await Promise.all(
-    Object.entries(postSources).map(([sourcePath, source]) =>
-      readBlogPost(sourcePath, source, tags),
-    ),
+function loadSourceBlogPosts(tags: BlogTagData[]): BlogPostData[] {
+  const posts = Object.entries(postSources).map(([sourcePath, source]) =>
+    readBlogPost(sourcePath, source, tags),
   );
 
   return posts
@@ -105,48 +106,32 @@ async function loadSourceBlogPosts(tags: BlogTagData[]): Promise<BlogPostData[]>
     });
 }
 
-async function loadSourceBlogTags(): Promise<BlogTagData[]> {
-  const processor = await getMdxProcessor();
-  const tags = await Promise.all(
-    Object.entries(tagSources).map(async ([sourcePath, source]) => {
-      const { document } = processor.parse(new SourceFile({ name: sourcePath, text: source }));
-      const frontmatter = blogTagFrontmatterSchema.parse(documentFrontmatter(document)?.data);
-
-      return {
-        title: frontmatter.title,
-        slug: sourceFileName(sourcePath),
-        description: frontmatter.description,
-      };
-    }),
-  );
+function loadSourceBlogTags(): BlogTagData[] {
+  const tags = Object.entries(tagSources).map(([sourcePath, frontmatter]) => ({
+    title: frontmatter.title,
+    slug: sourceFileName(sourcePath),
+    description: frontmatter.description,
+  }));
 
   return tags.sort((a, b) => a.title.localeCompare(b.title));
 }
 
-async function loadSourceBlogSeries(): Promise<BlogSeriesData[]> {
-  const processor = await getMdxProcessor();
-  const series = await Promise.all(
-    Object.entries(seriesSources).map(async ([sourcePath, source]) => {
-      const { document } = processor.parse(new SourceFile({ name: sourcePath, text: source }));
-      const frontmatter = blogSeriesFrontmatterSchema.parse(documentFrontmatter(document)?.data);
-
-      return {
-        title: frontmatter.title,
-        slug: sourceFileName(sourcePath),
-        description: frontmatter.description,
-        completed: frontmatter.completed,
-      };
-    }),
-  );
+function loadSourceBlogSeries(): BlogSeriesData[] {
+  const series = Object.entries(seriesSources).map(([sourcePath, frontmatter]) => ({
+    title: frontmatter.title,
+    slug: sourceFileName(sourcePath),
+    description: frontmatter.description,
+    completed: frontmatter.completed,
+  }));
 
   return series.sort((a, b) => a.title.localeCompare(b.title));
 }
 
-async function readBlogPost(
+function readBlogPost(
   sourcePath: string,
-  source: string,
+  source: BlogPostSource,
   tags: BlogTagData[],
-): Promise<BlogPostData | undefined> {
+): BlogPostData | undefined {
   const directoryName = sourcePath.split("/").at(-2);
   const match = directoryName?.match(/^(\d{4}-\d{2}-\d{2})_(.+)$/);
   if (!match) {
@@ -154,9 +139,7 @@ async function readBlogPost(
   }
 
   const [, directoryDate, slug] = match;
-  const processor = await getMdxProcessor();
-  const parsed = processor.parse(new SourceFile({ name: sourcePath, text: source }));
-  const frontmatter = blogPostFrontmatterSchema.parse(documentFrontmatter(parsed.document)?.data);
+  const { frontmatter, cover } = source;
 
   if (directoryDate !== frontmatter.publishedDate) {
     throw new Error(
@@ -166,25 +149,6 @@ async function readBlogPost(
 
   if (process.env.NODE_ENV === "production" && frontmatter.demo) {
     return undefined;
-  }
-
-  const result = await processor.process(parsed);
-  const content = processPostHtml(result.html, sourcePath, slug);
-  const toc: BlogPostTableOfContentsItem[] = [];
-  for (const { node } of selectHtml(content, "element")) {
-    if (
-      (node.tagName === "h1" || node.tagName === "h2" || node.tagName === "h3") &&
-      typeof node.attributes.id === "string"
-    ) {
-      const title = htmlText(node).replace(/\s+/g, " ").trim();
-      if (title) {
-        toc.push({
-          id: node.attributes.id,
-          title,
-          level: node.tagName === "h1" ? 2 : node.tagName === "h2" ? 3 : 4,
-        });
-      }
-    }
   }
 
   const postTags = frontmatter.tags
@@ -198,17 +162,6 @@ async function readBlogPost(
     })
     .sort((a, b) => a.slug.localeCompare(b.slug));
 
-  let cover: BlogPostCoverData | undefined;
-  if (typeof frontmatter.cover === "string") {
-    cover = { src: resolvePostAssetUrl(sourcePath, frontmatter.cover) };
-  } else if (frontmatter.cover) {
-    cover = {
-      src: resolvePostAssetUrl(sourcePath, frontmatter.cover.file),
-      width: frontmatter.cover.width,
-      height: frontmatter.cover.height,
-    };
-  }
-
   const appUrl = (process.env.TIN_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
   return {
     title: frontmatter.title,
@@ -218,66 +171,11 @@ async function readBlogPost(
     modifiedDate: frontmatter.modifiedDate,
     description: frontmatter.description,
     priority: frontmatter.priority,
-    toc: frontmatter.toc ? toc : undefined,
     tags: postTags,
     cover,
-    content,
     related: [],
     series: frontmatter.series,
   };
-}
-
-function processPostHtml(root: HtmlRootNode, sourcePath: string, slug: string): HtmlRootNode {
-  return rewriteHtml(root, {
-    element: ({ node }) => {
-      if (node.tagName !== "img") {
-        return;
-      }
-      const src = node.attributes.src;
-      if (typeof src !== "string" || src.length === 0) {
-        throw new Error(`Image source not found for post '${slug}'`);
-      }
-      return {
-        ...node,
-        attributes: {
-          ...node.attributes,
-          src: /^https?:\/\//.test(src) ? src : resolvePostAssetUrl(sourcePath, src),
-          alt: node.attributes.alt || src,
-          loading: "lazy",
-          decoding: "async",
-        },
-      };
-    },
-  });
-}
-
-function resolvePostAssetUrl(sourcePath: string, relativePath: string): string {
-  const sourceDirectory = sourcePath.slice(0, sourcePath.lastIndexOf("/") + 1);
-  const assetSourcePath = normalizeSourcePath(`${sourceDirectory}${relativePath}`);
-  const assetUrl = blogPostAssetUrls[assetSourcePath];
-  if (!assetUrl) {
-    throw new Error(`Blog post asset '${relativePath}' not found from '${sourcePath}'`);
-  }
-  return assetUrl;
-}
-
-function normalizeSourcePath(sourcePath: string): string {
-  const segments: string[] = [];
-  for (const segment of sourcePath.split("/")) {
-    if (segment === "." || segment === "") {
-      continue;
-    }
-    if (segment === "..") {
-      if (segments.length > 0 && segments.at(-1) !== "..") {
-        segments.pop();
-      } else {
-        segments.push(segment);
-      }
-      continue;
-    }
-    segments.push(segment);
-  }
-  return segments.join("/");
 }
 
 function sourceFileName(sourcePath: string): string {

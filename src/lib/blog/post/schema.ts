@@ -28,6 +28,16 @@ export const blogPostFrontmatterSchema = z.object({
 
 export type BlogPostFrontmatter = z.infer<typeof blogPostFrontmatterSchema>;
 
+export interface BlogPostSource {
+  frontmatter: BlogPostFrontmatter;
+  cover?: BlogPostCoverData;
+}
+
+export interface BlogPostContent {
+  content: HtmlRootNode;
+  toc?: BlogPostTableOfContentsItem[];
+}
+
 export interface BlogPostCommon {
   title: string;
   url: string;
