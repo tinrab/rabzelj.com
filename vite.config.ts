@@ -8,6 +8,8 @@ import path from "node:path";
 import { defineConfig } from "vite";
 import arraybufferPlugin from "vite-plugin-arraybuffer";
 
+import { blogMdx } from "./src/lib/blog/vite";
+
 const routeRules: Record<string, unknown> = {};
 for (const fileName of await fs.readdir("public")) {
   const filePath = path.join("public", fileName);
@@ -38,6 +40,7 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   plugins: [
+    blogMdx(),
     process.env.NODE_ENV === "production" ? cloudflare({ viteEnvironment: { name: "ssr" } }) : null,
     tanstackStart({
       srcDirectory: "src",

@@ -1,6 +1,6 @@
 import type { BlogPostData, ExternalBlogData } from "~/lib/blog/post/schema";
 
-import { loadBlogData } from "~/lib/blog/loader";
+import { loadBlogData, loadBlogPostContent } from "~/lib/blog/loader";
 import { blogTagIsNote } from "~/lib/blog/tag/utility";
 
 export async function loadBlogPosts({
@@ -17,7 +17,7 @@ export async function loadBlogPosts({
   }
 
   const blogData = await loadBlogData();
-  let posts = blogData.posts.map((post) => selectPostFields(post, { includeContent }));
+  let posts = blogData.posts;
 
   if (tagSlug !== undefined) {
     posts = posts.filter((post) => post.tags.some((tag) => tag.slug === tagSlug));
@@ -27,7 +27,10 @@ export async function loadBlogPosts({
     posts = posts.filter((post) => post.tags.some(blogTagIsNote) === selectNotes);
   }
 
-  return posts.sort((a, b) => {
+  const selectedPosts = await Promise.all(
+    posts.map((post) => selectPostFields(post, { includeContent })),
+  );
+  return selectedPosts.sort((a, b) => {
     const dateCmp = new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime();
     if (dateCmp !== 0) {
       return dateCmp;
@@ -54,13 +57,15 @@ export async function loadExternalBlogData(): Promise<ExternalBlogData> {
   return blogData.external;
 }
 
-function selectPostFields(
+async function selectPostFields(
   post: BlogPostData,
   { includeContent, includeRelated }: { includeContent?: boolean; includeRelated?: boolean },
-): BlogPostData {
+): Promise<BlogPostData> {
+  const article = includeContent ? await loadBlogPostContent(post.slug) : undefined;
   return {
     ...post,
-    content: includeContent ? post.content : undefined,
+    content: article?.content,
+    toc: article?.toc,
     related: includeRelated ? post.related : undefined,
   };
 }

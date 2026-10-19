@@ -12,5 +12,8 @@
       "pattern": "rabzelj.com",
       "custom_domain": true
     }
-  ]
+  ],
+  "observability": {
+    "enabled": true
+  }
 }
