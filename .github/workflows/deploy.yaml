@@ -44,12 +44,6 @@ jobs:
       - name: Install
         run: pnpm install
 
-      - name: Generate
-        run: node --import tsx/esm ./scripts/main.ts generate
-        env:
-          TIN_APP_URL: https://rabzelj.com
-          TIN_APP_DATA_DIR: ./data
-
       - name: Build
         run: pnpm run build
         env:

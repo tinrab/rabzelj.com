@@ -1,4 +1,4 @@
-import type { MdxArtifact } from "@temelj/mdx";
+import type { HtmlRootNode } from "@temelj/mdx";
 
 import { z } from "zod";
 
@@ -42,8 +42,7 @@ export interface BlogPostData extends BlogPostCommon {
   toc?: BlogPostTableOfContentsItem[];
   tags: BlogTagData[];
   cover?: BlogPostCoverData;
-  assetPath: string;
-  artifact?: MdxArtifact<BlogPostFrontmatter>;
+  content?: HtmlRootNode;
   related?: RelatedBlogPost[];
   series?: string;
 }
@@ -61,10 +60,9 @@ export interface BlogPostTableOfContentsItem {
 }
 
 export interface BlogPostCoverData {
-  file: string;
-  width: number;
-  height: number;
-  srcSet?: string;
+  src: string;
+  width?: number;
+  height?: number;
 }
 
 export interface ExternalBlogData {

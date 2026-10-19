@@ -290,7 +290,7 @@ The hash structure will look something like this:
 I chose a hash over sorted sets because individual hash fields can have expirations ([HEXPIRE](https://redis.io/docs/latest/commands/hexpire/)).
 The solution wouldn't require any complex queries; we'd just return the whole hash every time.
 
-```sh { "commandLine": "0" }
+```sh {"commandLines":"1"}
 redis-cli HGETALL bsky:tagrank
 ```
 

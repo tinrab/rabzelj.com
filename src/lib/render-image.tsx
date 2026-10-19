@@ -2,7 +2,7 @@ import type React from "react";
 
 import fontSans from "@fontsource/roboto/files/roboto-latin-400-normal.woff?arraybuffer";
 import { Resvg, initWasm } from "@resvg/resvg-wasm";
-import satori, { init as initSatori } from "satori";
+import satori, { init as initSatori } from "satori/standalone";
 
 // Some magic to make WASM work in dev server and CF workers.
 
@@ -41,11 +41,11 @@ async function initResvg(): Promise<void> {
 
 async function loadSatoriYogaWasm(): Promise<string | WebAssembly.Module> {
   if (import.meta.env.DEV) {
-    const mod = await import("satori/yoga.wasm?arraybuffer");
+    const mod = await import("satori/layout.wasm?arraybuffer");
     return mod.default;
   }
 
-  const mod = await import("satori/yoga.wasm");
+  const mod = await import("satori/layout.wasm");
   return mod.default;
 }
 

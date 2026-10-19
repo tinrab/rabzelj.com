@@ -3,6 +3,11 @@ declare module "*?url" {
   export default content;
 }
 
+declare module "*?inline" {
+  const content: string;
+  export default content;
+}
+
 declare module "*?arraybuffer" {
   const content: Buffer;
   export default content;

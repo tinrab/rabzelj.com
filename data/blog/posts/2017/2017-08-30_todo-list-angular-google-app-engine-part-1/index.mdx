@@ -44,7 +44,7 @@ To begin, you'll create an endpoint for signing in Google users. ID tokens will 
 
 Install necessary Go packages.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 go get github.com/rs/cors github.com/gorilla/mux
 ```
 
@@ -234,7 +234,7 @@ The code above checks Memcache for existing session and fetches the ID of user m
 
 To see how it works, declare a dummy handler and update the `init` function inside `app.go` file.
 
-```go {highlight:8-9,13-15}
+```go {"highlightLines":"8-9,13-15"}
 func init() {
   // Read configuration environment variables
   clientID = os.Getenv("CLIENT_ID")
@@ -254,7 +254,7 @@ func helloHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, u
 
 Test it using cURL. You can obtain the ID token using [OAuth 2.0 Playground](https://developers.google.com/oauthplayground).
 
-```bash {commandLine}
+```bash {"commandLines":true}
 curl localhost:8080/api/signin -X POST -H 'Authorization:[ID_TOKEN]'
 curl localhost:8080/api/hello -H 'Authorization:[SESSION_TOKEN]'
 ```
@@ -316,7 +316,7 @@ r.HandleFunc("/api/todos", authenticate(createTodoHandler)).
 
 See if it works.
 
-```bash {commandLine:2-3}
+```bash {"commandLines":"1"}
 curl localhost:8080/api/todos \
   -H 'Authorization:[SESSION_TOKEN]' \
   -d '{"title":"write more code"}'
@@ -372,7 +372,7 @@ r.HandleFunc("/api/todos", authenticate(listTodosHandler)).
 
 Try it out.
 
-```bash {commandLine:2}
+```bash {"commandLines":"1"}
 curl localhost:8080/api/todos \
   -H 'Authorization:[SESSION_TOKEN]'
 ```
@@ -443,7 +443,7 @@ r.HandleFunc("/api/todos/{id}", authenticate(updateTodoHandler)).
 
 Make sure it works.
 
-```bash {commandLine:2}
+```bash {"commandLines":"1"}
 curl localhost:8080/api/todos/[TODO_ID] -H 'Authorization:[SESSION_TOKEN]' \
   -d '{"title":"new title"}'
 ```
@@ -489,7 +489,7 @@ r.HandleFunc("/api/todos/{id}", authenticate(deleteTodoHandler)).
 
 Try deleting an existing todo.
 
-```bash {commandLine:2}
+```bash {"commandLines":"1"}
 curl localhost:8080/api/todos/[TODO_ID] -X DELETE \
   -H 'Authorization:[SESSION_TOKEN]'
 ```

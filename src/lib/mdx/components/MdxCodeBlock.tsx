@@ -11,14 +11,14 @@ import { cn } from "~/lib/utility";
 type MdxCodeBlockProps = {
   "data-file-name"?: string;
   "data-language"?: string;
-} & React.ComponentProps<"div">;
+} & React.ComponentProps<"pre">;
 
 export function MdxCodeBlock({
   className,
   children,
   "data-file-name": fileName,
   "data-language": language,
-  style: _style,
+  style,
   ...props
 }: MdxCodeBlockProps) {
   const codeId = useId();
@@ -39,7 +39,7 @@ export function MdxCodeBlock({
   };
 
   return (
-    <div className={cn(className, "relative rounded-sm")} {...props}>
+    <div className={cn(className, "relative rounded-sm")}>
       {fileName ? (
         <div className="border-border text-muted-foreground relative flex rounded-t-sm border-t-2 border-r-2 border-l-2 p-2">
           <div className="text-muted-foreground ml-2 flex grow items-center gap-2 self-center text-sm">
@@ -63,7 +63,9 @@ export function MdxCodeBlock({
 
       <div className="group relative">
         <pre
+          {...props}
           id={codeId}
+          style={style}
           className={cn(
             "border-border relative flex overflow-auto rounded-sm border-2 font-mono text-sm leading-relaxed font-normal [&_code]:bg-transparent",
             fileName ? "rounded-t-none" : "",

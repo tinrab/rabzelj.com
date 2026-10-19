@@ -46,7 +46,7 @@ Create `urlshortenerlinks_table.json` file, which describes the table.
 
 Run the following command to create the table on AWS.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 aws dynamodb create-table --region us-east-1 --cli-input-json file://urlshortenerlinks_table.json
 ```
 
@@ -259,14 +259,14 @@ Note the **Role ARN** value.
 
 Build both Go apps on Linux and macOS with the following commands.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 GOOS=linux GOARCH=amd64 go build -o shorten main.go
 zip deployment.zip shorten
 ```
 
 And if you're on Windows, you'll need to use `build-lambda-zip` tool.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 go get -u github.com/aws/aws-lambda-go/cmd/build-lambda-zip
 set GOOS=linux
 set GOARCH=amd64
@@ -276,13 +276,13 @@ build-lambda-zip -o deployment.zip shorten
 
 Replace `$ROLE` with your Role ARN, and deploy both functions.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 aws lambda create-function --region us-east-1 --function-name ShortenFunction --zip-file fileb://./deployment.zip --runtime go1.x --tracing-config Mode=Active --role $ROLE --handler shorten
 ```
 
 If the function already exist, use `update-function-code` command instead.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 aws lambda update-function-code --function-name ShortenFunction --region us-east-1 --zip-file fileb://./deployment.zip
 ```
 
@@ -308,7 +308,7 @@ The API should now be available on **Invoke URL**, which can be found at **YourA
 
 Test your URL shortener API.
 
-```bash {commandLine:2}
+```bash {"commandLines":"1"}
 curl $INVOKE_URL/shorten -X POST -d '{"url":"https://outcrawl.com/getting-started-microservices-go-grpc-kubernetes/"}'
 {"short_url":"SHORT_URL"}
 ```

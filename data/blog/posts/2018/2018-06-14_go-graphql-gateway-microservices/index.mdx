@@ -244,7 +244,7 @@ package account
 
 Running the following command will generate code inside `pb` subdirectory.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 go generate account/server.go
 ```
 
@@ -909,7 +909,7 @@ package graph
 
 It can be run with:
 
-```bash {commandLine}
+```bash {"commandLines":true}
 go generate ./graphql/graph/graph.go
 ```
 
@@ -994,7 +994,7 @@ func (s *GraphQLServer) Account_orders(ctx context.Context, obj *Account) ([]Ord
 
 To run Spidey, execute the following commands:
 
-```bash {commandLine}
+```bash {"commandLines":true}
 vgo vendor
 docker-compose up -d --build
 ```

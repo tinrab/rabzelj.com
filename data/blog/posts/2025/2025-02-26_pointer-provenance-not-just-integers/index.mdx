@@ -50,7 +50,7 @@ mod tests {
 
 Running the test gives us:
 
-```text { "commandLine": "0" }
+```text {"commandLines":"1"}
 cargo test
 running 1 test
 test tests::it_works ... ok
@@ -58,7 +58,7 @@ test tests::it_works ... ok
 
 What about if we run it in release mode with optimizations enabled?
 
-```text { "commandLine": "0" }
+```text {"commandLines":"1"}
 cargo test --release
 running 1 test
 test tests::it_works ... FAILED
@@ -97,7 +97,7 @@ int main(int argc, char const *argv[]) {
 
 Running it yields different results.
 
-```sh { "commandLine": "0,2" }
+```sh {"commandLines":"1,3"}
 clang ./main.c -o prov && ./prov
 result = 42
 clang ./main.c -o prov -O3 && ./prov
@@ -106,7 +106,7 @@ result = 5
 
 Let's try running [miri](https://github.com/rust-lang/miri) - an undefined behavior detector for Rust.
 
-```sh { "commandLine": "0" }
+```sh {"commandLines":"1"}
 cargo +nightly miri test
 running 1 test
 test tests::it_works ... error: Undefined Behavior: `ptr_offset_from` called on two different pointers that are not both derived from the same allocation
@@ -179,7 +179,7 @@ Let's see how an optimization can break a program if provenance is not taken int
 
 Let's look at the LLVM IR for the `example_provenance` function.
 
-```text { "commandLine": "0" }
+```text {"commandLines":"1"}
 rustc --emit=llvm-ir -O ./src/main.rs -o - | grep -A 10 "i32 @example_provenance"
 define dso_local noundef i32 @example_provenance(ptr noundef %a, ptr noundef %b) unnamed_addr #3 {
 start:
@@ -372,7 +372,7 @@ error[E0499]: cannot borrow `a` as mutable more than once at a time
 
 Let's look at LLVM IR for both of these.
 
-```text { "commandLine": "0,5" }
+```text {"commandLines":"1,6"}
 rustc --emit=llvm-ir -O ./src/main.rs -o - | grep -A 3 "i32 @example_may_alias"
 define dso_local noundef i32 @example_may_alias(ptr nocapture noundef readnone %a, ptr nocapture noundef readnone %b) unnamed_addr #4 {
 start:

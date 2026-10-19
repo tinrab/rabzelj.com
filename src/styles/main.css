@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "yet-another-react-lightbox/styles.css";
+@import "katex/dist/katex.min.css";
 
 @import "@fontsource/roboto/300";
 @import "@fontsource/roboto/400";

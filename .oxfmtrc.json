@@ -16,5 +16,13 @@
       ["value-parent", "value-sibling", "value-index"],
       "unknown"
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["wrangler.jsonc"],
+      "options": {
+        "trailingComma": "none"
+      }
+    }
+  ]
 }

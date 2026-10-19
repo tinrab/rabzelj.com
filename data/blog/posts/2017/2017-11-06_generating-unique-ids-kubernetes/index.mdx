@@ -93,13 +93,13 @@ CMD [ "app" ]
 
 If you're using Minikube, switch to its Docker daemon, otherwise you'll have to push the image to some other registry.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 eval $(minikube docker-env)
 ```
 
 Build the image. Here it is named `local/unique-id`.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 docker build -t local/unique-id .
 ```
 
@@ -156,20 +156,20 @@ spec:
 
 Create resources.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 kubectl create -f deployment.yaml
 kubectl create -f service.yaml
 ```
 
 Get the URL of the service.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 minikube service unique-id --url
 ```
 
 Finally, try calling it a couple of times.
 
-```bash {commandLine:2-4}
+```bash {"commandLines":"1"}
 curl $(minikube service unique-id --url)
 {
   "id": "168514248039727104"

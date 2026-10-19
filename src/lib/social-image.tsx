@@ -1,5 +1,4 @@
-import { serverConfig } from "~/config/server";
-import { pathLocator } from "~/lib/path-locator";
+import { staticConfig } from "~/config/static";
 
 export const SOCIAL_IMAGE_SIZE = {
   width: 1200,
@@ -7,7 +6,7 @@ export const SOCIAL_IMAGE_SIZE = {
 };
 
 interface SiteIdentityProps {
-  avatarSrc?: string;
+  avatarSrc: string;
 }
 
 export function FeaturedSocialImage({ avatarSrc }: SiteIdentityProps) {
@@ -18,6 +17,7 @@ export function FeaturedSocialImage({ avatarSrc }: SiteIdentityProps) {
     <div
       style={{
         fontFamily: "Roboto",
+        boxSizing: "border-box",
         padding: "4rem",
         width: "100%",
         height: "100%",
@@ -75,6 +75,8 @@ export function FeaturedSocialImage({ avatarSrc }: SiteIdentityProps) {
 
       <div
         style={{
+          position: "relative",
+          zIndex: 1,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -88,8 +90,8 @@ export function FeaturedSocialImage({ avatarSrc }: SiteIdentityProps) {
             borderRadius: "9999px",
             border: "2px solid #737373",
           }}
-          src={avatarSrc ?? `${serverConfig.app.url}${pathLocator.assets.avatar}`}
-          alt={serverConfig.app.title}
+          src={avatarSrc}
+          alt={staticConfig.app.title}
           width={210}
           height={210}
         />
@@ -106,7 +108,7 @@ export function FeaturedSocialImage({ avatarSrc }: SiteIdentityProps) {
               marginBottom: "2.5rem",
             }}
           >
-            {serverConfig.app.title}
+            {staticConfig.app.title}
           </div>
           <div
             style={{
@@ -143,6 +145,7 @@ export function BlogPostCoverSocialImage({
     <div
       style={{
         fontFamily: "Roboto",
+        boxSizing: "border-box",
         padding: "4rem",
         width: "100%",
         height: "100%",
@@ -197,11 +200,15 @@ export function BlogPostCoverSocialImage({
 
       <h1
         style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
           textAlign: "center",
-          fontSize: "6rem",
-          marginTop: "-1rem",
+          fontSize: title.length > 60 ? "4rem" : "6rem",
+          lineHeight: 1.1,
+          marginTop: 0,
           textWrap: "balance",
-          marginBottom: `${Math.max(2, 8 - (title.length / 20) * 3)}rem`,
+          marginBottom: "2rem",
         }}
       >
         {title}
@@ -209,6 +216,8 @@ export function BlogPostCoverSocialImage({
 
       <div
         style={{
+          position: "relative",
+          zIndex: 1,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -221,8 +230,8 @@ export function BlogPostCoverSocialImage({
             borderRadius: "9999px",
             border: "2px solid #737373",
           }}
-          src={avatarSrc ?? `${serverConfig.app.url}${pathLocator.assets.avatar}`}
-          alt={serverConfig.app.title}
+          src={avatarSrc}
+          alt={staticConfig.app.title}
           width={60}
           height={60}
         />
@@ -238,7 +247,7 @@ export function BlogPostCoverSocialImage({
               lineHeight: "1.75rem",
             }}
           >
-            {serverConfig.app.title}
+            {staticConfig.app.title}
           </div>
           <div
             style={{

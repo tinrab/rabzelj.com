@@ -16,7 +16,7 @@ Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), [Doc
 
 Run Minikube, or configure `kubectl` for some other provider.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 minikube start [--vm-driver=<driver>]
 ```
 
@@ -24,13 +24,13 @@ minikube start [--vm-driver=<driver>]
 
 Install [golang/dep](https://github.com/golang/dep), a tool for dependency management. Using it will simplify building Docker images.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 go get -u github.com/golang/dep/cmd/dep
 ```
 
 Create `first` directory, and initialize `dep` inside it.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 mkdir first && cd first
 dep init
 ```
@@ -87,19 +87,19 @@ For this example, the image will be pushed to [Docker Hub](https://hub.docker.co
 
 Log-in with your Docker account.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 docker login
 ```
 
 Run the following command; replacing `<username>` with your Docker Hub username and `<image>` with repository's name.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 docker build -t <username>/<image>
 ```
 
 Push it to Docker Hub.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 docker push <username>/<image>
 ```
 
@@ -147,13 +147,13 @@ spec:
 
 Create resources.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 kubectl apply -f first.yaml
 ```
 
 Try calling the service.
 
-```bash {commandLine:2}
+```bash {"commandLines":"1"}
 curl $(minikube service tutorial --url)
 first
 ```

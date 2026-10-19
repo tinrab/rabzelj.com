@@ -14,13 +14,13 @@ In the first part ([Build a Todo List with Angular and Google App Engine - Part 
 
 Create a new Angular project.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 ng new $PROJECT_NAME --style=scss --routing=true --skip-commit=true
 ```
 
 Run development server, preferably in the background.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 ng serve &
 ```
 
@@ -52,7 +52,7 @@ export const environment = {
 
 Create the user model class.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 ng g class user.model
 ```
 
@@ -76,7 +76,7 @@ Import Google API library in the head section inside `index.html`.
 
 Create the authentication service.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 ng g service auth
 ```
 
@@ -96,7 +96,7 @@ export class AuthService {}
 
 Add an import for `HttpClientModule` and a provider for your authentication service inside `app.module.ts` file.
 
-```typescript {highlight:3,6,13,16}
+```typescript {"highlightLines":"3,6,13,16"}
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
 import { HttpClientModule } from "@angular/common/http";
@@ -204,7 +204,7 @@ If user refreshes the page, he'll remain signed-in, because the old instance of 
 
 Create two new components.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 ng g component sign-in
 ng g component list
 ```
@@ -213,7 +213,7 @@ The sign-in component will act as a sign-in page, and list component is where th
 
 Create a guard for preventing unauthenticated access.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 ng g guard auth
 ```
 
@@ -355,7 +355,7 @@ You need another service to handle operations with todos.
 
 Create the todo model class.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 ng g class todo.model
 ```
 
@@ -373,7 +373,7 @@ export class Todo {
 
 Create the todo service.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 ng g service todo
 ```
 
@@ -395,7 +395,7 @@ export class TodoService {}
 
 Add `TodoService` to the providers array inside `app.module.ts`.
 
-```typescript {highlight:1,13}
+```typescript {"highlightLines":"1,13"}
 import { TodoService } from "./todo.service";
 @NgModule({
   declarations: [AppComponent, SignInComponent, ListComponent],
@@ -467,13 +467,13 @@ Time to display the todo list.
 
 Create the todo component.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 ng g component todo
 ```
 
 Add an input property inside `todo.component.ts` to hold the todo model.
 
-```typescript {highlight:1,10-11}
+```typescript {"highlightLines":"1,10-11"}
 import { Component, Input } from "@angular/core";
 import { Todo } from "../todo.model";
 
@@ -497,7 +497,7 @@ Display todo's title in the template.
 
 To display todos in a list, call the service inside a `ngAfterViewInit` lifecycle hook and set resulting data to a `todos` property.
 
-```typescript {highlight:1,5-6,13,15,19,23-26}
+```typescript {"highlightLines":"1,5-6,13,15,19,23-26"}
 import { Component, AfterViewInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { AuthService } from "../auth.service";
@@ -551,7 +551,7 @@ Sign in and observe your list of todos.
 
 First off, import `FormsModule` inside your root module.
 
-```typescript {highlight:1,11}
+```typescript {"highlightLines":"1,11"}
 import { FormsModule } from '@angular/forms';
 @NgModule({
   declarations: [
@@ -624,7 +624,7 @@ Update the todo component's template file.
 
 Add some properties and write a couple of functions in `todo.component.ts`.
 
-```typescript {highlight:4-5,16-19,21,23-35}
+```typescript {"highlightLines":"4-5,16-19,21,23-35"}
 import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { Todo } from "../todo.model";
 @Component({
@@ -686,7 +686,7 @@ Add a delete button to todo's template.
 
 Update `todo.component.ts` to handle the deletion. This is similar as updating.
 
-```typescript {highlight:3-4,7,10-12}
+```typescript {"highlightLines":"3-4,7,10-12"}
 export class TodoComponent {
   // ...
   @Output()
@@ -704,7 +704,7 @@ export class TodoComponent {
 
 Bind delete request to the delete handler inside list component's template.
 
-```html {highlight:4}
+```html {"highlightLines":"4"}
 <app-todo
   [item]="todo"
   (updateRequest)="updateTodo(todo, $event)"
@@ -744,7 +744,7 @@ At this point, your To-Do app should look as awesome as this.
 
 You can make it look even better with [Angular Material](https://material.angular.io/). First off, install some dependencies.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 npm install --save @angular/material @angular/cdk @angular/animations normalize.css
 ```
 
@@ -925,7 +925,7 @@ env_variables:
 
 Modify the `build` script and add a `deploy` script inside `package.json`.
 
-```json {highlight:3-4}
+```json {"highlightLines":"3-4"}
 {
   "scripts": {
     "build": "ng build --target=production --output-path=./server/static",
@@ -938,7 +938,7 @@ Above setup assumes your Google App Engine project is located inside `server` di
 
 Now build the app and deploy it.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 export PROJECT_ID=[PROJECT_ID]
 npm run build && npm run deploy
 ```

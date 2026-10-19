@@ -3,7 +3,6 @@ export const pathLocator = {
     index: "/blog",
     post: {
       index: (slug: string) => `/blog/${slug}`,
-      asset: (slug: string, assetPath: string) => `/_assets/blog/post/${slug}/${assetPath}`,
     },
     tags: {
       page: (slug: string): string => `/blog/tags/${slug}`,
@@ -14,7 +13,5 @@ export const pathLocator = {
     avatar: "/icon.png",
     blogPostCover: (slug: string): string => `/api/images/blog/post/cover/${slug}`,
     featured: "/api/images/featured",
-    generatedBlogPostCover: (slug: string): string => `/_assets/images/blog/post/cover/${slug}.png`,
-    generatedFeatured: "/_assets/images/featured.png",
   },
 };

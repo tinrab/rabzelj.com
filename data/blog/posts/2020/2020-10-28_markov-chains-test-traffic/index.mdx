@@ -15,7 +15,7 @@ Example code is available on [GitHub](https://github.com/tinrab/rusty-markov-tra
 # Markov chains
 
 A Markov chain is a stochastic model telling us probability of an event based on previously observed events.
-Probability of next event $$X_{n+1}$$ is determined by last known event $$P(X_{n+1}|X_{n})$$ or previous $m$ events, which gives us a Markov chain of order $$m$$:
+Probability of next event $X_{n+1}$ is determined by last known event $P(X_{n+1}|X_{n})$ or previous $m$ events, which gives us a Markov chain of order $m$:
 
 $$
 P(X_{n}=x_{n}|X_{n-1}=x_{n-1},...,X_{n-m}=x_{n-m}), n\gt m.
@@ -23,9 +23,9 @@ $$
 
 We can track actual user behaviour and build a model by counting events and calculating weighted probabilities for each event based on events preceding them.
 
-For example, $$10$$ users finished writing a blog post.
-$$9$$ users later published it and one of them trashed it.
-This gives us probabilities $$P(PostPublished|PostFinished)=0.9$$ and $$P(PostTrashed|PostFinished)=0.1$$.
+For example, $10$ users finished writing a blog post.
+$9$ users later published it and one of them trashed it.
+This gives us probabilities $P(PostPublished|PostFinished)=0.9$ and $P(PostTrashed|PostFinished)=0.1$.
 We can then selected a random event with [roulette wheel selection](https://en.wikipedia.org/wiki/Fitness_proportionate_selection).
 
 This is useful for stress or smoke testing when you need some fake traffic that resembles real users.
@@ -48,8 +48,8 @@ where
 }
 ```
 
-To build a model we have to go through all observed events and count the number of times $$n$$-th event occured after all $$n>m$$ events.
-We also track last known $$m$$ events inside the `memory` vector, which will be used to generate the next event.
+To build a model we have to go through all observed events and count the number of times $n$-th event occured after all $n>m$ events.
+We also track last known $m$ events inside the `memory` vector, which will be used to generate the next event.
 
 ```rust
 impl<T> MarkovChain<T>
@@ -216,7 +216,7 @@ for action in chain.iter().take(16) {
 
 Which gives us the following output.
 
-```bash {commandLine:2-21}
+```bash {"commandLines":"1"}
 cargo run --example traffic
 ## New session ##
 SignIn
@@ -239,9 +239,9 @@ CreateTodo
 DeleteTodo
 ```
 
-Notice how after each `SignIn` there's a `ListTodos`, which means $$P(ListTodos|SignIn)=1$$.
+Notice how after each `SignIn` there's a `ListTodos`, which means $P(ListTodos|SignIn)=1$.
 Built model can represent inherent rules of our application.
-Some series of actions will not be generated, those having probability $$0$$, which is a lot better than uniformly generated random data.
+Some series of actions will not be generated, those having probability $0$, which is a lot better than uniformly generated random data.
 
 Some combination of actions might not be possible, because they'd break business rules.
 Those can be filtered out, or left in to test invalid requests.

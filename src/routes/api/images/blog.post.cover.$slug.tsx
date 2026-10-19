@@ -1,34 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { loadBlogPost } from "~/lib/blog/post/loader";
-import { pathLocator } from "~/lib/path-locator";
 import { BlogPostCoverSocialImage, SOCIAL_IMAGE_SIZE } from "~/lib/social-image";
+
+import avatarSrc from "../../../../public/icon.png?inline";
 
 export const Route = createFileRoute("/api/images/blog/post/cover/$slug")({
   server: {
     handlers: {
-      GET: async ({ params, request }) => {
+      GET: async ({ params }) => {
         const post = await loadBlogPost(params.slug);
         if (!post) {
           return new Response(null, { status: 404 });
         }
 
-        if (process.env.NODE_ENV === "production") {
-          return new Response(null, {
-            status: 302,
-            headers: {
-              "Cache-Control": "public, max-age=604800, stale-while-revalidate=86400",
-              Location: new URL(
-                pathLocator.assets.generatedBlogPostCover(params.slug),
-                request.url,
-              ).toString(),
-            },
-          });
-        }
-
         const { renderImage } = await import("~/lib/render-image");
         const image = await renderImage(
           BlogPostCoverSocialImage({
+            avatarSrc,
             slug: params.slug,
             title: post.title,
           }),
@@ -39,7 +28,7 @@ export const Route = createFileRoute("/api/images/blog/post/cover/$slug")({
           status: 200,
           headers: {
             "Content-Type": "image/png",
-            "Cache-Control": "public, max-age=604800, state-while-revalidate=86400",
+            "Cache-Control": "public, max-age=604800, stale-while-revalidate=86400",
           },
         });
       },
