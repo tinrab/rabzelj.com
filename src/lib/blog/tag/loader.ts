@@ -1,9 +1,10 @@
-import { blogData } from "~/-generated/blog";
+import { loadBlogData } from "~/lib/blog/loader";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
 import { type BlogTagData, type BlogTagPostCountData } from "~/lib/blog/tag/schema";
 import { blogTagIsNote } from "~/lib/blog/tag/utility";
 
 export async function loadBlogTags(): Promise<BlogTagData[]> {
+  const blogData = await loadBlogData();
   return blogData.tags;
 }
 

@@ -1,4 +1,4 @@
-import { blogData } from "~/-generated/blog";
+import { loadBlogData } from "~/lib/blog/loader";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
 import {
   type BlogSeriesData,
@@ -7,6 +7,7 @@ import {
 } from "~/lib/blog/series/schema";
 
 export async function loadBlogSeries(): Promise<BlogSeriesData[]> {
+  const blogData = await loadBlogData();
   return blogData.series;
 }
 

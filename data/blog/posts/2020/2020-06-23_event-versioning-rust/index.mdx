@@ -138,7 +138,7 @@ pub enum Event {
 
 Declare a new version in `VersionedEvent`.
 
-```rust {highlight:6-7}
+```rust {"highlightLines":"6-7"}
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "version")]
 pub enum VersionedEvent {

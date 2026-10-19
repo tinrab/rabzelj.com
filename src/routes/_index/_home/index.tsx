@@ -82,8 +82,8 @@ function RouteComponent() {
       </div>
 
       <blockquote className="mb-8 max-w-md border-l-2 pl-6 text-lg italic">
-        Working with Rust, TypeScript, React.js. Focusing on distributed systems, microservices, AI,
-        CUDA, graphics programming, osdev, and no-code.
+        Working with Rust, TypeScript, React.js. Currently focusing on AI, CUDA, distributed
+        systems.
       </blockquote>
 
       <div className="mb-5 flex space-x-6">

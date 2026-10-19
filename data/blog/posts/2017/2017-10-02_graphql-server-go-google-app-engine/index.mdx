@@ -38,7 +38,7 @@ func init() {
 
 Run the development server and keep it running in the background.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 dev_appserver.py .
 ```
 
@@ -88,7 +88,7 @@ type Post struct {
 
 First off, install [graphql-go/graphql](https://github.com/graphql-go/graphql) package to work with GraphQL.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 go get github.com/graphql-go/graphql
 ```
 
@@ -190,7 +190,7 @@ mutation {
 
 Run it using cURL.
 
-```bash {commandLine:2-14}
+```bash {"commandLines":"1"}
 curl localhost:8080 -d 'mutation{john:createUser(name:"John"){id},bob:createUser(name:"Bob"){id},mark:createUser(name:"Mark"){id}}'
 {
   "data": {
@@ -225,7 +225,7 @@ var postType = graphql.NewObject(graphql.ObjectConfig{
 
 Update the `rootMutation`.
 
-```go {highlight:11-18}
+```go {"highlightLines":"11-18"}
 var rootMutation = graphql.NewObject(graphql.ObjectConfig{
   Name: "RootMutation",
   Fields: graphql.Fields{
@@ -271,7 +271,7 @@ func createPost(params graphql.ResolveParams) (interface{}, error) {
 
 Create a few posts for one of the existing users.
 
-```bash {commandLine:2-17}
+```bash {"commandLines":"1"}
 curl localhost:8080 -d 'mutation{a:createPost(userId:"5768037999312896",content:"Hi!"){id,content},b:createPost(userId:"5768037999312896",content:"lol"){id,content},c:createPost(userId:"5768037999312896",content:"GraphQL is pretty cool!"){id,content}}'
 {
   "data": {
@@ -333,7 +333,7 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 
 Update the `init` function.
 
-```go {highlight:4}
+```go {"highlightLines":"4"}
 func init() {
   schema, _ = graphql.NewSchema(graphql.SchemaConfig{
     Mutation: rootMutation,
@@ -390,7 +390,7 @@ You could pass in more arguments alongside `limit` and `offset`. For example, a 
 
 Test it out.
 
-```bash {commandLine:2-24}
+```bash {"commandLines":"1"}
 curl localhost:8080 -d '{posts{totalCount,nodes{id,content,createdAt}}}'
 {
   "data": {
@@ -419,7 +419,7 @@ curl localhost:8080 -d '{posts{totalCount,nodes{id,content,createdAt}}}'
 
 Try with limit and offset.
 
-```bash {commandLine:2-13}
+```bash {"commandLines":"1"}
 curl localhost:8080 -d '{posts(limit:1,offset:1){totalCount,nodes{id,content,createdAt}}}'
 {
   "data": {
@@ -441,7 +441,7 @@ To fetch a user, you must perform a user query (`queryUser`) and then a nested q
 
 Update the user type.
 
-```go {highlight:6}
+```go {"highlightLines":"6"}
 var userType = graphql.NewObject(graphql.ObjectConfig{
   Name: "User",
   Fields: graphql.Fields{
@@ -454,7 +454,7 @@ var userType = graphql.NewObject(graphql.ObjectConfig{
 
 Update the root query.
 
-```go {highlight:4-11}
+```go {"highlightLines":"4-11"}
 var rootQuery = graphql.NewObject(graphql.ObjectConfig{
   Name: "RootQuery",
   Fields: graphql.Fields{
@@ -516,7 +516,7 @@ func queryPostsByUser(params graphql.ResolveParams) (interface{}, error) {
 
 Fetch posts of one of the users.
 
-```bash {commandLine:2-21}
+```bash {"commandLines":"1"}
 curl localhost:8080 -d '{user(id:"5768037999312896"){name,posts{totalCount,nodes{content}}}}'
 {
   "data": {

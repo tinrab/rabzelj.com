@@ -1,6 +1,5 @@
 import { defineCommand, runMain } from "citty";
 
-import { generate } from "./generate";
 import { loadExternalBlog } from "./load-external-blog";
 
 const main = defineCommand({
@@ -12,15 +11,6 @@ const main = defineCommand({
       },
       async run() {
         await loadExternalBlog();
-      },
-    }),
-    generate: defineCommand({
-      meta: {
-        name: "generate",
-        description: "Generate assets.",
-      },
-      async run() {
-        await generate();
       },
     }),
   },

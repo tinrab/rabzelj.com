@@ -8,38 +8,27 @@ export function MdxContentHeading({
   id,
   children,
   ...props
-}: {
+}: React.HTMLAttributes<HTMLHeadingElement> & {
   lowerHeadings?: boolean;
-} & React.ComponentProps<typeof Typography>) {
+  variant: "h1" | "h2" | "h3";
+}) {
   const effectiveVariant = lowerHeadings
     ? variant === "h1"
       ? "h2"
       : variant === "h2"
         ? "h3"
-        : variant === "h3"
-          ? "h4"
-          : variant
+        : "h4"
     : variant;
-  const VariantComponent = effectiveVariant as React.ElementType;
 
-  if (id) {
-    return (
-      <Typography
-        id={id}
-        gutter
-        variant={effectiveVariant}
-        render={
-          <a href={`#${id}`} className="no-underline">
-            <VariantComponent>{children}</VariantComponent>
-          </a>
-        }
-        {...props}
-      />
-    );
-  }
   return (
     <Typography id={id} gutter variant={effectiveVariant} {...props}>
-      {children}
+      {id ? (
+        <a href={`#${id}`} className="no-underline">
+          {children}
+        </a>
+      ) : (
+        children
+      )}
     </Typography>
   );
 }

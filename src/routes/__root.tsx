@@ -7,6 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { Toaster } from "~/components/ui/sonner";
 import { loadClientConfig } from "~/config/client";
 import { makeClientConfigScript } from "~/config/utility";
+import "~/lib/blog/assets";
 import { pageMiddleware } from "~/lib/middleware";
 import { pathLocator } from "~/lib/path-locator";
 import { getThemeServerFn } from "~/lib/theme/fn";
@@ -69,6 +70,7 @@ export const Route = createRootRoute({
         { property: "og:type", content: "website" },
         {
           property: "og:image",
+          name: "image",
           content: `${app.url}${pathLocator.assets.featured}`,
         },
       ],
@@ -93,15 +95,6 @@ export const Route = createRootRoute({
         },
         { rel: "manifest", href: "/manifest.json" },
         { rel: "icon", href: "/favicon.ico" },
-
-        // Katex
-        // <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">
-        {
-          rel: "stylesheet",
-          href: "https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css",
-          integrity: "sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib",
-          crossOrigin: "anonymous",
-        },
       ],
     };
   },

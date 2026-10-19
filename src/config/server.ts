@@ -9,7 +9,6 @@ const serverConfigSchema = z.object({
     domain: z.string(),
     title: z.string(),
     description: z.string(),
-    dataDir: z.string(),
   }),
 });
 
@@ -23,7 +22,6 @@ const loadServerConfig = createServerOnlyFn((): ServerConfig => {
       ...staticConfig.app,
       url: siteUrl,
       domain: siteUrl && new URL(siteUrl).hostname,
-      dataDir: process.env.TIN_APP_DATA_DIR,
     },
   });
 });

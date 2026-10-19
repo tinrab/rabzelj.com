@@ -19,7 +19,7 @@ export function makeSeo({
 
   const pageTitle = `${title} | ${clientConfig.app.title}`;
 
-  const tags = [
+  const tags: Array<React.JSX.IntrinsicElements["meta"]> = [
     { title: pageTitle },
 
     { property: "og:title", content: pageTitle },
@@ -32,7 +32,7 @@ export function makeSeo({
   }
 
   if (image) {
-    tags.push({ property: "og:image", content: image });
+    tags.push({ property: "og:image", name: "image", content: image });
   }
 
   if (properties) {

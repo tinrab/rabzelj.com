@@ -3,8 +3,8 @@ import type React from "react";
 import { IconSlash } from "@tabler/icons-react";
 import { useState } from "react";
 
-import { GridFadeLine } from "~/components/GridFadeLine";
 import { HeaderContextProvider, useHeaderContext } from "~/components/layout/header-context";
+import { StructuralGrid } from "~/components/StructuralGrid";
 import { cn } from "~/lib/utility";
 
 export type HeaderProps = React.HtmlHTMLAttributes<HTMLDivElement>;
@@ -15,11 +15,11 @@ export function Header({ children, className, ...props }: HeaderProps) {
   return (
     <HeaderContextProvider menuOpen={menuOpen} onMenuOpenChange={setMenuOpen}>
       <header
-        className={cn("bg-background/95 relative w-full overflow-hidden", className)}
+        className={cn("bg-background relative w-full overflow-hidden border-b", className)}
         {...props}
       >
-        <GridFadeLine fadeDirection="down" className="opacity-60" />
-        <div className="relative z-10 flex flex-col items-center px-4">{children}</div>
+        <StructuralGrid />
+        <div className="relative z-10 flex flex-col items-center">{children}</div>
       </header>
     </HeaderContextProvider>
   );

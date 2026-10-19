@@ -132,7 +132,7 @@ You can implement an in-memory database, which conforms to `Repository` interfac
 
 Create `docker-compose.yaml` file in your project's root directory and declare the `postgres` service in it.
 
-```yaml {highlight:4-11}
+```yaml {"highlightLines":"4-11"}
 version: "3.6"
 
 services:
@@ -231,7 +231,7 @@ Meows are being ordered by their primary key, because keys will be k-sortable by
 
 Add `nats` service to `docker-compose.yaml`.
 
-```yaml {highlight:2-5}
+```yaml {"highlightLines":"2-5"}
 services:
   nats:
     image: "nats-streaming:0.9.2"
@@ -406,7 +406,7 @@ func (e *NatsEventStore) SubscribeMeowCreated() (<-chan MeowCreatedMessage, erro
 
 Update `docker-compose.yaml` file.
 
-```yaml {highlight:2-4}
+```yaml {"highlightLines":"2-4"}
 services:
   elasticsearch:
   image: "docker.elastic.co/elasticsearch/elasticsearch:6.2.3"
@@ -1237,7 +1237,7 @@ Reverse proxy will route traffic from and to the front-end app.
 
 Update `docker-compose.yaml` file.
 
-```yaml {highlight:2-10}
+```yaml {"highlightLines":"2-10"}
 services:
   nginx:
     build: "./nginx"
@@ -1308,14 +1308,14 @@ http {
 
 Create a vue app using [vue-cli](https://github.com/vuejs/vue-cli) 3.0+. Include Vuex when asked to select features.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 vue create frontend
 cd frontend
 ```
 
 Add all necessary dependencies.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 yarn add bootstrap timeago.js axios vue-native-websocket
 ```
 
@@ -1455,7 +1455,7 @@ actions: {
 
 At the end of `store.js` file, dispatch the `getMeows` action to fetch meows when the page loads.
 
-```js {highlight:1}
+```js {"highlightLines":"1"}
 store.dispatch("getMeows");
 
 export default store;
@@ -1649,7 +1649,7 @@ Include search and timeline components inside `src/App.vue`.
 
 At this point everything should work as expected. To run the app, first build Docker images with Docker Compose and then start Vue development server.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 docker-compose up -d --build
 cd frontend && yarn serve
 ```

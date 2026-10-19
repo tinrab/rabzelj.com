@@ -1,7 +1,7 @@
 import { IconAlertTriangle } from "@tabler/icons-react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { createMdxContent } from "@temelj/mdx-react";
+import { HtmlContent } from "@temelj/mdx-react";
 import { z } from "zod";
 
 import { BlogNoteAlert } from "~/components/blog/BlogNoteAlert";
@@ -14,21 +14,21 @@ import { clientConfig } from "~/config/client";
 import { loadBlogPost } from "~/lib/blog/post/loader";
 import { loadBlogSeriesWithPosts } from "~/lib/blog/series/loader";
 import { blogTagIsNote } from "~/lib/blog/tag/utility";
-import { mdxPageLowerHeadingComponents } from "~/lib/mdx/components/registry";
+import { mdxPageRegistry } from "~/lib/mdx/components/registry";
 import { pageMiddleware } from "~/lib/middleware";
 import { pathLocator } from "~/lib/path-locator";
 import { makeSeo } from "~/lib/seo";
 
 const loadRouteData = createServerFn({ method: "GET" })
   .middleware([pageMiddleware])
-  .inputValidator(
+  .validator(
     z.object({
       slug: z.string().min(1),
     }),
   )
   .handler(async ({ data: { slug } }) => {
     const post = await loadBlogPost(slug, {
-      includeArtifact: true,
+      includeContent: true,
       includeRelated: true,
     });
     if (!post) {
@@ -71,14 +71,6 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
 function RouteComponent() {
   const { post, series } = Route.useLoaderData();
 
-  const content = post.artifact?.compiled
-    ? createMdxContent(
-        {
-          artifact: post.artifact,
-        },
-        mdxPageLowerHeadingComponents,
-      )
-    : undefined;
   const isNote = post.tags.some(blogTagIsNote);
   const toc = post.toc;
 
@@ -94,11 +86,11 @@ function RouteComponent() {
 
       {isNote ? <BlogNoteAlert className="mt-4" /> : undefined}
 
-      {post.cover?.srcSet ? (
+      {post.cover ? (
         <img
           className="mx-auto mt-4 flex flex-col gap-2 text-center"
           alt="cover"
-          srcSet={post.cover.srcSet}
+          src={post.cover.src}
           width={post.cover.width}
           height={post.cover.height}
         />
@@ -134,7 +126,9 @@ function RouteComponent() {
 
       {toc?.length ? <BlogPostTableOfContents items={toc} /> : undefined}
 
-      <section className="pt-6">{content}</section>
+      <section className="pt-6">
+        {post.content ? <HtmlContent tree={post.content} registry={mdxPageRegistry} /> : undefined}
+      </section>
 
       <Separator className="my-4" />
 

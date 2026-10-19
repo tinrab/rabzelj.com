@@ -33,7 +33,7 @@ $$
 
 Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aliquam, ex.
 
-```rust { "highlight": "5..=7", "showLineNumbers": true }
+```rust {"highlightLines":"6-8","lineNumbers":true}
 pub fn fft(input: &[Complex64]) -> Vec<Complex64> {
     let n = input.len();
     if n <= 1 {
@@ -61,7 +61,7 @@ pub fn fft(input: &[Complex64]) -> Vec<Complex64> {
 
 Lorem ipsum dolor sit amet, consectetur `f(n) = n * 2` adipisicing elit. Enim, velit.
 
-```bash { "commandLine": "0" }
+```bash {"commandLines":"1"}
 ls -la
 total 12
 drwxrwxr-x  3 tin  tin  4096 Jun  7 03:17 .
@@ -96,24 +96,5 @@ $$
 Lorem ipsum, dolor sit amet consectetur adipisicing elit. Deserunt, nam.
 
 # Export JSX
-
-export function Demo() {
-  let count = 0;
-  return (
-    <div className="border p-4 flex flex-col items-start gap-4">
-      <h1>Hello, JSX!</h1>
-      <button
-        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-        onClick={() => {
-          count++;
-          document.getElementById("v-count").textContent = count.toString();
-        }}
-      >
-        Button
-      </button>
-      <p id="v-count">{count}</p>
-    </div>
-  );
-}
 
 <Demo />

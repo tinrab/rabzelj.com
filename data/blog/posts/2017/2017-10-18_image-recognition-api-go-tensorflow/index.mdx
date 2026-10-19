@@ -143,7 +143,7 @@ func main() {
 
 Now build the container and make sure everything works.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 docker-compose -f docker-compose.yaml up --build
 ```
 
@@ -223,7 +223,7 @@ func responseJSON(w http.ResponseWriter, data interface{}) {
 
 Register a new HTTP handler inside `main` function.
 
-```go {highlight:6-8}
+```go {"highlightLines":"6-8"}
 func main() {
   if err := loadModel(); err != nil {
     log.Fatal(err)
@@ -413,13 +413,13 @@ responseJSON(w, ClassifyResult{
 
 Rebuild the container.
 
-```bash {commandLine}
+```bash {"commandLines":true}
 docker-compose -f docker-compose.yaml up -d --build
 ```
 
 Try calling the `localhost:8080/recognize` endpoint with a couple of images.
 
-```bash {commandLine:2-11}
+```bash {"commandLines":"1"}
 curl localhost:8080/recognize -F 'image=@./cat.jpg'
 {
   "filename": "cat.jpg",
