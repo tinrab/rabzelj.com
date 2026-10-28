@@ -31,6 +31,7 @@
     "@temelj/request": "^0.13.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cn": "^0.5.0",
     "katex": "^0.19.0",
     "next-themes": "^0.4.6",
     "react": "^19.3.1",

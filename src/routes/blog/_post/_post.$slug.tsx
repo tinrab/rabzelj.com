@@ -37,7 +37,10 @@ const loadRouteData = createServerFn({ method: "GET" })
 
     const series = post.series ? await loadBlogSeriesWithPosts(post.series) : undefined;
 
-    return { post, series };
+    const isOutdated =
+      new Date(post.publishedDate).getTime() < Date.now() - 1000 * 60 * 60 * 24 * 180;
+
+    return { post, series, isOutdated };
   });
 
 export const Route = createFileRoute("/blog/_post/_post/$slug")({
@@ -69,7 +72,7 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
 });
 
 function RouteComponent() {
-  const { post, series } = Route.useLoaderData();
+  const { post, series, isOutdated } = Route.useLoaderData();
 
   const isNote = post.tags.some(blogTagIsNote);
   const toc = post.toc;
@@ -98,7 +101,7 @@ function RouteComponent() {
 
       <Separator className="my-4" />
 
-      {new Date(post.publishedDate).getTime() < Date.now() - 1000 * 60 * 60 * 24 * 180 && (
+      {isOutdated && (
         <Typography className="text-error mb-4 flex items-center gap-2 text-sm">
           <IconAlertTriangle />
           This blog post is more than 6 months old and may contain outdated information.

@@ -1,5 +1,5 @@
 :root {
-  --code-padding: 1rem;
+  --code-padding: 0.75rem;
   --line-number-width-default: 0;
   --code-line-number-color: 0 0% 9%;
   --code-line-highlight: 0 0% 9%;
@@ -13,8 +13,6 @@
 pre.shiki {
   display: block;
   overflow-x: auto;
-  padding-top: var(--code-padding);
-  padding-bottom: var(--code-padding);
 
   /* In case no language is specified for Shiki */
   background-color: rgb(250, 250, 250);
@@ -32,8 +30,6 @@ code {
   display: block;
   width: fit-content;
   min-width: 100%;
-  padding-left: var(--code-padding);
-  padding-right: var(--code-padding);
 
   white-space: pre;
   word-spacing: normal;

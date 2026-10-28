@@ -35,8 +35,6 @@ export function ThemeProvider({
   // Applies theme to the document.
   const applyTheme = useCallback(
     (newTheme: Theme) => {
-      setTheme(newTheme);
-
       if (typeof localStorage !== "undefined") {
         localStorage.setItem(storageKey, newTheme);
       }
@@ -64,30 +62,28 @@ export function ThemeProvider({
 
       void changeThemeServerFn({ data: { theme: newTheme } });
 
+      setTheme(newTheme);
       applyTheme(newTheme);
     },
     [theme, applyTheme],
   );
 
   // Listen to system theme preference
-  const handleMediaQuery = useCallback(
-    (event: MediaQueryListEvent | MediaQueryList) => {
-      if (initialTheme !== Theme.SYSTEM) {
-        return;
-      }
-      applyTheme(getSystemTheme(event));
-    },
-    [applyTheme, initialTheme],
-  );
+  const handleMediaQuery = useCallback(() => {
+    if (theme !== Theme.SYSTEM) {
+      return;
+    }
+    applyTheme(theme);
+  }, [applyTheme, theme]);
   useEffect(() => {
     const media = window.matchMedia(THEME_MEDIA_QUERY);
 
     // Intentionally use deprecated listener methods to support iOS & old browsers
     media.addListener(handleMediaQuery);
-    handleMediaQuery(media);
+    applyTheme(theme);
 
     return () => media.removeListener(handleMediaQuery);
-  }, [handleMediaQuery]);
+  }, [handleMediaQuery, applyTheme, theme]);
 
   return (
     <ThemeProviderContext.Provider
