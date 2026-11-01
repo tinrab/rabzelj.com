@@ -34,5 +34,5 @@ export async function loadBlogTagPostCounts(
     }
   }
 
-  return selectedTags.sort((a, b) => b.postCount - a.postCount);
+  return selectedTags.sort((a, b) => b.postCount - a.postCount || a.title.localeCompare(b.title));
 }

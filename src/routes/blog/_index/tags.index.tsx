@@ -11,7 +11,7 @@ const loadRouteData = createServerFn({ method: "GET" })
   .handler(async () => {
     const tags = await loadBlogTagPostCounts();
 
-    return { tags: tags.sort((a, b) => a.title.localeCompare(b.title)) };
+    return { tags };
   });
 
 export const Route = createFileRoute("/blog/_index/tags/")({
