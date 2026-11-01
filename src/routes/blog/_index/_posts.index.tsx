@@ -1,9 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
+import { BlogIndexHeader } from "~/components/blog/BlogIndexHeader";
 import { BlogPostList } from "~/components/blog/BlogPostList";
-import { BlogTagChip } from "~/components/blog/BlogTagChip";
-import { Typography } from "~/components/Typography";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
 import { groupBlogPosts } from "~/lib/blog/post/utility";
 import { pageMiddleware } from "~/lib/middleware";
@@ -25,26 +24,13 @@ function RouteComponent() {
   const { groupedPosts } = Route.useLoaderData();
 
   return (
-    <BlogPostList
-      posts={groupedPosts}
-      renderPost={(post) => (
-        <div className="flex flex-col">
-          <Typography
-            variant="a"
-            className="mb-1"
-            render={
-              <Link to="/blog/$slug" params={{ slug: post.slug }}>
-                {post.title}
-              </Link>
-            }
-          />
-          <div className="flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <BlogTagChip key={tag.slug} tag={tag} variant="ghost" />
-            ))}
-          </div>
-        </div>
-      )}
-    />
+    <>
+      <BlogIndexHeader title="Blog">
+        <p className="text-muted-foreground max-w-xl text-[1.0625rem] leading-relaxed">
+          Writing on Rust, GPU programming, distributed systems and web development.
+        </p>
+      </BlogIndexHeader>
+      <BlogPostList posts={groupedPosts} />
+    </>
   );
 }

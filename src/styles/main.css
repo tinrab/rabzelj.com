@@ -20,6 +20,42 @@
   --link: oklch(0.77 0.16 70);
 }
 
+@layer base {
+  html {
+    font-feature-settings: "kern" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklch, var(--link) 35%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 2px;
+  }
+}
+
+/* Article body: prose stops at the right margin rule, wide blocks run past it. */
+@utility prose-spine {
+  font-size: 1.0625rem;
+
+  & > * {
+    max-width: 40rem;
+  }
+
+  @media (width >= 80rem) {
+    & > * {
+      max-width: calc((100% + 3rem) * 2 / 3 - 3rem);
+    }
+
+    & > :is([data-slot="code-block"], [data-slot="table-container"], .katex-display),
+    & > p:has(> span > img:only-child) {
+      max-width: none;
+    }
+  }
+}
+
 @theme inline {
   --color-link: var(--link);
 

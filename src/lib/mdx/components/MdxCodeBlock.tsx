@@ -12,6 +12,7 @@ import {
   CodeBlockTitle,
 } from "~/components/ui/code-block";
 import { MdxInlineCode } from "~/lib/mdx/components/MdxInlineCode";
+import { cn } from "~/lib/utility";
 
 const CodeBlockContext = createContext(false);
 
@@ -41,7 +42,7 @@ export function MdxCodeBlock({
   );
 
   return (
-    <CodeBlock className={className}>
+    <CodeBlock className={cn("bg-background", className)}>
       {fileName ? (
         <CodeBlockHeader className="pb-3">
           <CodeBlockTitle>

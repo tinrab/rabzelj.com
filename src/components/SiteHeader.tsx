@@ -1,21 +1,6 @@
-import type React from "react";
-
-import { IconMenu } from "@tabler/icons-react";
 import { Link, type ToOptions, useLocation } from "@tanstack/react-router";
 
-import { Header, HeaderRow, HeaderTitle } from "~/components/layout/header";
-import { useHeaderContext } from "~/components/layout/header-context";
-import { HeaderMobile, HeaderMobileTitle } from "~/components/layout/header-mobile";
-import { NavigationList } from "~/components/navigation-list/NavigationList";
-import { NavigationListGroup } from "~/components/navigation-list/NavigationListGroup";
-import { NavigationListLink } from "~/components/navigation-list/NavigationListLink";
-import { Button } from "~/components/ui/button";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "~/components/ui/navigation-menu";
+import { SpineBody, SpineMargin, SpineRow } from "~/components/layout/Spine";
 import { ThemeModeMenu } from "~/lib/theme/ThemeModeMenu";
 import { cn } from "~/lib/utility";
 
@@ -30,73 +15,42 @@ export function SiteHeader() {
   const location = useLocation();
 
   return (
-    <Header>
-      <HeaderRow className="max-w-(--breakpoint-xl) px-4">
-        <Link to="/">
-          <HeaderTitle />
-        </Link>
+    <header className="relative border-b">
+      <SpineRow className="h-14 flex-row items-center xl:items-center">
+        <SpineMargin className="mr-auto xl:mr-0">
+          <Link to="/" className="font-medium tracking-tight">
+            Tin Rabzelj
+          </Link>
+        </SpineMargin>
 
-        <div className="ml-auto flex items-center gap-3">
-          <NavigationMenu className="hidden md:inline-flex">
-            <NavigationMenuList>
-              {links.map((link) => (
-                <NavigationMenuItem key={link.to}>
-                  <NavigationMenuLink
-                    render={
-                      <Link
-                        to={link.to}
-                        className={cn(location.pathname === link.to && "text-foreground")}
-                      >
-                        {link.title}
-                      </Link>
-                    }
-                  />
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
+        <SpineBody className="px-0 md:px-0 xl:px-6">
+          <nav aria-label="Main" className="flex items-center gap-6 text-[0.9375rem]">
+            {links.map((link) => {
+              const active = location.pathname.startsWith(link.to ?? "");
 
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "decoration-link underline-offset-[1.15rem] transition-colors",
+                    active
+                      ? "text-foreground underline decoration-2"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {link.title}
+                </Link>
+              );
+            })}
+          </nav>
+        </SpineBody>
+
+        <div className="pr-2 pl-3 md:pr-4 xl:col-span-1 xl:flex xl:justify-end xl:px-4">
           <ThemeModeMenu />
-
-          <HeaderMobileTrigger />
         </div>
-      </HeaderRow>
-
-      <HeaderMobile>
-        <HeaderMobileTitle className="p-4" />
-
-        <NavigationList className="px-4">
-          <NavigationListGroup>
-            {links.map((link) => (
-              <NavigationListLink
-                key={link.to}
-                variant="solid"
-                selected={location.href === link.to}
-                render={<Link to={link.to}>{link.title}</Link>}
-              />
-            ))}
-          </NavigationListGroup>
-        </NavigationList>
-      </HeaderMobile>
-    </Header>
-  );
-}
-
-type HeaderMobileTriggerProps = React.HTMLAttributes<HTMLButtonElement>;
-
-export function HeaderMobileTrigger({ className, ...props }: HeaderMobileTriggerProps) {
-  const { onMenuOpenChange } = useHeaderContext();
-
-  return (
-    <Button
-      variant="outline"
-      size="icon"
-      className={cn("shrink-0 md:hidden", className)}
-      onClick={() => onMenuOpenChange(true)}
-      {...props}
-    >
-      <IconMenu />
-      <span className="sr-only">Toggle navigation menu</span>
-    </Button>
+      </SpineRow>
+    </header>
   );
 }

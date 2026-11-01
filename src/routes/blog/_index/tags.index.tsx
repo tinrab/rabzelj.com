@@ -1,18 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
-import { Typography } from "~/components/Typography";
+import { BlogIndexHeader } from "~/components/blog/BlogIndexHeader";
+import { SpineBody, SpineRow } from "~/components/layout/Spine";
 import { loadBlogTagPostCounts } from "~/lib/blog/tag/loader";
 import { pageMiddleware } from "~/lib/middleware";
-import { useMediaQuery } from "~/lib/use-media-query";
 
 const loadRouteData = createServerFn({ method: "GET" })
   .middleware([pageMiddleware])
   .handler(async () => {
     const tags = await loadBlogTagPostCounts();
-    const maxPostCount = Math.max(...tags.map((tag) => tag.postCount));
 
-    return { tags, maxPostCount };
+    return { tags: tags.sort((a, b) => a.title.localeCompare(b.title)) };
   });
 
 export const Route = createFileRoute("/blog/_index/tags/")({
@@ -21,43 +20,33 @@ export const Route = createFileRoute("/blog/_index/tags/")({
 });
 
 function RouteComponent() {
-  const data = Route.useLoaderData();
-  const aboveMd = useMediaQuery("(min-width: 768px)");
-  const aboveLg = useMediaQuery("(min-width: 1024px)");
+  const { tags } = Route.useLoaderData();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-6 pb-8 md:pt-12">
-      <section>
-        <Typography variant="h2" className="text-balance" gutterBottom render={<h1>Tags</h1>} />
-      </section>
-
-      <section className="block max-w-5xl text-center">
-        <div className="flex flex-wrap items-center justify-center">
-          {data.tags.map((tag) => (
-            <Typography
-              key={tag.slug}
-              variant="a"
-              className="mx-2 inline-block"
-              style={{
-                fontSize: `${
-                  ((tag.postCount * 3 + data.maxPostCount) / data.maxPostCount) *
-                  (aboveLg ? 1.5 : aboveMd ? 1.2 : 0.8)
-                }rem`,
-                lineHeight: 1.3,
-              }}
-              render={
+    <>
+      <BlogIndexHeader title="Tags" />
+      <SpineRow className="border-t py-8 xl:py-12">
+        <SpineBody wide className="xl:col-start-2">
+          <ul className="grid gap-x-12 sm:grid-cols-2 xl:grid-cols-3">
+            {tags.map((tag) => (
+              <li key={tag.slug}>
                 <Link
                   to="/blog/tags/$slug"
                   params={{ slug: tag.slug }}
-                  className="mx-2 inline-block"
+                  className="group flex items-baseline justify-between gap-4 border-b py-2.5"
                 >
-                  {tag.title}
+                  <span className="decoration-link text-[1.0625rem] underline-offset-[0.3em] group-hover:underline">
+                    {tag.title}
+                  </span>
+                  <span className="text-muted-foreground text-sm tabular-nums">
+                    {tag.postCount}
+                  </span>
                 </Link>
-              }
-            />
-          ))}
-        </div>
-      </section>
-    </div>
+              </li>
+            ))}
+          </ul>
+        </SpineBody>
+      </SpineRow>
+    </>
   );
 }

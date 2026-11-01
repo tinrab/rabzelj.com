@@ -1,122 +1,110 @@
-import {
-  IconBrandBluesky,
-  IconBrandGithub,
-  IconBrandLinkedin,
-  IconBrandX,
-} from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 
+import { BlogPostRows } from "~/components/blog/BlogPostList";
+import { SpineBody, SpineMargin, SpineRow } from "~/components/layout/Spine";
 import { Typography } from "~/components/Typography";
-import { Button } from "~/components/ui/button";
 import { clientConfig } from "~/config/client";
+import { loadBlogPosts } from "~/lib/blog/post/loader";
+import { pageMiddleware } from "~/lib/middleware";
 import { pathLocator } from "~/lib/path-locator";
 import { stringCipher } from "~/lib/string";
 
+const RECENT_POST_COUNT = 6;
+
+const loadRouteData = createServerFn({ method: "GET" })
+  .middleware([pageMiddleware])
+  .handler(async () => {
+    const posts = await loadBlogPosts({ selectNotes: false });
+
+    return { recentPosts: posts.slice(0, RECENT_POST_COUNT) };
+  });
+
 export const Route = createFileRoute("/_index/_home/")({
   component: RouteComponent,
+  loader: () => loadRouteData(),
 });
 
 const socialLinks = [
-  {
-    title: "X / Twitter",
-    props: {
-      href: clientConfig.social.twitterUrl,
-      "aria-label": "X, formerly Twitter",
-    },
-    Icon: IconBrandX,
-  },
-  {
-    title: "Bluesky",
-    props: {
-      href: clientConfig.social.blueskyUrl,
-      "aria-label": "Bluesky",
-    },
-    Icon: IconBrandBluesky,
-  },
-  {
-    title: "GitHub",
-    props: { href: clientConfig.social.githubUrl, "aria-label": "GitHub" },
-    Icon: IconBrandGithub,
-  },
-  {
-    title: "Linkedin",
-    props: { href: clientConfig.social.linkedinUrl, "aria-label": "Linkedin" },
-    Icon: IconBrandLinkedin,
-  },
+  { title: "GitHub", href: clientConfig.social.githubUrl },
+  { title: "X", href: clientConfig.social.twitterUrl },
+  { title: "Bluesky", href: clientConfig.social.blueskyUrl },
+  { title: "LinkedIn", href: clientConfig.social.linkedinUrl },
 ];
 
 function RouteComponent() {
+  const { recentPosts } = Route.useLoaderData();
   const [email, setEmail] = useState<string>();
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col items-center px-4 pt-6 pb-8 wrap-break-word md:pt-12">
-      <img
-        className="relative mb-3 flex aspect-square shrink-0 rounded-full"
-        src={`${clientConfig.app.url}${pathLocator.assets.avatar}`}
-        alt="Tin Rabzelj"
-        width={128}
-        height={128}
-      />
-      <Typography variant="h1" className="mb-3 text-4xl md:text-5xl">
-        Tin Rabzelj
-      </Typography>
-      <h2 className="text-muted-foreground mb-6">Software Engineer</h2>
+    <>
+      <SpineRow className="gap-8 pt-12 pb-14 md:pt-20 xl:gap-0 xl:pt-28 xl:pb-24">
+        <SpineMargin className="flex xl:justify-end">
+          <img
+            className="size-24 shrink-0 shadow-[6px_6px_0_0_var(--color-foreground)] xl:size-32 xl:shadow-[8px_8px_0_0_var(--color-foreground)]"
+            src={`${clientConfig.app.url}${pathLocator.assets.avatar}`}
+            alt="Portrait of Tin Rabzelj"
+            width={128}
+            height={128}
+          />
+        </SpineMargin>
 
-      <div className="mb-5 text-center">
-        <Typography variant="body">
-          Personal blog: <Typography variant="a" render={<Link to="/blog">/blog</Link>} />.
-        </Typography>
-        <Typography variant="body">
-          Find my OSS projects on{" "}
+        <SpineBody wide>
+          <h1 className="text-[3.25rem] leading-[0.95] font-light tracking-[-0.045em] md:text-[4.5rem]">
+            Tin Rabzelj
+          </h1>
+          <p className="text-muted-foreground mt-6 max-w-xl text-[1.3125rem] leading-normal text-pretty">
+            Software engineer working with Rust, TypeScript and React. Currently focused on AI, CUDA
+            and distributed systems.
+          </p>
+          <ul className="mt-8 flex flex-wrap items-baseline gap-x-6 gap-y-2 text-[1.0625rem]">
+            {socialLinks.map(({ title, href }) => (
+              <li key={title}>
+                <Typography
+                  variant="a"
+                  render={
+                    <a href={href} target="_blank" rel="noreferrer">
+                      {title}
+                    </a>
+                  }
+                />
+              </li>
+            ))}
+            <li>
+              {email ? (
+                <Typography variant="a" render={<a href={`mailto:${email}`}>{email}</a>} />
+              ) : (
+                <button
+                  type="button"
+                  className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                  onClick={() => setEmail(stringCipher(clientConfig.social.email, -3))}
+                >
+                  Show email address
+                </button>
+              )}
+            </li>
+          </ul>
+        </SpineBody>
+      </SpineRow>
+
+      <SpineRow className="border-t py-8 xl:py-12">
+        <SpineMargin>
+          <h2 className="text-muted-foreground mb-3 pt-[0.2rem] text-[0.9375rem] xl:mb-0">
+            Recent writing
+          </h2>
+        </SpineMargin>
+
+        <BlogPostRows posts={recentPosts} withYear />
+
+        <SpineBody className="mt-4 xl:col-start-2">
           <Typography
             variant="a"
-            render={
-              <a href="https://github.com/tinrab" target="_blank" rel="noreferrer">
-                GitHub
-              </a>
-            }
+            className="text-[0.9375rem]"
+            render={<Link to="/blog">All posts</Link>}
           />
-          .
-        </Typography>
-      </div>
-
-      <blockquote className="mb-8 max-w-md border-l-2 pl-6 text-lg italic">
-        Working with Rust, TypeScript, React.js. Currently focusing on AI, CUDA, distributed
-        systems.
-      </blockquote>
-
-      <div className="mb-5 flex space-x-6">
-        {socialLinks.map(({ title, props, Icon }) => (
-          <a
-            key={title}
-            {...props}
-            className="text-foreground/60 hover:text-foreground/80 text-base transition-colors"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <span className="sr-only">{title}</span>
-            <Icon className="size-8" aria-hidden="true" />
-          </a>
-        ))}
-      </div>
-
-      <Button
-        variant="secondary"
-        onClick={() => {
-          if (!email) {
-            setEmail(stringCipher(clientConfig.social.email, -3));
-          }
-        }}
-        nativeButton={false}
-        render={
-          email?.length ? (
-            <a href={`mailto:${email}`}>Contact Email</a>
-          ) : (
-            <span className="cursor-pointer">View Email</span>
-          )
-        }
-      />
-    </div>
+        </SpineBody>
+      </SpineRow>
+    </>
   );
 }

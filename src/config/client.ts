@@ -11,7 +11,7 @@ const clientConfigSchema = z.object({
     description: z.string(),
   }),
   social: z.object({
-    email: z.email(),
+    email: z.string(),
     twitterUrl: z.url(),
     twitterId: z.string(),
     githubUrl: z.url(),

@@ -86,10 +86,5 @@ export interface BlogPostCoverData {
 
 export interface BlogPostYearGroup<T extends BlogPostCommon> {
   year: number;
-  months: BlogPostMonthGroup<T>[];
-}
-
-export interface BlogPostMonthGroup<T extends BlogPostCommon> {
-  month: string;
   posts: T[];
 }

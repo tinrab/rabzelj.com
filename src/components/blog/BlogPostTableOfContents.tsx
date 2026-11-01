@@ -1,34 +1,33 @@
-import { Typography } from "~/components/Typography";
+import type { BlogPostTableOfContentsItem } from "~/lib/blog/post/schema";
 
-export function BlogPostTableOfContents({
-  items,
-}: {
-  items: {
-    id: string;
-    title: string;
-    level: 2 | 3 | 4;
-  }[];
-}) {
+import { cn } from "~/lib/utility";
+
+interface BlogPostTableOfContentsProps {
+  items: BlogPostTableOfContentsItem[];
+}
+
+export function BlogPostTableOfContents({ items }: BlogPostTableOfContentsProps) {
   return (
-    <nav
-      aria-label="Table of contents"
-      className="bg-muted/35 mt-8 rounded-lg border px-4 py-4 sm:px-5"
-    >
-      <Typography variant="small" className="text-muted-foreground tracking-[0.16em] uppercase">
-        On this page
-      </Typography>
+    <nav aria-labelledby="toc-heading" className="text-sm">
+      <h2 id="toc-heading" className="text-muted-foreground">
+        Contents
+      </h2>
 
-      <ul className="mt-3 space-y-2">
+      <ul className="mt-3 flex flex-col gap-2">
         {items.map((item) => (
           <li
             key={item.id}
-            className={item.level === 3 ? "ml-4" : item.level === 4 ? "ml-8" : undefined}
+            className={cn(item.level === 3 && "pl-4 xl:pl-0", item.level === 4 && "pl-8 xl:pl-0")}
           >
-            <Typography
-              variant="mutedLink"
-              className="inline text-sm leading-6 no-underline"
-              render={<a href={`#${item.id}`}>{item.title}</a>}
-            />
+            <a
+              href={`#${item.id}`}
+              className={cn(
+                "hover:text-foreground leading-snug transition-colors",
+                item.level === 2 ? "text-foreground/80" : "text-muted-foreground",
+              )}
+            >
+              {item.title}
+            </a>
           </li>
         ))}
       </ul>

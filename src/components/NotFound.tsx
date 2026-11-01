@@ -1,17 +1,57 @@
+import type React from "react";
+
 import { Link } from "@tanstack/react-router";
 
-import { Button } from "~/components/ui/button";
+import { LayoutMain } from "~/components/layout/LayoutMain";
+import { LayoutRoot } from "~/components/layout/LayoutRoot";
+import { SpineBody, SpineMargin, SpineRow } from "~/components/layout/Spine";
+import { SiteFooter } from "~/components/SiteFooter";
+import { SiteHeader } from "~/components/SiteHeader";
+import { Typography } from "~/components/Typography";
 
-export function NotFound({ children }: { children?: React.ReactNode }) {
+interface StatusPageProps {
+  code: string;
+  message: React.ReactNode;
+}
+
+export function StatusPage({ code, message }: StatusPageProps) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 p-8">
-      <div className="text-lg text-gray-600 dark:text-gray-400">
-        {children || <p>The page you are looking for does not exist.</p>}
-      </div>
-      <p className="flex flex-wrap items-center gap-2">
-        <Button onClick={() => window.history.back()}>Go back</Button>
-        <Button variant="outline" nativeButton={false} render={<Link to="/">Start Over</Link>} />
-      </p>
-    </div>
+    <SpineRow className="gap-6 pt-16 pb-24 xl:gap-0 xl:pt-28 xl:pb-40">
+      <SpineMargin>
+        <p className="text-[2.75rem] leading-none font-light tracking-[-0.03em] tabular-nums">
+          {code}
+        </p>
+      </SpineMargin>
+      <SpineBody className="xl:pt-2">
+        <p className="text-[1.3125rem] leading-normal">{message}</p>
+        <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
+          <li>
+            <Typography variant="a" render={<Link to="/">Go to the home page</Link>} />
+          </li>
+          <li>
+            <Typography variant="a" render={<Link to="/blog">Browse the blog</Link>} />
+          </li>
+        </ul>
+      </SpineBody>
+    </SpineRow>
+  );
+}
+
+export function NotFound() {
+  return (
+    <StatusPage code="404" message="This page doesn't exist. It may have been moved or renamed." />
+  );
+}
+
+// Used where no layout route matched, so it brings its own frame.
+export function RootNotFound() {
+  return (
+    <LayoutRoot>
+      <SiteHeader />
+      <LayoutMain>
+        <NotFound />
+      </LayoutMain>
+      <SiteFooter />
+    </LayoutRoot>
   );
 }
