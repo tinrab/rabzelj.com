@@ -1,7 +1,11 @@
 import type React from "react";
 
+import fontSansLight from "@fontsource/roboto/files/roboto-latin-300-normal.woff?arraybuffer";
 import fontSans from "@fontsource/roboto/files/roboto-latin-400-normal.woff?arraybuffer";
+import fontSansMedium from "@fontsource/roboto/files/roboto-latin-500-normal.woff?arraybuffer";
 import { Resvg, initWasm } from "@resvg/resvg-wasm";
+// satori is pinned to 0.32.0. From 0.33 it bundles HarfBuzz, which compiles WASM from bytes at
+// import time; Cloudflare Workers forbid that, so every image request fails in production.
 import satori, { init as initSatori } from "satori/standalone";
 
 // Some magic to make WASM work in dev server and CF workers.
@@ -38,12 +42,12 @@ async function initResvg(): Promise<void> {
 
 async function loadSatoriYogaWasm(): Promise<string | WebAssembly.Module> {
   if (import.meta.env.DEV) {
-    const mod = await import("satori/layout.wasm?arraybuffer");
+    const mod = await import("satori/yoga.wasm?arraybuffer");
 
     return mod.default;
   }
 
-  const mod = await import("satori/layout.wasm");
+  const mod = await import("satori/yoga.wasm");
 
   return mod.default;
 }
@@ -70,11 +74,9 @@ export async function renderImage(
     width,
     height,
     fonts: [
-      {
-        name: "Roboto",
-        style: "normal",
-        data: fontSans,
-      },
+      { name: "Roboto", style: "normal", weight: 300, data: fontSansLight },
+      { name: "Roboto", style: "normal", weight: 400, data: fontSans },
+      { name: "Roboto", style: "normal", weight: 500, data: fontSansMedium },
     ],
   });
 
