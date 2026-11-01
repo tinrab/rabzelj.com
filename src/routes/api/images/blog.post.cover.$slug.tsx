@@ -20,8 +20,10 @@ export const Route = createFileRoute("/api/images/blog/post/cover/$slug")({
         const image = await renderImage(
           BlogPostCoverSocialImage({
             avatarSrc,
-            slug: params.slug,
+            slug: post.slug,
             title: post.title,
+            publishedDate: post.publishedDate,
+            tags: post.tags.map((tag) => tag.title),
           }),
           SOCIAL_IMAGE_SIZE,
         );
