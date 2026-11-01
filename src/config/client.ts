@@ -27,13 +27,21 @@ const clientConfigSchema = z.object({
 export type ClientConfig = z.infer<typeof clientConfigSchema>;
 
 export function loadClientConfig(): ClientConfig {
-  const config = extractClientConfig<ClientConfig>();
+  const config = extractClientConfig(clientConfigSchema);
+
   if (config) {
     return config;
   }
 
   if (typeof process === "undefined") {
-    return staticConfig as ClientConfig;
+    return {
+      ...staticConfig,
+      app: {
+        ...staticConfig.app,
+        url: "",
+        domain: "",
+      },
+    };
   }
 
   const siteUrl = process.env.TIN_APP_URL?.replace(/\/$/, "") || "";

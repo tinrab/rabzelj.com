@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 
 import { THEME_LOCAL_STORAGE_KEY } from "~/lib/theme/constants";
 import { changeThemeServerFn } from "~/lib/theme/fn";
-import { Theme } from "~/lib/theme/types";
+import { Theme, themeSchema } from "~/lib/theme/types";
 
 type ThemeProviderState = {
   theme: Theme;
@@ -40,6 +40,7 @@ export function ThemeProvider({
       }
 
       let resolvedTheme = newTheme;
+
       if (resolvedTheme === Theme.SYSTEM) {
         resolvedTheme = getSystemTheme();
       }
@@ -73,8 +74,10 @@ export function ThemeProvider({
     if (theme !== Theme.SYSTEM) {
       return;
     }
+
     applyTheme(theme);
   }, [applyTheme, theme]);
+
   useEffect(() => {
     const media = window.matchMedia(THEME_MEDIA_QUERY);
 
@@ -102,24 +105,31 @@ function getStoredTheme(key: string): Theme {
   if (typeof localStorage === "undefined") {
     return Theme.SYSTEM;
   }
+
   let theme: Theme | undefined;
+
   try {
-    theme = (localStorage.getItem(key) as Theme) || undefined;
+    theme = themeSchema.safeParse(localStorage.getItem(key)).data;
   } catch {
     // Unsupported
   }
+
   return theme || Theme.SYSTEM;
 }
 
 function getSystemTheme(mediaQuery?: MediaQueryList | MediaQueryListEvent): Theme {
   let matchedMedia = mediaQuery;
+
   if (typeof window !== "undefined") {
     matchedMedia = window.matchMedia(THEME_MEDIA_QUERY);
   }
+
   if (!matchedMedia) {
     return Theme.DARK;
   }
+
   const isDark = matchedMedia.matches;
+
   return isDark ? Theme.DARK : Theme.LIGHT;
 }
 
@@ -129,8 +139,10 @@ export function useThemeProviderContext(): ThemeProviderState | undefined {
 
 export function useTheme(): ThemeProviderState {
   const context = useContext(ThemeProviderContext);
+
   if (context === undefined) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
+
   return context;
 }

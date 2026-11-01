@@ -17,7 +17,7 @@ import { blogTagIsNote } from "~/lib/blog/tag/utility";
 import { mdxPageRegistry } from "~/lib/mdx/components/registry";
 import { pageMiddleware } from "~/lib/middleware";
 import { pathLocator } from "~/lib/path-locator";
-import { makeSeo } from "~/lib/seo";
+import { makeSeo, type SeoProperties } from "~/lib/seo";
 
 const loadRouteData = createServerFn({ method: "GET" })
   .middleware([pageMiddleware])
@@ -31,6 +31,7 @@ const loadRouteData = createServerFn({ method: "GET" })
       includeContent: true,
       includeRelated: true,
     });
+
     if (!post) {
       throw notFound();
     }
@@ -50,7 +51,16 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
     if (loaderData === undefined) {
       return {};
     }
+
     const { post } = loaderData;
+
+    const properties: SeoProperties = {
+      "article:published_time": post.publishedDate,
+    };
+
+    if (post.modifiedDate) {
+      properties["article:modified_time"] = post.modifiedDate;
+    }
 
     return {
       meta: makeSeo({
@@ -58,14 +68,7 @@ export const Route = createFileRoute("/blog/_post/_post/$slug")({
         title: post.title,
         description: post.description,
         image: `${clientConfig.app.url}${pathLocator.assets.blogPostCover(post.slug)}`,
-        properties: {
-          "article:published_time": post.publishedDate,
-          ...(post.modifiedDate
-            ? {
-                "article:modified_time": post.modifiedDate,
-              }
-            : {}),
-        },
+        properties,
       }),
     };
   },

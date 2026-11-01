@@ -6,14 +6,11 @@ import satori, { init as initSatori } from "satori/standalone";
 
 // Some magic to make WASM work in dev server and CF workers.
 
-const imageRuntimeState = ((
-  globalThis as typeof globalThis & {
-    __imageRuntime?: {
-      satoriInitialized: boolean;
-      resvgInitialized: boolean;
-    };
-  }
-).__imageRuntime ??= {
+declare global {
+  var __imageRuntime: { satoriInitialized: boolean; resvgInitialized: boolean } | undefined;
+}
+
+const imageRuntimeState = (globalThis.__imageRuntime ??= {
   satoriInitialized: false,
   resvgInitialized: false,
 });
@@ -42,27 +39,31 @@ async function initResvg(): Promise<void> {
 async function loadSatoriYogaWasm(): Promise<string | WebAssembly.Module> {
   if (import.meta.env.DEV) {
     const mod = await import("satori/layout.wasm?arraybuffer");
+
     return mod.default;
   }
 
   const mod = await import("satori/layout.wasm");
+
   return mod.default;
 }
 
 async function loadResvgWasm(): Promise<string | WebAssembly.Module> {
   if (import.meta.env.DEV) {
     const mod = await import("@resvg/resvg-wasm/index_bg.wasm?arraybuffer");
+
     return mod.default;
   }
 
   const mod = await import("@resvg/resvg-wasm/index_bg.wasm");
+
   return mod.default;
 }
 
 export async function renderImage(
   node: React.ReactNode,
   { width, height }: { width: number; height: number },
-): Promise<Uint8Array> {
+): Promise<Uint8Array<ArrayBuffer>> {
   await initSatoriYoga();
 
   const svg = await satori(node, {
@@ -80,8 +81,9 @@ export async function renderImage(
   await initResvg();
   const resvg = new Resvg(svg);
   const pngData = resvg.render();
+
   try {
-    return pngData.asPng();
+    return new Uint8Array(pngData.asPng());
   } finally {
     pngData.free();
     resvg.free();

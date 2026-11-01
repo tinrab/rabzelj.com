@@ -35,6 +35,7 @@ export function BlogSeriesSection({ series, currentSlug, className }: BlogSeries
           <ol className="space-y-2">
             {series.posts.map((post, index) => {
               const isCurrent = post.slug === currentSlug;
+
               return (
                 <li key={`${post.slug}__${index}`} className="flex items-start gap-2">
                   <Badge variant={isCurrent ? "outline" : "ghost"}>{index + 1}</Badge>

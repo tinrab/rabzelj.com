@@ -46,6 +46,7 @@ interface HeaderTitleProps extends React.ComponentProps<"div"> {}
 
 export function HeaderTitle({ className, ...props }: HeaderTitleProps) {
   const { onMenuOpenChange } = useHeaderContext();
+
   return (
     <div className={cn("relative", className)} onClick={() => onMenuOpenChange(false)} {...props}>
       <div className="text-foreground flex h-[24px] w-auto gap-2 font-bold">

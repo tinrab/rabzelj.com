@@ -86,6 +86,7 @@ type HeaderMobileTriggerProps = React.HTMLAttributes<HTMLButtonElement>;
 
 export function HeaderMobileTrigger({ className, ...props }: HeaderMobileTriggerProps) {
   const { onMenuOpenChange } = useHeaderContext();
+
   return (
     <Button
       variant="outline"

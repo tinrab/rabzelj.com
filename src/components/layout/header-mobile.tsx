@@ -17,6 +17,7 @@ type HeaderMobileProps = React.ComponentProps<"div">;
 
 export function HeaderMobile({ className, children, ...props }: HeaderMobileProps) {
   const { menuOpen, onMenuOpenChange } = useHeaderContext();
+
   return (
     <Sheet open={menuOpen} onOpenChange={onMenuOpenChange}>
       <SheetContent side="left">
@@ -43,6 +44,7 @@ type HeaderMobileTriggerProps = React.HTMLAttributes<HTMLButtonElement>;
 
 export function HeaderMobileTrigger({ className, ...props }: HeaderMobileTriggerProps) {
   const { onMenuOpenChange } = useHeaderContext();
+
   return (
     <Button
       variant="outline"

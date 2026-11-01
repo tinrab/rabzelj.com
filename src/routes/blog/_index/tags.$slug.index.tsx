@@ -15,6 +15,7 @@ const loadRouteData = createServerFn({ method: "GET" })
   .validator(z.object({ slug: z.string().min(1) }))
   .handler(async ({ data: { slug } }) => {
     const tag = await loadBlogTag(slug);
+
     if (!tag) {
       throw notFound();
     }

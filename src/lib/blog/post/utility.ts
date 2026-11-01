@@ -6,11 +6,13 @@ export function groupBlogPosts<T extends BlogPostCommon>(posts: T[]): BlogPostYe
   for (const post of posts) {
     const publishedDate = new Date(post.publishedDate);
     const year = publishedDate.getUTCFullYear();
+
     const month = publishedDate.toLocaleDateString("en-US", {
       month: "long",
     });
 
     let yearGroup = groupedPosts.find((group) => group.year === year);
+
     if (!yearGroup) {
       yearGroup = {
         year,
@@ -20,6 +22,7 @@ export function groupBlogPosts<T extends BlogPostCommon>(posts: T[]): BlogPostYe
     }
 
     let monthGroup = yearGroup.months.find((group) => group.month === month);
+
     if (!monthGroup) {
       monthGroup = {
         month,

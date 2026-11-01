@@ -1,4 +1,4 @@
-import type { BlogPostData, ExternalBlogData } from "~/lib/blog/post/schema";
+import type { BlogPostData } from "~/lib/blog/post/schema";
 
 import { loadBlogData, loadBlogPostContent } from "~/lib/blog/loader";
 import { blogTagIsNote } from "~/lib/blog/tag/utility";
@@ -30,11 +30,14 @@ export async function loadBlogPosts({
   const selectedPosts = await Promise.all(
     posts.map((post) => selectPostFields(post, { includeContent })),
   );
+
   return selectedPosts.sort((a, b) => {
     const dateCmp = new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime();
+
     if (dateCmp !== 0) {
       return dateCmp;
     }
+
     return a.slug.localeCompare(b.slug);
   });
 }
@@ -49,12 +52,8 @@ export async function loadBlogPost(
 
   const blogData = await loadBlogData();
   const post = blogData.posts.find((candidate) => candidate.slug === slug);
-  return post ? selectPostFields(post, { includeContent, includeRelated }) : undefined;
-}
 
-export async function loadExternalBlogData(): Promise<ExternalBlogData> {
-  const blogData = await loadBlogData();
-  return blogData.external;
+  return post ? selectPostFields(post, { includeContent, includeRelated }) : undefined;
 }
 
 async function selectPostFields(
@@ -62,6 +61,7 @@ async function selectPostFields(
   { includeContent, includeRelated }: { includeContent?: boolean; includeRelated?: boolean },
 ): Promise<BlogPostData> {
   const article = includeContent ? await loadBlogPostContent(post.slug) : undefined;
+
   return {
     ...post,
     content: article?.content,

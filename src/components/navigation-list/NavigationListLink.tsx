@@ -40,11 +40,11 @@ export function NavigationListLink({
         "aria-selected": selected,
         "aria-disabled": disabled,
       },
-      { ["data-disabled" as string]: disabled },
       props,
     ),
     state: {
       slot: "navigation-list-link",
+      disabled,
     },
   });
 }

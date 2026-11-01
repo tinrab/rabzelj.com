@@ -79,13 +79,13 @@ function CodeBlockActions({ className, ...props }: React.ComponentProps<"div">) 
 }
 
 function CodeBlockCopyButton({
-  value,
+  getValue,
   variant = "ghost",
   size = "icon-xs",
   className,
   onClick,
   ...props
-}: Omit<React.ComponentProps<typeof Button>, "value"> & { value: string | (() => string) }) {
+}: React.ComponentProps<typeof Button> & { getValue: () => string }) {
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
@@ -94,6 +94,7 @@ function CodeBlockCopyButton({
     }
 
     const timeout = setTimeout(() => setCopied(false), 2000);
+
     return () => clearTimeout(timeout);
   }, [copied]);
 
@@ -109,7 +110,7 @@ function CodeBlockCopyButton({
         onClick={(event) => {
           onClick?.(event);
           navigator.clipboard
-            .writeText(typeof value === "function" ? value() : value)
+            .writeText(getValue())
             .then(() => setCopied(true))
             .catch(() => {});
         }}
@@ -131,11 +132,13 @@ function CodeBlockContent({
   wrap = false,
   lineNumbers = false,
   startLine = 1,
+  code,
   ...props
 }: React.ComponentProps<"pre"> & {
   wrap?: boolean;
   lineNumbers?: boolean;
   startLine?: number;
+  code?: string;
 }) {
   return (
     <pre
@@ -155,8 +158,8 @@ function CodeBlockContent({
         data-slot="code-block-code"
         className="grid min-h-lh min-w-max content-start in-data-numbered:grid-cols-[auto_1fr] in-data-wrap:min-w-0"
       >
-        {lineNumbers && typeof children === "string"
-          ? children
+        {code !== undefined
+          ? code
               .replace(/\n$/, "")
               .split("\n")
               .map((line, index) => <CodeBlockLine key={index}>{line}</CodeBlockLine>)

@@ -5,11 +5,13 @@ import { blogTagIsNote } from "~/lib/blog/tag/utility";
 
 export async function loadBlogTags(): Promise<BlogTagData[]> {
   const blogData = await loadBlogData();
+
   return blogData.tags;
 }
 
 export async function loadBlogTag(slug: string): Promise<BlogTagData | undefined> {
   const tags = await loadBlogTags();
+
   return tags.find((tag) => tag.slug === slug);
 }
 

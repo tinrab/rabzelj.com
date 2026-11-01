@@ -2,15 +2,11 @@ import { Link, useLocation } from "@tanstack/react-router";
 
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-type BlogTabId = "personal" | "notes" | "external";
+type BlogTabId = "personal" | "notes";
 
 export function BlogTabList() {
   const location = useLocation();
-  const id: BlogTabId = location.pathname.endsWith("external")
-    ? "external"
-    : location.pathname.endsWith("notes")
-      ? "notes"
-      : "personal";
+  const id: BlogTabId = location.pathname.endsWith("notes") ? "notes" : "personal";
 
   return (
     <Tabs defaultValue="all" value={id}>
@@ -24,11 +20,6 @@ export function BlogTabList() {
           value="notes"
           nativeButton={false}
           render={<Link to="/blog/notes">Notes</Link>}
-        />
-        <TabsTrigger
-          value="external"
-          nativeButton={false}
-          render={<Link to="/blog/external">External</Link>}
         />
       </TabsList>
     </Tabs>

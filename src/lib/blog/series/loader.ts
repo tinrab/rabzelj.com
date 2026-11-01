@@ -8,11 +8,13 @@ import {
 
 export async function loadBlogSeries(): Promise<BlogSeriesData[]> {
   const blogData = await loadBlogData();
+
   return blogData.series;
 }
 
 export async function loadBlogSeriesBySlug(slug: string): Promise<BlogSeriesData | undefined> {
   const series = await loadBlogSeries();
+
   return series.find((s) => s.slug === slug);
 }
 
@@ -20,16 +22,15 @@ export async function loadBlogSeriesWithPosts(
   slug: string,
 ): Promise<BlogSeriesPostData | undefined> {
   const series = await loadBlogSeriesBySlug(slug);
+
   if (!series) {
     return undefined;
   }
 
   const allPosts = await loadBlogPosts();
+
   const seriesPosts: BlogSeriesPost[] = allPosts
-    .filter((post) => {
-      const postSeries = (post as { series?: string }).series;
-      return postSeries === slug;
-    })
+    .filter((post) => post.series === slug)
     .map((post) => ({
       title: post.title,
       slug: post.slug,

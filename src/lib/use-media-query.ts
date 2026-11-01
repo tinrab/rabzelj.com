@@ -9,10 +9,12 @@ export function useMediaQuery(query: string) {
     (onChange: () => void) => {
       const result = window.matchMedia(query);
       result.addEventListener("change", onChange);
+
       return () => result.removeEventListener("change", onChange);
     },
     [query],
   );
+
   const getSnapshot = useCallback(() => window.matchMedia(query).matches, [query]);
 
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);

@@ -25,7 +25,7 @@ export const typographyVariants = cva("", {
   defaultVariants: { variant: "body" },
 });
 
-const topGutters: Record<string, string> = {
+const topGutters: Partial<Record<TypographyVariant, string>> = {
   h1: "mt-12 lg:mt-14",
   h2: "mt-10 lg:mt-12",
   h3: "mt-8",
@@ -38,7 +38,7 @@ const topGutters: Record<string, string> = {
   muted: "mt-6",
 };
 
-const bottomGutters: Record<string, string> = {
+const bottomGutters: Partial<Record<TypographyVariant, string>> = {
   h1: "mb-4",
   h2: "mb-3",
   h3: "mb-3",
@@ -68,6 +68,7 @@ const variantElementMap = {
 } as const;
 
 type VariantElementMap = typeof variantElementMap;
+
 type TypographyVariant = keyof VariantElementMap;
 
 type TypographyOwnProps = Omit<VariantProps<typeof typographyVariants>, "variant"> & {
@@ -90,7 +91,7 @@ export function Typography<V extends TypographyVariant = "span">({
   className,
   ...props
 }: TypographyProps<V>) {
-  const safeVariant = (variant ?? "span") as TypographyVariant;
+  const safeVariant: TypographyVariant = variant ?? "span";
   const defaultTagName = variantElementMap[safeVariant];
 
   return useRender({

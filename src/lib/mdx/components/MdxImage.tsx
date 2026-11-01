@@ -13,13 +13,12 @@ type MdxImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
 
 export function MdxImage({ alt, className, src, ...props }: MdxImageProps) {
   const [open, setOpen] = useState(false);
-  const canOpenLightbox = typeof src === "string" && src.length > 0;
 
   const image = <img alt={alt} className={cn(className, "mx-auto")} src={src} {...props} />;
 
   return (
     <span className="mx-auto flex flex-col gap-2 text-center">
-      {canOpenLightbox ? (
+      {src ? (
         <>
           <button
             type="button"

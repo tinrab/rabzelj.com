@@ -1,11 +1,13 @@
 import { clientConfig } from "~/config/client";
 
+export type SeoProperties = Record<string, string>;
+
 interface SeoOptions {
   path: string;
   title: string;
   description?: string;
   image?: string;
-  properties?: Record<string, string>;
+  properties?: SeoProperties;
 }
 
 export function makeSeo({

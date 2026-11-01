@@ -6,5 +6,6 @@ export const pageMiddleware = createMiddleware({ type: "function" }).server((ctx
     "Cache-Control",
     "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400",
   );
+
   return ctx.next({});
 });

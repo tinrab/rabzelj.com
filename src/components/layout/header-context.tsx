@@ -31,8 +31,10 @@ export function HeaderContextProvider({
 
 export function useHeaderContext(): HeaderContextValue {
   const context = useContext(HeaderContext);
+
   if (context === undefined) {
     throw new Error("useHeaderContext was used outside of HeaderContext");
   }
+
   return context;
 }

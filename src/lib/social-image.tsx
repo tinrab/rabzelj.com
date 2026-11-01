@@ -56,6 +56,7 @@ export function FeaturedSocialImage({ avatarSrc }: SiteIdentityProps) {
 
       {Array.from({ length: slashCount }, (_, i) => {
         const size = 2000;
+
         return (
           <div
             key={String(i)}
@@ -138,6 +139,7 @@ export function BlogPostCoverSocialImage({
   const seed =
     slug.split("").reduce((a, b) => {
       const x = (a << 5) - a + b.charCodeAt(0);
+
       return x & x;
     }, 0) % 360;
 
@@ -160,6 +162,7 @@ export function BlogPostCoverSocialImage({
     >
       {Array.from({ length: 4 }, (_, i) => {
         const size = 1200 + i * 100;
+
         return (
           <div
             key={size}

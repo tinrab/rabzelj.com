@@ -10,11 +10,13 @@ export const Route = createFileRoute("/api/images/blog/post/cover/$slug")({
     handlers: {
       GET: async ({ params }) => {
         const post = await loadBlogPost(params.slug);
+
         if (!post) {
           return new Response(null, { status: 404 });
         }
 
         const { renderImage } = await import("~/lib/render-image");
+
         const image = await renderImage(
           BlogPostCoverSocialImage({
             avatarSrc,
@@ -24,7 +26,7 @@ export const Route = createFileRoute("/api/images/blog/post/cover/$slug")({
           SOCIAL_IMAGE_SIZE,
         );
 
-        return new Response(image as BufferSource, {
+        return new Response(image, {
           status: 200,
           headers: {
             "Content-Type": "image/png",

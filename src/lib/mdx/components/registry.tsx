@@ -41,12 +41,22 @@ function Math({ source, style }: MathComponentProps) {
     throwOnError: false,
     trust: false,
   });
+
   return style === "display" ? (
     <div dangerouslySetInnerHTML={{ __html: html }} />
   ) : (
     <span dangerouslySetInnerHTML={{ __html: html }} />
   );
 }
+
+const jsxComponents = {
+  Note: { component: Note },
+};
+
+const devJsxComponents = {
+  ...jsxComponents,
+  Demo: { component: MdxDemo },
+};
 
 export const mdxPageRegistry = defineMdxRegistry({
   html: {
@@ -55,6 +65,7 @@ export const mdxPageRegistry = defineMdxRegistry({
     ),
     a: ({ node: _, href, ...props }: ElementProps<"a">) => {
       const isExternal = href?.startsWith("http") || href?.startsWith("mailto:");
+
       return (
         <Typography
           variant="a"
@@ -105,12 +116,10 @@ export const mdxPageRegistry = defineMdxRegistry({
       if (!alt) {
         throw new Error("Image must have an alt attribute");
       }
+
       return <MdxImage alt={alt} {...props} />;
     },
   },
-  jsx: {
-    Note: { component: Note },
-    ...(import.meta.env.DEV ? { Demo: { component: MdxDemo } } : {}),
-  },
+  jsx: import.meta.env.DEV ? devJsxComponents : jsxComponents,
   math: Math,
 });

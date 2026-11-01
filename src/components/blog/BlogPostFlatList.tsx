@@ -7,7 +7,6 @@ import { cn } from "~/lib/utility";
 interface BlogPostFlatListProps<T extends BlogPostCommon> {
   posts: T[];
   renderPost: (post: T) => React.ReactNode;
-  anchorSuffix?: string;
 }
 
 export function BlogPostFlatList<T extends BlogPostCommon>({

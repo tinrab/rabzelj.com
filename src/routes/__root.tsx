@@ -32,11 +32,13 @@ export const Route = createRootRoute({
   },
   head: () => {
     const { app } = loadClientConfig();
+
     if (!app || !app.url) {
       return {};
     }
 
     let tagline = app.description.trim();
+
     if (tagline.endsWith(".")) {
       tagline = tagline.slice(0, -1);
     }

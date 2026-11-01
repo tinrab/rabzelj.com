@@ -33,9 +33,10 @@ export function MdxCodeBlock({
   ...props
 }: MdxCodeBlockProps) {
   const contentRef = useRef<HTMLPreElement>(null);
+
   const actions = (
     <CodeBlockActions>
-      <CodeBlockCopyButton value={() => contentRef.current?.textContent ?? ""} />
+      <CodeBlockCopyButton getValue={() => contentRef.current?.textContent ?? ""} />
     </CodeBlockActions>
   );
 

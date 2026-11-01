@@ -1,15 +1,8 @@
-import type {
-  BlogPostContent,
-  BlogPostSource,
-  BlogPostData,
-  ExternalBlogData,
-} from "~/lib/blog/post/schema";
+import type { BlogPostContent, BlogPostSource, BlogPostData } from "~/lib/blog/post/schema";
 import type { BlogSeriesData, BlogSeriesFrontmatter } from "~/lib/blog/series/schema";
 import type { BlogTagData, BlogTagFrontmatter } from "~/lib/blog/tag/schema";
 
 import { pathLocator } from "~/lib/path-locator";
-
-import externalBlogData from "../../../data/blog/external.json";
 
 const postSources = import.meta.glob<BlogPostSource>("../../../data/blog/posts/**/index.mdx", {
   eager: true,
@@ -36,7 +29,9 @@ const postContents = import.meta.glob<BlogPostContent>("../../../data/blog/posts
 
 export async function loadBlogPostContent(slug: string): Promise<BlogPostContent> {
   const sourcePath = Object.keys(postContents).find((path) => path.endsWith(`_${slug}/index.mdx`));
+
   if (!sourcePath) throw new Error(`Blog post source not found: ${slug}`);
+
   return postContents[sourcePath]();
 }
 
@@ -46,13 +41,13 @@ interface BlogData {
   posts: BlogPostData[];
   tags: BlogTagData[];
   series: BlogSeriesData[];
-  external: ExternalBlogData;
 }
 
 let blogData: BlogData | undefined;
 
 export function loadBlogData(): Promise<BlogData> {
   blogData ??= createBlogData();
+
   return Promise.resolve(blogData);
 }
 
@@ -76,20 +71,7 @@ function createBlogData(): BlogData {
       }));
   }
 
-  return {
-    posts,
-    tags,
-    series,
-    external: {
-      flinect: {
-        posts: externalBlogData.flinect.posts.map((post) => ({
-          title: post.title,
-          url: post.url,
-          publishedDate: post.publishedDate,
-        })),
-      },
-    },
-  };
+  return { posts, tags, series };
 }
 
 function loadSourceBlogPosts(tags: BlogTagData[]): BlogPostData[] {
@@ -102,6 +84,7 @@ function loadSourceBlogPosts(tags: BlogTagData[]): BlogPostData[] {
     .sort((a, b) => {
       const dateComparison =
         new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime();
+
       return dateComparison || a.slug.localeCompare(b.slug);
     });
 }
@@ -134,6 +117,7 @@ function readBlogPost(
 ): BlogPostData | undefined {
   const directoryName = sourcePath.split("/").at(-2);
   const match = directoryName?.match(/^(\d{4}-\d{2}-\d{2})_(.+)$/);
+
   if (!match) {
     throw new Error(`Invalid blog post source path '${sourcePath}'`);
   }
@@ -155,14 +139,17 @@ function readBlogPost(
     .map((tagSlug) => {
       const normalizedSlug = tagSlug.toLowerCase();
       const tag = tags.find((candidate) => candidate.slug === normalizedSlug);
+
       if (!tag) {
         throw new Error(`Tag '${normalizedSlug}' not found for post '${slug}'`);
       }
+
       return tag;
     })
     .sort((a, b) => a.slug.localeCompare(b.slug));
 
   const appUrl = (process.env.TIN_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+
   return {
     title: frontmatter.title,
     url: `${appUrl}${pathLocator.blog.post.index(slug)}`,
@@ -180,8 +167,10 @@ function readBlogPost(
 
 function sourceFileName(sourcePath: string): string {
   const fileName = sourcePath.split("/").at(-1);
+
   if (!fileName?.endsWith(".mdx")) {
     throw new Error(`Invalid MDX source path '${sourcePath}'`);
   }
+
   return fileName.slice(0, -4);
 }
