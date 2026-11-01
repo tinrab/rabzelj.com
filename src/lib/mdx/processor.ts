@@ -60,5 +60,6 @@ let processorPromise: Promise<Processor> | undefined;
 
 export function getMdxProcessor(): Promise<Processor> {
   processorPromise ??= createMdxProcessor();
+
   return processorPromise;
 }

@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 
 import { THEME_LOCAL_STORAGE_KEY } from "~/lib/theme/constants";
 import { changeThemeServerFn } from "~/lib/theme/fn";
-import { Theme } from "~/lib/theme/types";
+import { Theme, themeSchema } from "~/lib/theme/types";
 
 type ThemeProviderState = {
   theme: Theme;
@@ -35,13 +35,12 @@ export function ThemeProvider({
   // Applies theme to the document.
   const applyTheme = useCallback(
     (newTheme: Theme) => {
-      setTheme(newTheme);
-
       if (typeof localStorage !== "undefined") {
         localStorage.setItem(storageKey, newTheme);
       }
 
       let resolvedTheme = newTheme;
+
       if (resolvedTheme === Theme.SYSTEM) {
         resolvedTheme = getSystemTheme();
       }
@@ -64,30 +63,30 @@ export function ThemeProvider({
 
       void changeThemeServerFn({ data: { theme: newTheme } });
 
+      setTheme(newTheme);
       applyTheme(newTheme);
     },
     [theme, applyTheme],
   );
 
   // Listen to system theme preference
-  const handleMediaQuery = useCallback(
-    (event: MediaQueryListEvent | MediaQueryList) => {
-      if (initialTheme !== Theme.SYSTEM) {
-        return;
-      }
-      applyTheme(getSystemTheme(event));
-    },
-    [applyTheme, initialTheme],
-  );
+  const handleMediaQuery = useCallback(() => {
+    if (theme !== Theme.SYSTEM) {
+      return;
+    }
+
+    applyTheme(theme);
+  }, [applyTheme, theme]);
+
   useEffect(() => {
     const media = window.matchMedia(THEME_MEDIA_QUERY);
 
     // Intentionally use deprecated listener methods to support iOS & old browsers
     media.addListener(handleMediaQuery);
-    handleMediaQuery(media);
+    applyTheme(theme);
 
     return () => media.removeListener(handleMediaQuery);
-  }, [handleMediaQuery]);
+  }, [handleMediaQuery, applyTheme, theme]);
 
   return (
     <ThemeProviderContext.Provider
@@ -106,24 +105,31 @@ function getStoredTheme(key: string): Theme {
   if (typeof localStorage === "undefined") {
     return Theme.SYSTEM;
   }
+
   let theme: Theme | undefined;
+
   try {
-    theme = (localStorage.getItem(key) as Theme) || undefined;
+    theme = themeSchema.safeParse(localStorage.getItem(key)).data;
   } catch {
     // Unsupported
   }
+
   return theme || Theme.SYSTEM;
 }
 
 function getSystemTheme(mediaQuery?: MediaQueryList | MediaQueryListEvent): Theme {
   let matchedMedia = mediaQuery;
+
   if (typeof window !== "undefined") {
     matchedMedia = window.matchMedia(THEME_MEDIA_QUERY);
   }
+
   if (!matchedMedia) {
     return Theme.DARK;
   }
+
   const isDark = matchedMedia.matches;
+
   return isDark ? Theme.DARK : Theme.LIGHT;
 }
 
@@ -133,8 +139,10 @@ export function useThemeProviderContext(): ThemeProviderState | undefined {
 
 export function useTheme(): ThemeProviderState {
   const context = useContext(ThemeProviderContext);
+
   if (context === undefined) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
+
   return context;
 }

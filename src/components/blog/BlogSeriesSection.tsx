@@ -2,16 +2,6 @@ import { Link } from "@tanstack/react-router";
 
 import type { BlogSeriesPostData } from "~/lib/blog/series/schema";
 
-import { Typography } from "~/components/Typography";
-import { Badge } from "~/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
 import { cn } from "~/lib/utility";
 
 interface BlogSeriesSectionProps {
@@ -22,50 +12,46 @@ interface BlogSeriesSectionProps {
 
 export function BlogSeriesSection({ series, currentSlug, className }: BlogSeriesSectionProps) {
   const currentIndex = series.posts.findIndex((post) => post.slug === currentSlug);
+  const total = series.completed ? String(series.posts.length) : "an unfinished series";
 
   return (
-    <section className={cn("py-4", className)}>
-      <Card>
-        <CardHeader>
-          <CardTitle>{series.title}</CardTitle>
-          {series.description && <CardDescription>{series.description}</CardDescription>}
-        </CardHeader>
+    <nav aria-label="Series" className={cn("text-[0.9375rem]", className)}>
+      <p className="text-muted-foreground text-sm">
+        Part {currentIndex + 1} of {total}
+      </p>
+      <p className="mt-1 font-medium text-balance">{series.title}</p>
 
-        <CardContent>
-          <ol className="space-y-2">
-            {series.posts.map((post, index) => {
-              const isCurrent = post.slug === currentSlug;
-              return (
-                <li key={`${post.slug}__${index}`} className="flex items-start gap-2">
-                  <Badge variant={isCurrent ? "outline" : "ghost"}>{index + 1}</Badge>
-                  {isCurrent ? (
-                    <Typography className="text-foreground font-medium">{post.title}</Typography>
-                  ) : (
-                    <Typography
-                      variant="a"
-                      render={<Link to="/blog/$slug" params={{ slug: post.slug }} />}
-                    >
-                      {post.title}
-                    </Typography>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </CardContent>
+      <ol className="mt-3 flex flex-col gap-2 text-sm">
+        {series.posts.map((post, index) => {
+          const isCurrent = post.slug === currentSlug;
 
-        <CardFooter>
-          {series.completed ? (
-            <Typography variant="muted" className="mt-3 text-xs">
-              Part {currentIndex + 1} of {series.posts.length}
-            </Typography>
-          ) : (
-            <Typography variant="muted" className="mt-3 text-xs">
-              Part {currentIndex + 1} of <Typography className="font-bold">unknown</Typography>
-            </Typography>
-          )}
-        </CardFooter>
-      </Card>
-    </section>
+          return (
+            <li key={post.slug} className="flex gap-3 xl:flex-row-reverse">
+              <span
+                className={cn(
+                  "w-4 shrink-0 tabular-nums xl:text-right",
+                  isCurrent ? "text-link" : "text-muted-foreground",
+                )}
+              >
+                {index + 1}
+              </span>
+              {isCurrent ? (
+                <span aria-current="page" className="text-foreground">
+                  {post.title}
+                </span>
+              ) : (
+                <Link
+                  to="/blog/$slug"
+                  params={{ slug: post.slug }}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {post.title}
+                </Link>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }

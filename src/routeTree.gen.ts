@@ -20,7 +20,6 @@ import { Route as BlogIndexPostsRouteImport } from './routes/blog/_index/_posts'
 import { Route as BlogPostPostRouteImport } from './routes/blog/_post/_post'
 import { Route as ResourcesIndexIndexRouteImport } from './routes/resources/_index.index'
 import { Route as BlogIndexPostsIndexRouteImport } from './routes/blog/_index/_posts.index'
-import { Route as BlogIndexPostsExternalRouteImport } from './routes/blog/_index/_posts.external'
 import { Route as BlogIndexPostsNotesRouteImport } from './routes/blog/_index/_posts.notes'
 import { Route as BlogIndexTagsIndexRouteImport } from './routes/blog/_index/tags.index'
 import { Route as BlogPostPostSlugRouteImport } from './routes/blog/_post/_post.$slug'
@@ -80,11 +79,6 @@ const BlogIndexPostsIndexRoute = BlogIndexPostsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => BlogIndexPostsRoute,
 } as any)
-const BlogIndexPostsExternalRoute = BlogIndexPostsExternalRouteImport.update({
-  id: '/external',
-  path: '/external',
-  getParentRoute: () => BlogIndexPostsRoute,
-} as any)
 const BlogIndexPostsNotesRoute = BlogIndexPostsNotesRouteImport.update({
   id: '/notes',
   path: '/notes',
@@ -120,7 +114,6 @@ export interface FileRoutesByFullPath {
   '/resources': typeof ResourcesIndexRouteWithChildren
   '/api/images/featured': typeof ApiImagesFeaturedRoute
   '/resources/': typeof ResourcesIndexIndexRoute
-  '/blog/external': typeof BlogIndexPostsExternalRoute
   '/blog/notes': typeof BlogIndexPostsNotesRoute
   '/blog/$slug': typeof BlogPostPostSlugRoute
   '/blog/': typeof BlogIndexPostsIndexRoute
@@ -135,7 +128,6 @@ export interface FileRoutesByTo {
   '/api/images/featured': typeof ApiImagesFeaturedRoute
   '/': typeof IndexHomeIndexRoute
   '/resources': typeof ResourcesIndexIndexRoute
-  '/blog/external': typeof BlogIndexPostsExternalRoute
   '/blog/notes': typeof BlogIndexPostsNotesRoute
   '/blog/$slug': typeof BlogPostPostSlugRoute
   '/blog/tags': typeof BlogIndexTagsIndexRoute
@@ -154,7 +146,6 @@ export interface FileRoutesById {
   '/blog/_post/_post': typeof BlogPostPostRouteWithChildren
   '/_index/_home/': typeof IndexHomeIndexRoute
   '/resources/_index/': typeof ResourcesIndexIndexRoute
-  '/blog/_index/_posts/external': typeof BlogIndexPostsExternalRoute
   '/blog/_index/_posts/notes': typeof BlogIndexPostsNotesRoute
   '/blog/_post/_post/$slug': typeof BlogPostPostSlugRoute
   '/blog/_index/_posts/': typeof BlogIndexPostsIndexRoute
@@ -172,7 +163,6 @@ export interface FileRouteTypes {
     | '/resources'
     | '/api/images/featured'
     | '/resources/'
-    | '/blog/external'
     | '/blog/notes'
     | '/blog/$slug'
     | '/blog/'
@@ -187,7 +177,6 @@ export interface FileRouteTypes {
     | '/api/images/featured'
     | '/'
     | '/resources'
-    | '/blog/external'
     | '/blog/notes'
     | '/blog/$slug'
     | '/blog/tags'
@@ -205,7 +194,6 @@ export interface FileRouteTypes {
     | '/blog/_post/_post'
     | '/_index/_home/'
     | '/resources/_index/'
-    | '/blog/_index/_posts/external'
     | '/blog/_index/_posts/notes'
     | '/blog/_post/_post/$slug'
     | '/blog/_index/_posts/'
@@ -304,13 +292,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexPostsIndexRouteImport
       parentRoute: typeof BlogIndexPostsRoute
     }
-    '/blog/_index/_posts/external': {
-      id: '/blog/_index/_posts/external'
-      path: '/external'
-      fullPath: '/blog/external'
-      preLoaderRoute: typeof BlogIndexPostsExternalRouteImport
-      parentRoute: typeof BlogIndexPostsRoute
-    }
     '/blog/_index/_posts/notes': {
       id: '/blog/_index/_posts/notes'
       path: '/notes'
@@ -362,13 +343,11 @@ const IndexHomeRouteWithChildren = IndexHomeRoute._addFileChildren(
 )
 
 interface BlogIndexPostsRouteChildren {
-  BlogIndexPostsExternalRoute: typeof BlogIndexPostsExternalRoute
   BlogIndexPostsNotesRoute: typeof BlogIndexPostsNotesRoute
   BlogIndexPostsIndexRoute: typeof BlogIndexPostsIndexRoute
 }
 
 const BlogIndexPostsRouteChildren: BlogIndexPostsRouteChildren = {
-  BlogIndexPostsExternalRoute: BlogIndexPostsExternalRoute,
   BlogIndexPostsNotesRoute: BlogIndexPostsNotesRoute,
   BlogIndexPostsIndexRoute: BlogIndexPostsIndexRoute,
 }

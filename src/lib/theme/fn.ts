@@ -18,7 +18,8 @@ export const changeThemeServerFn = createServerFn({ method: "POST" })
   });
 
 export const getThemeServerFn = createServerFn().handler(async () => {
-  const theme = getCookie(THEME_COOKIE_NAME) || Theme.SYSTEM;
+  const theme = themeSchema.safeParse(getCookie(THEME_COOKIE_NAME)).data ?? Theme.SYSTEM;
   setResponseHeader("Cache-Control", "private, max-age=31536000");
-  return theme as Theme;
+
+  return theme;
 });

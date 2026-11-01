@@ -1,12 +1,25 @@
 import type React from "react";
 
-import { IconCheck, IconCopy } from "@tabler/icons-react";
-import { useMutation } from "@tanstack/react-query";
-import { useId } from "react";
+import { createContext, useContext, useRef } from "react";
 
 import { ProgrammingLanguageIcon } from "~/components/ProgrammingLanguageIcon";
-import { Button } from "~/components/ui/button";
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockContent,
+  CodeBlockCopyButton,
+  CodeBlockHeader,
+  CodeBlockTitle,
+} from "~/components/ui/code-block";
+import { MdxInlineCode } from "~/lib/mdx/components/MdxInlineCode";
 import { cn } from "~/lib/utility";
+
+const CodeBlockContext = createContext(false);
+
+export function MdxCode(props: React.ComponentProps<"code">) {
+  // CodeBlockContent owns the code element, including for fences without a language.
+  return useContext(CodeBlockContext) ? props.children : <MdxInlineCode {...props} />;
+}
 
 type MdxCodeBlockProps = {
   "data-file-name"?: string;
@@ -18,76 +31,34 @@ export function MdxCodeBlock({
   children,
   "data-file-name": fileName,
   "data-language": language,
-  style,
   ...props
 }: MdxCodeBlockProps) {
-  const codeId = useId();
-  const copyMutation = useMutation({
-    mutationKey: ["copy", codeId],
-    mutationFn: async () => {
-      const code = document.getElementById(codeId)?.textContent;
-      if (!code) {
-        return;
-      }
-      await navigator.clipboard.writeText(code);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    },
-  });
+  const contentRef = useRef<HTMLPreElement>(null);
 
-  const handleCopyClick = (): void => {
-    copyMutation.mutate();
-  };
+  const actions = (
+    <CodeBlockActions>
+      <CodeBlockCopyButton getValue={() => contentRef.current?.textContent ?? ""} />
+    </CodeBlockActions>
+  );
 
   return (
-    <div className={cn(className, "relative rounded-sm")}>
+    <CodeBlock className={cn("bg-background", className)}>
       {fileName ? (
-        <div className="border-border text-muted-foreground relative flex rounded-t-sm border-t-2 border-r-2 border-l-2 p-2">
-          <div className="text-muted-foreground ml-2 flex grow items-center gap-2 self-center text-sm">
-            {language ? (
-              <ProgrammingLanguageIcon className="size-5" language={language} />
-            ) : undefined}
+        <CodeBlockHeader className="pb-3">
+          <CodeBlockTitle>
+            {language ? <ProgrammingLanguageIcon language={language} /> : undefined}
             {fileName}
-          </div>
-
-          <Button
-            variant="outline"
-            size="icon-sm"
-            aria-label="copy code"
-            onClick={handleCopyClick}
-            disabled={copyMutation.isPending}
-          >
-            {copyMutation.isPending ? <IconCheck /> : <IconCopy />}
-          </Button>
-        </div>
-      ) : undefined}
-
-      <div className="group relative">
-        <pre
-          {...props}
-          id={codeId}
-          style={style}
-          className={cn(
-            "border-border relative flex overflow-auto rounded-sm border-2 font-mono text-sm leading-relaxed font-normal [&_code]:bg-transparent",
-            fileName ? "rounded-t-none" : "",
-            "shiki",
-          )}
-        >
+          </CodeBlockTitle>
+          {actions}
+        </CodeBlockHeader>
+      ) : (
+        actions
+      )}
+      <CodeBlockContext value={true}>
+        <CodeBlockContent {...props} ref={contentRef} data-language={language} className="shiki">
           {children}
-        </pre>
-        {!fileName ? (
-          <div className="text-muted-foreground absolute top-0 right-0 z-10 hidden p-2 group-hover:block">
-            <Button
-              variant="outline"
-              size="icon-sm"
-              aria-label="copy code"
-              onClick={handleCopyClick}
-              disabled={copyMutation.isPending}
-            >
-              {copyMutation.isPending ? <IconCheck /> : <IconCopy />}
-            </Button>
-          </div>
-        ) : undefined}
-      </div>
-    </div>
+        </CodeBlockContent>
+      </CodeBlockContext>
+    </CodeBlock>
   );
 }

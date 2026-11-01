@@ -1,10 +1,9 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { BlogIndexHeader } from "~/components/blog/BlogIndexHeader";
 import { BlogPostList } from "~/components/blog/BlogPostList";
-import { BlogTagChip } from "~/components/blog/BlogTagChip";
-import { Typography } from "~/components/Typography";
 import { loadBlogPosts } from "~/lib/blog/post/loader";
 import { groupBlogPosts } from "~/lib/blog/post/utility";
 import { loadBlogTag } from "~/lib/blog/tag/loader";
@@ -15,6 +14,7 @@ const loadRouteData = createServerFn({ method: "GET" })
   .validator(z.object({ slug: z.string().min(1) }))
   .handler(async ({ data: { slug } }) => {
     const tag = await loadBlogTag(slug);
+
     if (!tag) {
       throw notFound();
     }
@@ -34,35 +34,13 @@ function RouteComponent() {
   const { tag, groupedPosts } = Route.useLoaderData();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-6 pb-8 md:pt-12">
-      <div className="mb-8">
-        <Typography variant="h2" gutterBottom render={<h1>{tag.title}</h1>} />
-        <Typography variant="body">{tag.description}</Typography>
-
-        <Typography variant="a" render={<Link to="/blog/tags">See all tags.</Link>} />
-      </div>
-
-      <BlogPostList
-        posts={groupedPosts}
-        renderPost={(post) => (
-          <div className="flex flex-col">
-            <Typography
-              variant="a"
-              className="mb-1"
-              render={
-                <Link to="/blog/$slug" params={{ slug: post.slug }}>
-                  {post.title}
-                </Link>
-              }
-            />
-            <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <BlogTagChip key={tag.slug} tag={tag} variant="ghost" />
-              ))}
-            </div>
-          </div>
-        )}
-      />
-    </div>
+    <>
+      <BlogIndexHeader title={tag.title}>
+        <p className="text-muted-foreground max-w-xl text-[1.0625rem] leading-relaxed">
+          {tag.description}
+        </p>
+      </BlogIndexHeader>
+      <BlogPostList posts={groupedPosts} />
+    </>
   );
 }

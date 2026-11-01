@@ -18,11 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { MdxCodeBlock } from "~/lib/mdx/components/MdxCodeBlock";
+import { MdxCode, MdxCodeBlock } from "~/lib/mdx/components/MdxCodeBlock";
 import { MdxContentHeading } from "~/lib/mdx/components/MdxContentHeading";
 import { MdxDemo } from "~/lib/mdx/components/MdxDemo";
 import { MdxImage } from "~/lib/mdx/components/MdxImage";
-import { MdxInlineCode } from "~/lib/mdx/components/MdxInlineCode";
 import { cn } from "~/lib/utility";
 
 type ElementProps<Tag extends keyof React.JSX.IntrinsicElements> =
@@ -42,12 +41,22 @@ function Math({ source, style }: MathComponentProps) {
     throwOnError: false,
     trust: false,
   });
+
   return style === "display" ? (
     <div dangerouslySetInnerHTML={{ __html: html }} />
   ) : (
     <span dangerouslySetInnerHTML={{ __html: html }} />
   );
 }
+
+const jsxComponents = {
+  Note: { component: Note },
+};
+
+const devJsxComponents = {
+  ...jsxComponents,
+  Demo: { component: MdxDemo },
+};
 
 export const mdxPageRegistry = defineMdxRegistry({
   html: {
@@ -56,6 +65,7 @@ export const mdxPageRegistry = defineMdxRegistry({
     ),
     a: ({ node: _, href, ...props }: ElementProps<"a">) => {
       const isExternal = href?.startsWith("http") || href?.startsWith("mailto:");
+
       return (
         <Typography
           variant="a"
@@ -101,22 +111,15 @@ export const mdxPageRegistry = defineMdxRegistry({
     pre: ({ node: _, className, ...props }: ElementProps<"pre">) => (
       <MdxCodeBlock className={cn("mt-4", className)} {...props} />
     ),
-    code: ({ node: _, className, ...props }: ElementProps<"code">) =>
-      className?.split(/\s+/).some((name) => name.startsWith("language-")) ? (
-        <code className={className} {...props} />
-      ) : (
-        <MdxInlineCode className={className} {...props} />
-      ),
+    code: ({ node: _, ...props }: ElementProps<"code">) => <MdxCode {...props} />,
     img: ({ node: _, alt, ...props }: ElementProps<"img">) => {
       if (!alt) {
         throw new Error("Image must have an alt attribute");
       }
+
       return <MdxImage alt={alt} {...props} />;
     },
   },
-  jsx: {
-    Note: { component: Note },
-    ...(import.meta.env.DEV ? { Demo: { component: MdxDemo } } : {}),
-  },
+  jsx: import.meta.env.DEV ? devJsxComponents : jsxComponents,
   math: Math,
 });

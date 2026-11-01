@@ -15,27 +15,35 @@ export function ProgrammingLanguageIcon({ language, ...props }: ProgrammingLangu
   if (language === "text") {
     return;
   }
+
   if (language === "typescript" || language === "ts" || language === "tsx") {
     return <IconBrandTypescript {...props} />;
   }
+
   if (language === "rust" || language === "rs") {
     return <IconBrandRust {...props} />;
   }
+
   if (language === "python" || language === "py") {
     return <IconBrandPython {...props} />;
   }
+
   if (language === "toml") {
     return <IconToml {...props} />;
   }
+
   if (language === "json") {
     return <IconJson {...props} />;
   }
+
   if (language === "yaml" || language === "yml") {
     return <IconYaml {...props} />;
   }
+
   if (language === "h" || language === "c" || language === "hpp" || language === "cpp") {
     return <IconBrandCpp {...props} />;
   }
+
   throw new Error(`Unknown language: '${language}'`);
 }
 

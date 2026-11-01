@@ -8,24 +8,24 @@ export const typographyVariants = cva("", {
   variants: {
     variant: {
       span: "",
-      h1: "scroll-m-20 text-balance font-extrabold text-4xl tracking-tight",
-      h2: "scroll-m-20 text-balance font-semibold text-3xl tracking-tight",
-      h3: "scroll-m-20 text-balance font-semibold text-2xl tracking-tight",
-      h4: "scroll-m-20 text-balance font-semibold text-xl tracking-tight",
-      body: "leading-7",
-      quote: "mt-6 border-l-2 pl-6 italic",
-      lead: "text-muted-foreground text-xl",
-      large: "font-semibold text-lg",
+      h1: "scroll-m-20 text-balance text-4xl font-normal leading-[1.1] tracking-[-0.025em] md:text-[2.75rem]",
+      h2: "scroll-m-20 text-balance text-[1.75rem] font-medium leading-tight tracking-[-0.015em]",
+      h3: "scroll-m-20 text-balance text-[1.3125rem] font-medium leading-snug tracking-[-0.01em]",
+      h4: "scroll-m-20 text-balance text-[1.0625rem] font-medium leading-snug",
+      body: "leading-[1.75]",
+      quote: "mt-6 border-l-2 border-link pl-6 text-muted-foreground",
+      lead: "text-muted-foreground text-[1.3125rem] leading-normal",
+      large: "font-medium text-lg",
       small: "font-medium text-sm leading-none",
       muted: "text-muted-foreground",
-      a: "text-link underline underline-offset-4",
+      a: "text-foreground underline decoration-link decoration-1 underline-offset-[0.3em] transition-[text-decoration-thickness] hover:decoration-2",
       mutedLink: "text-muted-foreground transition-colors hover:text-foreground",
     },
   },
   defaultVariants: { variant: "body" },
 });
 
-const topGutters: Record<string, string> = {
+const topGutters: Partial<Record<TypographyVariant, string>> = {
   h1: "mt-12 lg:mt-14",
   h2: "mt-10 lg:mt-12",
   h3: "mt-8",
@@ -38,7 +38,7 @@ const topGutters: Record<string, string> = {
   muted: "mt-6",
 };
 
-const bottomGutters: Record<string, string> = {
+const bottomGutters: Partial<Record<TypographyVariant, string>> = {
   h1: "mb-4",
   h2: "mb-3",
   h3: "mb-3",
@@ -68,6 +68,7 @@ const variantElementMap = {
 } as const;
 
 type VariantElementMap = typeof variantElementMap;
+
 type TypographyVariant = keyof VariantElementMap;
 
 type TypographyOwnProps = Omit<VariantProps<typeof typographyVariants>, "variant"> & {
@@ -90,7 +91,7 @@ export function Typography<V extends TypographyVariant = "span">({
   className,
   ...props
 }: TypographyProps<V>) {
-  const safeVariant = (variant ?? "span") as TypographyVariant;
+  const safeVariant: TypographyVariant = variant ?? "span";
   const defaultTagName = variantElementMap[safeVariant];
 
   return useRender({

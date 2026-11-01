@@ -16,7 +16,10 @@ export const blogPostFrontmatterSchema = z.object({
   series: z.string().trim().optional(),
   cover: z
     .union([
-      z.string().trim(),
+      z
+        .string()
+        .trim()
+        .transform((file): BlogPostCoverSource => ({ file })),
       z.object({
         file: z.string().trim(),
         height: z.number(),
@@ -27,6 +30,12 @@ export const blogPostFrontmatterSchema = z.object({
 });
 
 export type BlogPostFrontmatter = z.infer<typeof blogPostFrontmatterSchema>;
+
+export interface BlogPostCoverSource {
+  file: string;
+  width?: number;
+  height?: number;
+}
 
 export interface BlogPostSource {
   frontmatter: BlogPostFrontmatter;
@@ -75,24 +84,7 @@ export interface BlogPostCoverData {
   height?: number;
 }
 
-export interface ExternalBlogData {
-  flinect: {
-    posts: ExternalBlogPostData[];
-  };
-}
-
-export interface ExternalBlogPostData {
-  title: string;
-  url: string;
-  publishedDate: string;
-}
-
 export interface BlogPostYearGroup<T extends BlogPostCommon> {
   year: number;
-  months: BlogPostMonthGroup<T>[];
-}
-
-export interface BlogPostMonthGroup<T extends BlogPostCommon> {
-  month: string;
   posts: T[];
 }

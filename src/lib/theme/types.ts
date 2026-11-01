@@ -5,5 +5,7 @@ export const Theme = {
   LIGHT: "light",
   SYSTEM: "system",
 } as const;
+
 export const themeSchema = z.nativeEnum(Theme);
+
 export type Theme = z.infer<typeof themeSchema>;

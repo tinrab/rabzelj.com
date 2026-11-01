@@ -1,0 +1,299 @@
+---
+title: Implementing Google's API Filtering Language in Rust
+description: Learn how to implement Google's AIP-160 filtering specification in Rust using pest parser generator.
+tags:
+  - rust
+  - grpc
+publishedDate: 2024-12-05
+---
+
+Google's [AIP](https://google.aip.dev/) (**A**PI **I**mprovement **P**roposals) is a set of guidelines for building consistent and user-friendly APIs.
+It's essentially a style guide for gRPC APIs.
+
+One key specification is [AIP-132](https://google.aip.dev/132), which defines the standard "List" method for retrieving collections of resources.
+Here's what a typical list method looks like:
+
+```protobuf
+message ListProjectsRequest {
+  optional int32 page_size = 1;
+  optional string page_token = 2;
+  optional string filter = 3;
+  optional string order_by = 4;
+  string account = 5;
+  optional bool show_deleted = 6;
+}
+
+message ListProjectsResponse {
+  repeated Project projects = 1;
+  optional string next_page_token = 2;
+  int64 total_size = 3;
+}
+
+service ProjectService {
+  rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse) {}
+  // ...
+}
+```
+
+The `filter` field, detailed in [AIP-160](https://google.aip.dev/160), enables "fuzzy" filtering capabilities.
+Users can query resources with expressions like:
+
+```text
+name = "foo" AND deleted = false
+
+experiment.rollout <= cohort(request.user)
+
+title.contains("how") AND tags:("rust" OR "typescript")
+```
+
+This specification provides a powerful and flexible way to query resources in APIs.
+Although, you might not always need it.
+
+This blog post is about how I implemented filtering language in Rust.
+
+If you have never written a parser or a compiler before, you should do it manually first and learn how they work.
+In Rust, you can use [pest](https://crates.io/crates/pest), a parser generator tool, to generate a parser for you.
+There's always something to parse, and this is a great way to do it.
+
+The filtering language implementation is part of my library [bomboni](https://github.com/tinrab/bomboni) (WIP), which provides utilities for building gRPC APIs, among other things.
+
+# Parsing
+
+Let's start with a simple example to demonstrate [pest](https://crates.io/crates/pest)'s capabilities.
+Here's grammar for a basic mathematical expression parser:
+
+```text { "fileName": "src/expr.pest" }
+Program = _{ SOI ~ Expr ~ EOI }
+
+Expr =  { Term ~ (Operation ~ Term)* }
+Term = _{ Number | "(" ~ Expr ~ ")" }
+
+Number    = @{ ASCII_DIGIT+ }
+Operation = _{ Add | Subtract | Multiply | Divide }
+Add       =  { "+" }
+Subtract  =  { "-" }
+Multiply  =  { "*" }
+Divide    =  { "/" }
+
+WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
+```
+
+We define the parser struct and derive the `Parser` macro with the path to the grammar file.
+
+```rust { "fileName": "src/lib.rs" }
+mod expr {
+  #[derive(pest_derive::Parser)]
+  #[grammar = "expr.pest"]
+  pub struct ExprParser;
+}
+```
+
+That gives us `ExprParser::parse(...)` and `Rule` enum (`Rule::Program`, `Rule::Expr`, etc.).
+
+The result of parsing is a `Pair` struct, which contains the abstract syntax tree (AST) data.
+
+```rust
+let ast = ExprParser::parse(Rule::Program, r#"(2 + 4) * 7"#).unwrap();
+dbg!(ast);
+/*
+ast = [
+  Pair {
+    rule: Expr,
+    span: Span {
+      str: "(2 + 4) * 7",
+      start: 0,
+      end: 11,
+    },
+    inner: [
+      Pair {
+        rule: Expr,
+        span: Span {
+          str: "2 + 4",
+          start: 1,
+          end: 6,
+        },
+      ...
+    ]
+  }
+]
+*/
+```
+
+We can also do error handling.
+
+```rust
+let err = ExprParser::parse(Rule::Program, r#"2 * x"#).unwrap_err();
+dbg!(err);
+/*
+  Error {
+    variant: ParsingError {
+      positives: [
+        Number,
+      ],
+      negatives: [],
+    },
+    location: Pos(
+      4,
+    ),
+    line_col: Pos(
+      (
+        1,
+        5,
+      ),
+    ),
+    ...
+  }
+*/
+```
+
+So, you start with a grammar file, derive the parser, and parse some text.
+Then, you traverse the AST to evaluate the expression, generate SQL queries, extract values from text, or do whatever you want.
+
+# AIP Filtering Language
+
+For the filtering language, we translate the EBNF grammar from the specification into the pest format.
+You can find the translated grammar on GitHub: [grammar.pest](https://github.com/tinrab/bomboni/blob/v0.1.61/bomboni_request/src/filter/grammar.pest).
+
+Declare the parser.
+
+```rust
+pub(crate) mod parser {
+    #[derive(Parser)]
+    #[grammar = "./filter/grammar.pest"]
+    pub struct FilterParser;
+}
+```
+
+We want to convert pest-generated types into more convenient types: [Filter](https://github.com/tinrab/bomboni/blob/v0.1.61/bomboni_request/src/filter/mod.rs#L33) and `Value` types.
+Pest's spans contain source strings or "lexemes", but we want a custom "value" enum that represents strings, numbers, booleans, etc.
+
+```rust
+impl Filter {
+  pub fn parse(source: &str) -> FilterResult<Self> {
+    let filter = FilterParser::parse(Rule::filter, source)?.next().unwrap();
+    Self::parse_tree(filter)
+  }
+
+  fn parse_tree(pair: Pair<Rule>) -> FilterResult<Self> {
+    match pair.as_rule() {
+      Rule::comparable => Self::parse_tree(pair.into_inner().next().unwrap()),
+      Rule::string | Rule::boolean | Rule::number | Rule::any => {
+        Ok(Self::Value(Value::parse(&pair)?))
+      }
+      // ...
+      _ => {
+        unimplemented!("{:?}", pair)
+      }
+    }
+  }
+  // ...
+}
+```
+
+# Schema validation and evaluation
+
+After parsing a filter, we need to validate queried field types and evaluate expressions against actual data.
+We accomplish this through a schema system that defines the structure and types of our resources.
+
+```rust
+impl Project {
+  pub fn get_schema() -> Schema {
+    Schema {
+      members: btree_map_into! {
+        "id" => FieldMemberSchema::new_ordered(ValueType::Integer),
+        "displayName" => FieldMemberSchema::new_ordered(ValueType::String),
+      },
+    }
+  }
+}
+
+impl SchemaMapped for Project {
+  fn get_field(&self, name: &str) -> Value {
+    match name {
+      "id" => self.id.0.to_string().into(),
+      "displayName" => self.display_name.clone().into(),
+      _ => unimplemented!("SchemaMapped for Project::{name}"),
+    }
+  }
+}
+```
+
+`Schema` defines the structure of the resource, and `SchemaMapped` defines how to get a value from a resource.
+The latter is needed if we want to evaluate filters against resources.
+
+Here's how we validate a filter against the schema.
+
+```rust
+assert!(
+  Filter::parse("id = 42")
+    .unwrap()
+    .validate(&Project::get_schema(), None)
+    .is_ok()
+);
+
+assert_eq!(
+  Filter::parse("displayName = 42")
+    .unwrap()
+    .validate(&Project::get_schema(), None)
+    .unwrap_err(),
+  FilterError::InvalidType {
+    expected: ValueType::String,
+    actual: ValueType::Integer,
+  },
+);
+```
+
+This is how we evaluate a filter against a resource.
+
+```rust
+assert_eq!(
+  Filter::parse("id = 42")
+    .unwrap()
+    .evaluate(&Project {
+      id: 42,
+      display_name: "Test Project".into(),
+    })
+    .unwrap(),
+  Value::from(true),
+);
+```
+
+This is all done by simply traversing the AST.
+
+The library also supports generating SQL queries from filters, making it possible to integrate with databases.
+
+```rust
+let (sql, params) = SqlFilterBuilder::new(
+    SqlDialect::Postgres,
+    &Project::get_schema(),
+).build(&Filter::parse("id = 42")?)?;
+// "id = $1"
+println!("{sql}");
+/*
+&params = [
+    Integer(
+        42,
+    ),
+]
+*/
+dbg!(&params);
+```
+
+# Conclusion
+
+Consider using `pest` for parsing text in your Rust projects.
+You don't need regexes, loops over chars, or `.split_whitespace().map(|s| s.trim())...`.
+
+Make it easier.
+
+You can use the `FilterParser` in your Rust projects by adding the `bomboni_request` crate as a dependency.
+
+```toml
+[dependencies]
+bomboni_common = "0.1.61"
+bomboni_request = "0.1.61"
+pest = "2.7.14"
+pest_derive = "2.7.14"
+```
+
+The complete implementation is available on GitHub in the [bomboni](https://github.com/tinrab/bomboni) library.

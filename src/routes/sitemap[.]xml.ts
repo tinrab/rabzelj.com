@@ -20,6 +20,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         }));
 
         const posts = await loadBlogPosts();
+
         const blogPostRoutes: SitemapUrl[] = posts.map((post) => ({
           url: `${serverConfig.app.url}${pathLocator.blog.post.index(post.slug)}`,
           changeFrequency: "weekly",
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         }));
 
         const tags = await loadBlogTagPostCounts();
+
         const blogTagRoutes: SitemapUrl[] = tags.map((tag) => ({
           url: `${serverConfig.app.url}${pathLocator.blog.tags.page(tag.slug)}`,
           changeFrequency: "weekly",
@@ -55,6 +57,7 @@ type SitemapUrl = {
 
 function makeSitemap(urls: SitemapUrl[]): string {
   const xmlUrls: string[] = [];
+
   for (const url of urls) {
     const lastModified = url.lastModified.toISOString();
     const changeFrequency = url.changeFrequency;

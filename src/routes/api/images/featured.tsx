@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/images/featured")({
         const { renderImage } = await import("~/lib/render-image");
         const image = await renderImage(FeaturedSocialImage({ avatarSrc }), SOCIAL_IMAGE_SIZE);
 
-        return new Response(image as BufferSource, {
+        return new Response(image, {
           status: 200,
           headers: {
             "Content-Type": "image/png",

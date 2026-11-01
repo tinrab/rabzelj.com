@@ -6,7 +6,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useThemeProviderContext } from "~/lib/theme/theme-context";
-import { Theme } from "~/lib/theme/types";
+import { Theme, themeSchema } from "~/lib/theme/types";
 
 type ThemeModeSelectProps = {
   theme?: Theme;
@@ -29,12 +29,16 @@ export function ThemeModeSelect({
 
   const resolvedTheme = theme ?? themeProvider?.theme;
 
-  const handleThemeChange = (newTheme: unknown): void => {
-    if (themeProvider === undefined) {
+  const handleThemeChange: NonNullable<React.ComponentProps<typeof Select>["onValueChange"]> = (
+    newTheme,
+  ) => {
+    const parsedTheme = themeSchema.safeParse(newTheme);
+
+    if (themeProvider === undefined || !parsedTheme.success) {
       return;
     }
 
-    themeProvider.setTheme(newTheme as Theme);
+    themeProvider.setTheme(parsedTheme.data);
   };
 
   return (

@@ -10,10 +10,12 @@ import arraybufferPlugin from "vite-plugin-arraybuffer";
 
 import { blogMdx } from "./src/lib/blog/vite";
 
-const routeRules: Record<string, unknown> = {};
+const routeRules: Record<string, { headers: Record<string, string> }> = {};
+
 for (const fileName of await fs.readdir("public")) {
   const filePath = path.join("public", fileName);
   const st = await fs.stat(filePath);
+
   if (st.isDirectory()) {
     routeRules[`/${fileName}/**`] = {
       headers: {
@@ -56,6 +58,7 @@ export default defineConfig({
           if (warning.code === "MODULE_LEVEL_DIRECTIVE" || warning.code === "SOURCEMAP_ERROR") {
             return;
           }
+
           warn(warning);
         },
       },

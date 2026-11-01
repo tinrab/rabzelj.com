@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRootRoute, HeadContent, Outlet, ScriptOnce, Scripts } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
+import { RootNotFound } from "~/components/NotFound";
 import { Toaster } from "~/components/ui/sonner";
 import { loadClientConfig } from "~/config/client";
 import { makeClientConfigScript } from "~/config/utility";
@@ -24,6 +25,7 @@ const loadClientConfigServerFn = createServerFn({
   });
 
 export const Route = createRootRoute({
+  notFoundComponent: RootNotFound,
   loader: async () => {
     return {
       theme: await getThemeServerFn(),
@@ -32,11 +34,13 @@ export const Route = createRootRoute({
   },
   head: () => {
     const { app } = loadClientConfig();
+
     if (!app || !app.url) {
       return {};
     }
 
     let tagline = app.description.trim();
+
     if (tagline.endsWith(".")) {
       tagline = tagline.slice(0, -1);
     }
