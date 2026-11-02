@@ -35,7 +35,7 @@ function RouteComponent() {
                   params={{ slug: tag.slug }}
                   className="group flex items-baseline justify-between gap-4 border-b py-2.5"
                 >
-                  <span className="decoration-link text-[1.0625rem] underline-offset-[0.3em] group-hover:underline">
+                  <span className="decoration-link text-base decoration-2 underline-offset-4 group-hover:underline">
                     {tag.title}
                   </span>
                   <span className="text-muted-foreground text-sm tabular-nums">

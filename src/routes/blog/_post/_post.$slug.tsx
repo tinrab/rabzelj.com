@@ -92,7 +92,7 @@ function RouteComponent() {
           ) : undefined}
         </SpineBody>
 
-        <SpineMargin className="text-[0.9375rem] xl:col-start-1 xl:row-start-1 xl:pt-[0.55rem]">
+        <SpineMargin className="text-sm xl:col-start-1 xl:row-start-1 xl:pt-2">
           <time dateTime={post.publishedDate}>{formatBlogPostDate(post.publishedDate)}</time>
           <ul className="text-muted-foreground mt-1 flex flex-wrap gap-x-3 gap-y-1 xl:justify-end">
             {post.tags.map((tag) => (
@@ -148,9 +148,7 @@ function RouteComponent() {
       {related.length >= 2 ? (
         <SpineRow className="border-t py-8 xl:py-12">
           <SpineMargin>
-            <h2 className="text-muted-foreground mb-3 pt-[0.2rem] text-[0.9375rem] xl:mb-0">
-              Related posts
-            </h2>
+            <h2 className="text-muted-foreground mb-3 pt-1 text-sm xl:mb-0">Related posts</h2>
           </SpineMargin>
           <SpineBody>
             <ul className="flex flex-col gap-3">
@@ -159,7 +157,7 @@ function RouteComponent() {
                   <Link
                     to="/blog/$slug"
                     params={{ slug: relatedPost.slug }}
-                    className="decoration-link text-[1.1875rem] leading-snug text-balance underline-offset-[0.3em] hover:underline"
+                    className="decoration-link text-xl leading-snug text-balance decoration-2 underline-offset-4 hover:underline"
                   >
                     {relatedPost.title}
                   </Link>

@@ -12,7 +12,7 @@ const links = [
 
 export function SiteFooter() {
   return (
-    <footer className="relative border-t text-[0.9375rem]">
+    <footer className="relative border-t text-sm">
       <SpineRow className="gap-3 py-8 xl:gap-0">
         <SpineMargin className="text-muted-foreground">Tin Rabzelj</SpineMargin>
         <SpineBody>

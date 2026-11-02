@@ -38,15 +38,13 @@
 
 /* Article body: prose stops at the right margin rule, wide blocks run past it. */
 @utility prose-spine {
-  font-size: 1.0625rem;
-
   & > * {
-    max-width: 40rem;
+    max-width: --spacing(160);
   }
 
-  @media (width >= 80rem) {
+  @variant xl {
     & > * {
-      max-width: calc((100% + 3rem) * 2 / 3 - 3rem);
+      max-width: calc((100% + --spacing(12)) * 2 / 3 - --spacing(12));
     }
 
     & > :is([data-slot="code-block"], [data-slot="table-container"], .katex-display),

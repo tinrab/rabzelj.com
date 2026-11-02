@@ -18,12 +18,10 @@ export function StatusPage({ code, message }: StatusPageProps) {
   return (
     <SpineRow className="gap-6 pt-16 pb-24 xl:gap-0 xl:pt-28 xl:pb-40">
       <SpineMargin>
-        <p className="text-[2.75rem] leading-none font-light tracking-[-0.03em] tabular-nums">
-          {code}
-        </p>
+        <p className="text-5xl leading-none font-light tracking-tight tabular-nums">{code}</p>
       </SpineMargin>
       <SpineBody className="xl:pt-2">
-        <p className="text-[1.3125rem] leading-normal">{message}</p>
+        <p className="text-xl leading-normal">{message}</p>
         <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
           <li>
             <Typography variant="a" render={<Link to="/">Go to the home page</Link>} />

@@ -30,9 +30,9 @@ export function BlogTabList() {
             to={tab.to}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "decoration-link underline-offset-[0.4em] transition-colors",
+              "decoration-link underline-offset-4 transition-colors",
               active
-                ? "text-foreground underline decoration-2"
+                ? "text-foreground underline decoration-4"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >

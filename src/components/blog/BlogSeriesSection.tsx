@@ -15,7 +15,7 @@ export function BlogSeriesSection({ series, currentSlug, className }: BlogSeries
   const total = series.completed ? String(series.posts.length) : "an unfinished series";
 
   return (
-    <nav aria-label="Series" className={cn("text-[0.9375rem]", className)}>
+    <nav aria-label="Series" className={cn("text-sm", className)}>
       <p className="text-muted-foreground text-sm">
         Part {currentIndex + 1} of {total}
       </p>

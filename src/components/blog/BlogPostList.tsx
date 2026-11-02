@@ -18,7 +18,7 @@ export function BlogPostList({ posts }: BlogPostListProps) {
           <SpineMargin>
             <h2
               id={`h-${yearGroup.year}`}
-              className="mb-4 text-[2.75rem] leading-none font-light tracking-[-0.03em] tabular-nums xl:sticky xl:top-10 xl:mb-0"
+              className="mb-4 text-5xl leading-none font-light tracking-tight tabular-nums xl:sticky xl:top-10 xl:mb-0"
             >
               <a href={`#h-${yearGroup.year}`}>{yearGroup.year}</a>
             </h2>
@@ -42,11 +42,11 @@ export function BlogPostRows({ posts, withYear, className }: BlogPostRowsProps) 
     <ul className={cn("xl:col-span-3 xl:grid xl:grid-cols-subgrid", className)}>
       {posts.map((post) => (
         <li key={post.slug} className="py-2 xl:col-span-3 xl:grid xl:grid-cols-subgrid">
-          <div className="flex gap-4 px-4 md:px-6 xl:col-span-2">
+          <div className="flex items-baseline gap-4 px-4 md:px-6 xl:col-span-2">
             <span
               className={cn(
-                "text-muted-foreground shrink-0 pt-[0.2rem] text-[0.9375rem] tabular-nums",
-                withYear ? "w-[4.5rem]" : "w-14",
+                "text-muted-foreground shrink-0 text-sm tabular-nums",
+                withYear ? "w-18" : "w-14",
               )}
             >
               {withYear
@@ -57,8 +57,7 @@ export function BlogPostRows({ posts, withYear, className }: BlogPostRowsProps) 
               to="/blog/$slug"
               params={{ slug: post.slug }}
               className={cn(
-                "decoration-link text-[1.1875rem] leading-snug text-balance underline-offset-[0.3em] hover:underline",
-                post.priority === 1 && "font-medium",
+                "decoration-link text-base leading-snug text-balance decoration-2 underline-offset-4 hover:underline md:text-lg",
               )}
             >
               {post.title}
@@ -67,8 +66,8 @@ export function BlogPostRows({ posts, withYear, className }: BlogPostRowsProps) 
 
           <ul
             className={cn(
-              "text-muted-foreground mt-1 flex flex-wrap gap-x-3 gap-y-1 pr-4 text-sm md:pr-6 xl:mt-0 xl:px-6 xl:pt-[0.3rem]",
-              withYear ? "pl-[6.5rem] md:pl-[7rem]" : "pl-[5.5rem] md:pl-[6rem]",
+              "text-muted-foreground mt-1 flex flex-wrap gap-x-3 gap-y-1 pr-4 text-sm md:pr-6 xl:mt-0 xl:px-6 xl:pt-0.5",
+              withYear ? "pl-26 md:pl-28" : "pl-22 md:pl-24",
             )}
           >
             {post.tags.map((tag) => (

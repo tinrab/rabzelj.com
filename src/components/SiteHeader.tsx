@@ -23,8 +23,8 @@ export function SiteHeader() {
           </Link>
         </SpineMargin>
 
-        <SpineBody className="px-0 md:px-0 xl:px-6">
-          <nav aria-label="Main" className="flex items-center gap-6 text-[0.9375rem]">
+        <SpineBody className="self-stretch px-0 md:px-0 xl:px-6">
+          <nav aria-label="Main" className="flex h-full gap-6 text-sm">
             {links.map((link) => {
               const active = location.pathname.startsWith(link.to ?? "");
 
@@ -34,10 +34,10 @@ export function SiteHeader() {
                   to={link.to}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "decoration-link underline-offset-[1.15rem] transition-colors",
+                    "flex items-center border-b-4 transition-colors",
                     active
-                      ? "text-foreground underline decoration-2"
-                      : "text-muted-foreground hover:text-foreground",
+                      ? "border-link text-foreground"
+                      : "text-muted-foreground hover:text-foreground border-transparent",
                   )}
                 >
                   {link.title}

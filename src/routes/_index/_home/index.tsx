@@ -51,14 +51,14 @@ function RouteComponent() {
         </SpineMargin>
 
         <SpineBody wide>
-          <h1 className="text-[3.25rem] leading-[0.95] font-light tracking-[-0.045em] md:text-[4.5rem]">
+          <h1 className="text-5xl leading-[0.95] font-light tracking-tighter md:text-7xl">
             Tin Rabzelj
           </h1>
-          <p className="text-muted-foreground mt-6 max-w-xl text-[1.3125rem] leading-normal text-pretty">
+          <p className="text-muted-foreground mt-6 max-w-xl text-xl leading-normal text-pretty">
             Software engineer working with Rust, TypeScript and React. Currently focused on AI, CUDA
             and distributed systems.
           </p>
-          <ul className="mt-8 flex flex-wrap items-baseline gap-x-6 gap-y-2 text-[1.0625rem]">
+          <ul className="mt-8 flex flex-wrap items-baseline gap-x-6 gap-y-2 text-base">
             {socialLinks.map(({ title, href }) => (
               <li key={title}>
                 <Typography
@@ -90,19 +90,13 @@ function RouteComponent() {
 
       <SpineRow className="border-t py-8 xl:py-12">
         <SpineMargin>
-          <h2 className="text-muted-foreground mb-3 pt-[0.2rem] text-[0.9375rem] xl:mb-0">
-            Recent writing
-          </h2>
+          <h2 className="text-muted-foreground mb-3 pt-1 text-sm xl:mb-0">Recent writing</h2>
         </SpineMargin>
 
         <BlogPostRows posts={recentPosts} withYear />
 
         <SpineBody className="mt-4 xl:col-start-2">
-          <Typography
-            variant="a"
-            className="text-[0.9375rem]"
-            render={<Link to="/blog">All posts</Link>}
-          />
+          <Typography variant="a" className="text-sm" render={<Link to="/blog">All posts</Link>} />
         </SpineBody>
       </SpineRow>
     </>

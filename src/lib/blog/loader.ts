@@ -157,7 +157,6 @@ function readBlogPost(
     publishedDate: frontmatter.publishedDate,
     modifiedDate: frontmatter.modifiedDate,
     description: frontmatter.description,
-    priority: frontmatter.priority,
     tags: postTags,
     cover,
     related: [],

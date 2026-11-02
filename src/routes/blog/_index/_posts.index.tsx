@@ -26,7 +26,7 @@ function RouteComponent() {
   return (
     <>
       <BlogIndexHeader title="Blog">
-        <p className="text-muted-foreground max-w-xl text-[1.0625rem] leading-relaxed">
+        <p className="text-muted-foreground max-w-xl text-base leading-relaxed">
           Writing on Rust, GPU programming, distributed systems and web development.
         </p>
       </BlogIndexHeader>

@@ -12,7 +12,6 @@ export const blogPostFrontmatterSchema = z.object({
   modifiedDate: z.string().trim().optional(),
   description: z.string().trim().regex(/[.?]$/),
   tags: z.array(z.string().trim()),
-  priority: z.number().default(0),
   series: z.string().trim().optional(),
   cover: z
     .union([
@@ -52,7 +51,6 @@ export interface BlogPostCommon {
   url: string;
   publishedDate: string;
   modifiedDate?: string;
-  priority?: number;
 }
 
 export interface BlogPostData extends BlogPostCommon {

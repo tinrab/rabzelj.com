@@ -36,7 +36,7 @@ function RouteComponent() {
   return (
     <>
       <BlogIndexHeader title={tag.title}>
-        <p className="text-muted-foreground max-w-xl text-[1.0625rem] leading-relaxed">
+        <p className="text-muted-foreground max-w-xl text-base leading-relaxed">
           {tag.description}
         </p>
       </BlogIndexHeader>
